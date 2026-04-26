@@ -1,5 +1,6 @@
 import { runAnalyze } from './commands/analyze';
 import { runMigrate } from './commands/migrate';
+import { runStats } from './commands/stats';
 
 interface ParsedArgs {
   readonly command: string;
@@ -20,12 +21,14 @@ function printHelp(): void {
       '',
       'Commands:',
       '  analyze [--no-llm] [--json] <repo-path>   Run the Analyze stage on a local repo',
+      '  stats                                      Show cumulative API usage and ADR-0002 kill criteria',
       '  migrate <repo-url>                         Run the migration pipeline (skeleton)',
       '  help                                       Show this help',
       '',
       'Examples:',
-      '  pnpm --filter @migrate-bot/cli analyze --no-llm ./packages/agent/test-fixtures/pages-router-minimal',
-      '  ANTHROPIC_API_KEY=sk-... pnpm --filter @migrate-bot/cli analyze ./path/to/repo',
+      '  pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze --no-llm <repo-path>',
+      '  ANTHROPIC_API_KEY=sk-... pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze <repo-path>',
+      '  pnpm --filter @migrate-bot/cli exec tsx src/index.ts stats',
       '',
     ].join('\n'),
   );
@@ -37,6 +40,8 @@ async function main(): Promise<number> {
   switch (command) {
     case 'analyze':
       return runAnalyze(args);
+    case 'stats':
+      return runStats(args);
     case 'migrate':
       return runMigrate(args);
     case 'help':

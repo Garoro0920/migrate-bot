@@ -33,6 +33,11 @@ export interface FileClassification {
   readonly kind: FileKind;
 }
 
+export interface AnalyzeUsage {
+  readonly costUsd: number;
+  readonly callCount: number;
+}
+
 export interface AnalyzeResult {
   readonly nextVersion: string;
   readonly pagesFiles: readonly string[];
@@ -40,6 +45,7 @@ export interface AnalyzeResult {
   readonly recommendedPlan: Plan;
   readonly blockers: readonly Blocker[];
   readonly classifications: readonly FileClassification[];
+  readonly usage: AnalyzeUsage;
 }
 
 export type TaskKind = 'codemod' | 'agent' | 'hybrid';

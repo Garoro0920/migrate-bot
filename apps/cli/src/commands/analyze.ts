@@ -56,6 +56,9 @@ export async function runAnalyze(args: readonly string[]): Promise<number> {
       lines.push(`    - ${c.path}: ${c.kind}`);
     }
   }
+  lines.push(
+    `  cost (this run): $${result.usage.costUsd.toFixed(4)} (${result.usage.callCount} call${result.usage.callCount === 1 ? '' : 's'})`,
+  );
   lines.push('');
   process.stdout.write(lines.join('\n'));
   return 0;

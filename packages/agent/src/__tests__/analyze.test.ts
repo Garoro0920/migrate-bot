@@ -17,6 +17,8 @@ describe('analyze (skipLlm)', () => {
     expect(result.classifications).toEqual([]);
     expect(result.pagesFiles).toContain('pages/_app.tsx');
     expect(result.pagesFiles).toContain('pages/api/hello.ts');
+    expect(result.usage.callCount).toBe(0);
+    expect(result.usage.costUsd).toBe(0);
   });
 });
 
@@ -31,6 +33,7 @@ describe('analyze (other stages still stub)', () => {
         recommendedPlan: 'small',
         blockers: [],
         classifications: [],
+        usage: { costUsd: 0, callCount: 0 },
       }),
     ).rejects.toThrow(/not implemented/);
   });

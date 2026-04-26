@@ -2,12 +2,14 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { getAnthropicClient } from '../clients/anthropic';
+import { recordUsage, type UsageRecord } from '../observability/usage';
 import type { FileClassification, FileKind } from '../types';
 
 export const CLASSIFY_MODEL = 'claude-haiku-4-5-20251001';
 export const CLASSIFY_MAX_TOKENS = 4096;
 export const CLASSIFY_EXCERPT_LINES = 100;
 export const CLASSIFY_BATCH_LIMIT = 50;
+export const CLASSIFY_STAGE = 'analyze.classify';
 
 const FILE_KIND_VALUES = [
   'static-page',
@@ -55,19 +57,26 @@ export interface ClassifyInput {
 
 export interface ClassifyOptions {
   readonly model?: string;
+  readonly logPath?: string;
+}
+
+export interface ClassifyOutcome {
+  readonly classifications: readonly FileClassification[];
+  readonly usage: UsageRecord | null;
 }
 
 export async function classifyPagesFiles(
   inputs: readonly ClassifyInput[],
   options: ClassifyOptions = {},
-): Promise<readonly FileClassification[]> {
-  if (inputs.length === 0) return [];
+): Promise<ClassifyOutcome> {
+  if (inputs.length === 0) return { classifications: [], usage: null };
 
   const client = getAnthropicClient();
   const userPayload = JSON.stringify({ pagesFiles: inputs }, null, 2);
+  const model = options.model ?? CLASSIFY_MODEL;
 
   const response = await client.messages.create({
-    model: options.model ?? CLASSIFY_MODEL,
+    model,
     max_tokens: CLASSIFY_MAX_TOKENS,
     system: [
       {
@@ -84,13 +93,25 @@ export async function classifyPagesFiles(
     ],
   });
 
+  const usageRecord = await recordUsage({
+    model,
+    stage: CLASSIFY_STAGE,
+    usage: {
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      cacheCreationInputTokens: response.usage.cache_creation_input_tokens ?? 0,
+      cacheReadInputTokens: response.usage.cache_read_input_tokens ?? 0,
+    },
+    ...(options.logPath !== undefined ? { logPath: options.logPath } : {}),
+  });
+
   const textBlock = response.content.find((c) => c.type === 'text');
   if (!textBlock || textBlock.type !== 'text') {
     throw new Error('classify: Anthropic response had no text block');
   }
   const parsed = parseJsonResponse(textBlock.text);
   const validated = ClassificationSchema.parse(parsed);
-  return validated.classifications;
+  return { classifications: validated.classifications, usage: usageRecord };
 }
 
 function parseJsonResponse(text: string): unknown {

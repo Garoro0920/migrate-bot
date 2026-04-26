@@ -38,3 +38,6 @@ Thumbs.db
 # Phase 0 hearing materials with PII (per ADR-0001 注記)
 docs/decisions/interview-candidates.md
 docs/decisions/interviews/
+
+# API usage log (per-cwd, ADR-0002 §1.1 monitoring)
+.migrate-bot/

@@ -28,6 +28,9 @@ ANTHROPIC_API_KEY=sk-... corepack pnpm --filter @migrate-bot/cli analyze \
 
 # 全パイプライン（骨格、未実装）
 corepack pnpm --filter @migrate-bot/cli migrate <repo-url>
+
+# API 累計コスト確認（ADR-0002 §1.1 kill criteria 進捗）
+corepack pnpm --filter @migrate-bot/cli exec tsx src/index.ts stats
 ```
 
 ## API キー設定
