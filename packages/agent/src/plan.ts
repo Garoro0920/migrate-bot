@@ -119,6 +119,10 @@ export function computeTargetPath(sourcePath: string, kind: FileKind): string {
   if (kind === 'api-route') {
     // pages/api/hello.ts → app/api/hello/route.ts
     // pages/api/users/[id].ts → app/api/users/[id]/route.ts
+    // pages/api/users/index.ts → app/api/users/route.ts (index は省略)
+    if (noExt.endsWith('/index')) {
+      return `app/${noExt.slice(0, -'/index'.length)}/route.${ext}`;
+    }
     return `app/${noExt}/route.${ext}`;
   }
 

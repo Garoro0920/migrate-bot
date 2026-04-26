@@ -163,4 +163,10 @@ describe('computeTargetPath', () => {
       'app/api/users/[id]/route.ts',
     );
   });
+
+  it('drops index from API routes: pages/api/users/index.ts to app/api/users/route.ts', () => {
+    expect(computeTargetPath('pages/api/users/index.ts', 'api-route')).toBe(
+      'app/api/users/route.ts',
+    );
+  });
 });
