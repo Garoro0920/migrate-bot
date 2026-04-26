@@ -1,0 +1,23 @@
+{
+  "name": "@migrate-bot/runner",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@migrate-bot/agent": "workspace:*",
+    "@migrate-bot/db": "workspace:*",
+    "@migrate-bot/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5"
+  }
+}

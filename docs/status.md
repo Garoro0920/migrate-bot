@@ -9,15 +9,16 @@
 
 ## 現在のフェーズ
 
-**Phase 1: ローカル PoC（完了基準達成、補足検証実施済）**
+**Phase 2: GitHub App 化（着手中、コード側 foundation 完了）**
 
-詳細 → `docs/roadmap.md` §1.2
+詳細 → `docs/roadmap.md` §1.3
 
-注: Phase 0 は ADR-0002 により skip。市場検証は社会人化以降に再評価予定。
+Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip。
 
 ## 進行中タスク
 
-なし（Phase 1 §1.2 完了。Phase 2 着手前に operator 確認待ち）
+- Phase 2 後半: webhook handler に enqueue ロジック追加、runner と DB の本番接続、wrangler.toml 整備
+- 外部サービス契約 (Cloudflare Workers Paid $5/mo, Fly.io 等) の operator 承認 (憲章 §6 該当)
 
 ## 直近の重要判断
 
@@ -29,6 +30,12 @@
 - **2026-04-26: `vercel/next.js` `examples/with-typescript` (5 ファイル) で end-to-end 成功** — pnpm install + tsc --noEmit + next build すべて pass。**Phase 1 §1.2 完了基準達成**
 - 2026-04-26: Phase 1 残検証として `pages-router-medium` fixture (31 ファイル) を作成し pipeline 実行。30/31 task 成功、`_document.tsx` collision で 1 skip、cost $0.2354
 - 2026-04-26: `docs/business.md` §4.1 に実測コストデータを追記。暫定上限の正式変更は Phase 2 で実顧客 5〜10 件分のデータ蓄積後に保留
+- 2026-04-26: Phase 2 着手。code-side foundation を 4 commit に分割 (`ef4ba9d`〜`<latest>`):
+  - `packages/shared` 状態機械 + concurrency + IDs (31 tests)
+  - `packages/db` Drizzle schema (D1 互換、5 tests)
+  - `apps/api` Hono webhook skeleton (10 tests)
+  - `apps/runner` Node runner skeleton (9 tests)
+  - 計 +55 tests (累計 151)。外部サービス契約は未着手 (operator 承認待ち)
 
 ## Phase 1 §1.2 の完了状況
 
