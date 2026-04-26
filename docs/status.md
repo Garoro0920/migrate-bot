@@ -17,7 +17,12 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 
 ## 進行中タスク
 
-- **Phase 2 外部サービス契約 (operator 作業)**: `docs/phase-2-deployment.md` に従い GitHub App / Cloudflare / Fly.io を順に登録。月額 $10〜$15 程度の §6 該当判断
+- **Phase 2 外部サービス契約 (operator 作業、進行中)**:
+  - ✅ GitHub アカウント `Garoro0920` 作成 + private repo `Garoro0920/migrate-bot` 作成 + push 済
+  - ✅ GitHub App `migrate-bot-dev` 登録済 (App ID: 3509236、private key は operator ローカル保管)
+  - ⏸ **次回ここから**: Cloudflare アカウント + Workers Paid + D1 + Queues + secrets (`docs/phase-2-deployment.md` §2)
+  - ⏸ Fly.io アカウント + flyctl + secrets (`docs/phase-2-deployment.md` §3)
+  - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留可)
 - Phase 2 後半 (Claude Code 作業、operator 契約完了後): D1 接続、Queue 連携、agent パイプライン runner 統合、デプロイ動作確認
 
 ## 直近の重要判断
@@ -39,6 +44,9 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - apps/api/wrangler.toml + apps/runner/fly.toml + Dockerfile プレースホルダ
   - 計 +95 tests (累計 169)。コード側は外部サービス未利用で完結
 - 2026-04-26: `docs/phase-2-deployment.md` を作成。GitHub App / Cloudflare / Fly.io の登録手順、月額固定費合意（$10〜$15）、撤退手順、セキュリティチェックリストを集約
+- 2026-04-26: 月額 $10〜$15 の固定費に operator 合意 (憲章 §6)
+- 2026-04-26: GitHub アカウント `Garoro0920` で private repo 作成・push、git config を新アカウントに切替 (旧 `Ga1or0920/migrate-bot` は GitHub 上に残存、operator が必要に応じて削除)
+- 2026-04-26: GitHub App `migrate-bot-dev` 登録 (App ID 3509236)、.gitignore に *.pem 等の秘密鍵パターン追加 (`f4578f2`)
 
 ## Phase 1 §1.2 の完了状況
 
@@ -77,11 +85,13 @@ ADR-0002 §1.1 kill criteria 累計使用 0.4% (約 $0.36)。
 
 ## 次に着手すべきこと
 
-選択肢（operator 確認待ち）:
-1. **LLM 品質改善**: import path 深さ整合のプロンプト改善 + deterministic 後処理。eval ハーネスの最小実装（`docs/development.md` §3 の前倒し）
-2. **Phase 2 着手準備**: GitHub App 登録、Cloudflare Workers + Hono、Drizzle + D1 設計（`docs/roadmap.md` §1.3）
-3. **PoC の OSS 公開検討**: ADR-0002 §1.4 の市場シグナル取得（GitHub star / issue / discussion 観察）
-4. **`_document + _app` merge 機能**: collision 時に既存 layout を読み LLM に追加コンテキストとして渡す
+**次回セッション開始時の最初のタスク**: Cloudflare 登録 (`docs/phase-2-deployment.md` §2)。
+operator は事前にクレカ + 永続メール + 2FA アプリ + 静かな環境を準備して再開する。
+
+その後の選択肢:
+1. Cloudflare 完了後 → Fly.io 登録 (`docs/phase-2-deployment.md` §3)
+2. 全外部契約完了後 → Phase 2 後半コード作業 (D1/Queue 接続、agent パイプライン runner 統合)
+3. 並行で進めてよい task: LLM 品質改善 (import path 深さ整合のプロンプト改善 + 後処理)、`_document + _app` merge 機能
 
 ## 開発コマンド
 
