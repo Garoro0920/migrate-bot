@@ -1,29 +1,40 @@
-  # Dependencies
-  node_modules/
-  .pnpm-store/
+# Dependencies
+node_modules/
+.pnpm-store/
 
-  # Build outputs
-  dist/
-  build/
-  .next/
-  .turbo/
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
 
-  # Env / secrets
-  .env
-  .env.local
-  .env.*.local
+# TypeScript
+*.tsbuildinfo
 
-  # Cloudflare / Fly local state
-  .wrangler/
-  .fly/
+# Test coverage
+coverage/
 
-  # Logs
-  *.log
-  npm-debug.log*
+# Env / secrets
+.env
+.env.local
+.env.*.local
 
-  # Editor
-  .vscode/
-  .idea/
-  *.swp
-  .DS_Store
-  Thumbs.db
+# Cloudflare / Fly local state
+.wrangler/
+.fly/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Phase 0 hearing materials with PII (per ADR-0001 注記)
+docs/decisions/interview-candidates.md
+docs/decisions/interviews/
