@@ -1,0 +1,30 @@
+# Fly.io Machines 設定。Phase 2 後半で `fly launch` 後に値を埋める。
+# 1 ジョブ = 1 マシン (architecture.md §1.2)。auto_stop で完了後に停止。
+#
+# 参考: https://fly.io/docs/reference/configuration/
+
+app = "migrate-bot-runner-dev"
+primary_region = "nrt"
+
+[build]
+dockerfile = "Dockerfile"
+
+[env]
+NODE_ENV = "production"
+
+# Machines は API から起動 (worker consumer から machine.start)。
+# auto_start = true で受信時に起動、auto_stop_machines = true で完了後に停止。
+[http_service]
+auto_start_machines = true
+auto_stop_machines = true
+min_machines_running = 0
+
+[[vm]]
+size = "shared-cpu-1x"
+memory = "512mb"
+
+# Secrets (`fly secrets set ANTHROPIC_API_KEY=...`):
+# - ANTHROPIC_API_KEY
+# - DATABASE_URL (D1 client は別経路、HTTP API or proxy)
+# - GITHUB_APP_ID
+# - GITHUB_APP_PRIVATE_KEY

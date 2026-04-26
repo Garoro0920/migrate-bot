@@ -1,3 +1,4 @@
+import { runAdminTrigger } from './commands/admin-trigger';
 import { runAnalyze } from './commands/analyze';
 import { runMigrate } from './commands/migrate';
 import { runPlan } from './commands/plan';
@@ -31,6 +32,7 @@ function printHelp(): void {
       '  migrate [--no-llm] [--json] <repo-path>   Run the full Analyze + Plan + Migrate pipeline',
       '  verify [--skip-*] [--json] <repo-path>    Run pnpm install + tsc --noEmit + next build',
       '  stats                                      Show cumulative API usage and ADR-0002 kill criteria',
+      '  admin-trigger <inst-id> <owner/repo>      Enqueue a job (dev tool, in-memory queue only)',
       '  help                                       Show this help',
       '',
       'Notes:',
@@ -55,6 +57,8 @@ async function main(): Promise<number> {
       return runVerify(args);
     case 'stats':
       return runStats(args);
+    case 'admin-trigger':
+      return runAdminTrigger(args);
     case 'help':
     case '--help':
     case '-h':

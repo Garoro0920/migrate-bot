@@ -1,0 +1,8 @@
+node_modules
+dist
+.turbo
+.migrate-bot
+.env.local
+.env
+**/*.test.ts
+**/test-fixtures

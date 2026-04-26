@@ -54,6 +54,9 @@ importers:
       '@migrate-bot/agent':
         specifier: workspace:*
         version: link:../../packages/agent
+      '@migrate-bot/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       '@types/node':
         specifier: ^22
