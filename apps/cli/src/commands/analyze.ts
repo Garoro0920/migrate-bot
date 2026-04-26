@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { type AnalyzeOptions, analyze } from '@migrate-bot/agent';
+import { getUsageLogPath } from '../paths';
 
 interface ParsedAnalyzeArgs {
   readonly repoPath: string | undefined;
@@ -31,7 +32,10 @@ export async function runAnalyze(args: readonly string[]): Promise<number> {
   }
 
   const localPath = resolve(repoPath);
-  const options: AnalyzeOptions = skipLlm ? { skipLlm: true } : {};
+  const options: AnalyzeOptions = {
+    ...(skipLlm ? { skipLlm: true } : {}),
+    logPath: getUsageLogPath(),
+  };
   const result = await analyze({ localPath, source: localPath }, options);
 
   if (json) {

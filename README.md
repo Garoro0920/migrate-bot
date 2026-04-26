@@ -36,16 +36,22 @@ corepack pnpm --filter @migrate-bot/cli exec tsx src/index.ts stats
 ## API キー設定
 
 LLM 呼び出しを伴う Analyze 実行には Anthropic API キーが必要。
-`.env.local.example` をコピーして `.env.local` を作成し、API キーを記入する。
-（`.env.local` は `.gitignore` で除外済み）
+プロジェクトルートの `.env.local.example` を `.env.local` にコピーし、API キーを記入する。
+CLI 起動時に **`.env.local` は自動読み込み**される（毎セッション env を手動でセットする必要はない）。
 
 ```sh
+# bash
 cp .env.local.example .env.local
-# エディタで ANTHROPIC_API_KEY を設定
+# PowerShell
+Copy-Item .env.local.example .env.local
 ```
 
+その後エディタで `ANTHROPIC_API_KEY` の値を本物のキーに置き換える。
+`.env.local` は `.gitignore` で除外済み。
+
 ADR-0002 §1 の kill criteria（累計 API コスト $30 で評価、$80 で強制停止）に
-従い、初期段階は Haiku（最も安価）のみで運用する。
+従い、初期段階は Haiku（最も安価）のみで運用する。コスト監視は `.migrate-bot/usage.jsonl`
+（プロジェクトルート相対）に追記され、`stats` コマンドで確認できる。
 
 ## ディレクトリ構成
 

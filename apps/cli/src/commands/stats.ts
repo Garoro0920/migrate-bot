@@ -1,19 +1,15 @@
-import {
-  DEFAULT_LOG_PATH,
-  KILL_CRITERIA,
-  killCriteriaStatus,
-  loadUsageHistory,
-  summarize,
-} from '@migrate-bot/agent';
+import { KILL_CRITERIA, killCriteriaStatus, loadUsageHistory, summarize } from '@migrate-bot/agent';
+import { getUsageLogPath } from '../paths';
 
 export async function runStats(_args: readonly string[]): Promise<number> {
-  const records = await loadUsageHistory(DEFAULT_LOG_PATH);
+  const logPath = getUsageLogPath();
+  const records = await loadUsageHistory(logPath);
   const summary = summarize(records);
   const status = killCriteriaStatus(summary.totalCostUsd);
 
   const lines: string[] = [];
   lines.push('[migrate-bot] usage stats');
-  lines.push(`  log: ${DEFAULT_LOG_PATH}`);
+  lines.push(`  log: ${logPath}`);
   lines.push(`  total calls: ${summary.totalCalls}`);
   lines.push(`  total cost: $${summary.totalCostUsd.toFixed(4)}`);
   lines.push(`  first call: ${summary.firstAt ?? '(none)'}`);

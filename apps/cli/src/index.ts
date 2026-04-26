@@ -1,6 +1,10 @@
 import { runAnalyze } from './commands/analyze';
 import { runMigrate } from './commands/migrate';
 import { runStats } from './commands/stats';
+import { loadDotenv } from './env';
+import { getDotenvPath } from './paths';
+
+loadDotenv(getDotenvPath());
 
 interface ParsedArgs {
   readonly command: string;
@@ -25,10 +29,9 @@ function printHelp(): void {
       '  migrate <repo-url>                         Run the migration pipeline (skeleton)',
       '  help                                       Show this help',
       '',
-      'Examples:',
-      '  pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze --no-llm <repo-path>',
-      '  ANTHROPIC_API_KEY=sk-... pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze <repo-path>',
-      '  pnpm --filter @migrate-bot/cli exec tsx src/index.ts stats',
+      'Notes:',
+      '  - .env.local at the project root is auto-loaded; ANTHROPIC_API_KEY is read from there',
+      '  - Usage log is written to <project-root>/.migrate-bot/usage.jsonl',
       '',
     ].join('\n'),
   );
