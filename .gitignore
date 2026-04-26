@@ -1,0 +1,29 @@
+  # Dependencies
+  node_modules/
+  .pnpm-store/
+
+  # Build outputs
+  dist/
+  build/
+  .next/
+  .turbo/
+
+  # Env / secrets
+  .env
+  .env.local
+  .env.*.local
+
+  # Cloudflare / Fly local state
+  .wrangler/
+  .fly/
+
+  # Logs
+  *.log
+  npm-debug.log*
+
+  # Editor
+  .vscode/
+  .idea/
+  *.swp
+  .DS_Store
+  Thumbs.db
