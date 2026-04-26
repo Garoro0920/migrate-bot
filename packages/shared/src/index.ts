@@ -23,3 +23,9 @@ export {
   nextStatesOf,
   STATE_SLA_MS,
 } from './job-state';
+export {
+  InMemoryQueue,
+  type JobQueueMessage,
+  type QueueMessage,
+  type QueueProducer,
+} from './queue';
