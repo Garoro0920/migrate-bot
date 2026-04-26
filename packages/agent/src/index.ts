@@ -23,4 +23,9 @@ export {
 } from './observability/usage';
 export { computeTargetPath, plan } from './plan';
 export type * from './types';
-export { verify } from './verify';
+export {
+  type CommandResult,
+  type CommandRunner,
+  type VerifyOptions,
+  verify,
+} from './verify';

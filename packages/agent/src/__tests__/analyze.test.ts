@@ -35,12 +35,3 @@ describe('migrate empty plan against fixture (no API calls)', () => {
     expect(result.usage.callCount).toBe(0);
   });
 });
-
-describe('verify still stub', () => {
-  it('throws not-implemented', async () => {
-    const { verify } = await import('../verify');
-    await expect(verify({ localPath: FIXTURE, source: 'fixture' })).rejects.toThrow(
-      /not implemented/,
-    );
-  });
-});
