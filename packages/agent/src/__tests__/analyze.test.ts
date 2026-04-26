@@ -22,15 +22,22 @@ describe('analyze (skipLlm)', () => {
   });
 });
 
-describe('downstream stages still stub', () => {
-  it('migrate throws not-implemented', async () => {
+describe('migrate empty plan against fixture (no API calls)', () => {
+  it('returns empty result when plan has no tasks', async () => {
     const { migrate } = await import('../migrate');
-    await expect(migrate({ localPath: FIXTURE, source: 'fixture' }, { tasks: [] })).rejects.toThrow(
-      /not implemented/,
+    const result = await migrate(
+      { localPath: FIXTURE, source: 'fixture' },
+      { tasks: [] },
+      { skipLlm: true },
     );
+    expect(result.changes).toEqual([]);
+    expect(result.failedTaskIds).toEqual([]);
+    expect(result.usage.callCount).toBe(0);
   });
+});
 
-  it('verify throws not-implemented', async () => {
+describe('verify still stub', () => {
+  it('throws not-implemented', async () => {
     const { verify } = await import('../verify');
     await expect(verify({ localPath: FIXTURE, source: 'fixture' })).rejects.toThrow(
       /not implemented/,

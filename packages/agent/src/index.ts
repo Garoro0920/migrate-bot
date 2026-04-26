@@ -1,6 +1,6 @@
 export { type AnalyzeOptions, analyze } from './analyze';
 export { type ClonedRepo, type CloneOptions, cloneRepo } from './io/clone';
-export { migrate } from './migrate';
+export { type MigrateOptions, migrate } from './migrate';
 export {
   calculateCostUsd,
   type KnownModel,
@@ -21,6 +21,6 @@ export {
   type UsageRecord,
   type UsageSummary,
 } from './observability/usage';
-export { plan } from './plan';
+export { computeTargetPath, plan } from './plan';
 export type * from './types';
 export { verify } from './verify';

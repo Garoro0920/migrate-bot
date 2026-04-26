@@ -53,6 +53,8 @@ export type TaskKind = 'codemod' | 'agent' | 'hybrid';
 export interface MigrationTask {
   readonly id: string;
   readonly kind: TaskKind;
+  readonly fileKind: FileKind;
+  readonly sourcePath: string;
   readonly targetPath: string;
   readonly description: string;
   readonly dependsOn: readonly string[];
@@ -69,9 +71,15 @@ export interface FileChange {
   readonly kind: FileChangeKind;
 }
 
+export interface MigrateUsage {
+  readonly costUsd: number;
+  readonly callCount: number;
+}
+
 export interface MigrateResult {
   readonly changes: readonly FileChange[];
   readonly failedTaskIds: readonly string[];
+  readonly usage: MigrateUsage;
 }
 
 export interface VerifyResult {

@@ -30,6 +30,7 @@
 - 2026-04-26: Anthropic 公式で MODEL_PRICING を検証、Opus 4.7 のレートを $15/$75 → $5/$25 に修正
 - 2026-04-26: CLI が `.env.local` 自動読込、usage log を project root 起点に解決
 - 2026-04-26: Plan 段階を deterministic に実装（CLI に `plan` サブコマンド追加）
+- 2026-04-26: Migrate 段階を実装（Sonnet 4.6 + Opus 4.7 リトライ、tool use で write_transformed_file/abort）。CLI `migrate` を tmp ワーキングコピー方式で本実装に置換
 
 ## Phase 1 §1.2 の進捗
 
@@ -40,13 +41,15 @@
 - [x] docs/prompts/analyze-classify.md v0.1（Haiku 向け、frontmatter 規則準拠）
 - [x] API コスト累計トラッキング (`packages/agent/src/observability/`、`.migrate-bot/usage.jsonl`、CLI `stats`)
 - [x] 実 API での fixture 動作確認（4/4 正解、コスト 1 セント未満）
-- [x] Plan 段階（deterministic、API コストゼロ。FileKind から TaskKind と依存順を決定）
+- [x] Plan 段階（deterministic、API コストゼロ。FileKind から TaskKind と依存順、target path を決定）
+- [x] Migrate 段階（Sonnet 4.6 デフォルト、Opus 4.7 リトライ、tool_use で構造化出力、ファイル書込、cp で tmp ワーキングコピー）
+- [ ] Verify 段階（次の自然な checkpoint）
 - [ ] 検証対象（実 API 利用、実リポジトリ）:
   - [ ] `vercel/next.js` の `examples/with-typescript`
   - [ ] `vercel/next.js` の `examples/blog-starter`
   - [ ] 自作の中規模 sample repo（30〜100 ファイル）
 - [x] Plan 段階実装
-- [ ] Migrate 段階実装
+- [x] Migrate 段階実装
 - [ ] Verify 段階実装（出力 branch で `next build` と型検査が通る）
 - [ ] 1 ジョブのトークン使用量・所要時間・コストを計測しレポート
 - [ ] `docs/business.md` §4.1 のコスト想定値を実測ベースで再評価
