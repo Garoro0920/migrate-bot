@@ -17,8 +17,8 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 
 ## 進行中タスク
 
-- Phase 2 後半: webhook handler に enqueue ロジック追加、runner と DB の本番接続、wrangler.toml 整備
-- 外部サービス契約 (Cloudflare Workers Paid $5/mo, Fly.io 等) の operator 承認 (憲章 §6 該当)
+- **Phase 2 外部サービス契約 (operator 作業)**: `docs/phase-2-deployment.md` に従い GitHub App / Cloudflare / Fly.io を順に登録。月額 $10〜$15 程度の §6 該当判断
+- Phase 2 後半 (Claude Code 作業、operator 契約完了後): D1 接続、Queue 連携、agent パイプライン runner 統合、デプロイ動作確認
 
 ## 直近の重要判断
 
@@ -30,12 +30,15 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 - **2026-04-26: `vercel/next.js` `examples/with-typescript` (5 ファイル) で end-to-end 成功** — pnpm install + tsc --noEmit + next build すべて pass。**Phase 1 §1.2 完了基準達成**
 - 2026-04-26: Phase 1 残検証として `pages-router-medium` fixture (31 ファイル) を作成し pipeline 実行。30/31 task 成功、`_document.tsx` collision で 1 skip、cost $0.2354
 - 2026-04-26: `docs/business.md` §4.1 に実測コストデータを追記。暫定上限の正式変更は Phase 2 で実顧客 5〜10 件分のデータ蓄積後に保留
-- 2026-04-26: Phase 2 着手。code-side foundation を 4 commit に分割 (`ef4ba9d`〜`<latest>`):
-  - `packages/shared` 状態機械 + concurrency + IDs (31 tests)
+- 2026-04-26: Phase 2 着手。code-side foundation を 8 commit に分割 (`ef4ba9d`〜`234d046`):
+  - `packages/shared` 状態機械 + concurrency + IDs + Queue 抽象 (36 tests)
   - `packages/db` Drizzle schema (D1 互換、5 tests)
-  - `apps/api` Hono webhook skeleton (10 tests)
-  - `apps/runner` Node runner skeleton (9 tests)
-  - 計 +55 tests (累計 151)。外部サービス契約は未着手 (operator 承認待ち)
+  - `apps/api` Hono webhook + GitHub event parsing + signature verify (14 tests)
+  - `apps/runner` Node runner skeleton + Octokit App wrapper (13 tests)
+  - `apps/cli` `admin-trigger` 追加 (27 tests, +5)
+  - apps/api/wrangler.toml + apps/runner/fly.toml + Dockerfile プレースホルダ
+  - 計 +95 tests (累計 169)。コード側は外部サービス未利用で完結
+- 2026-04-26: `docs/phase-2-deployment.md` を作成。GitHub App / Cloudflare / Fly.io の登録手順、月額固定費合意（$10〜$15）、撤退手順、セキュリティチェックリストを集約
 
 ## Phase 1 §1.2 の完了状況
 
