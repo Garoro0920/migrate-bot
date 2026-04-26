@@ -9,32 +9,41 @@
 
 ## 現在のフェーズ
 
-**Phase 0: 市場検証**
+**Phase 1: ローカル PoC**
 
-詳細 → `docs/roadmap.md` §1.1
+詳細 → `docs/roadmap.md` §1.2
+
+注: Phase 0 は ADR-0002 により skip。市場検証は社会人化以降に再評価予定。
 
 ## 進行中タスク
 
-なし（プロジェクト初期化直後）
+なし（Phase 1 着手準備中）
 
 ## 直近の重要判断
 
 - 2026-04-26: 単一 CLAUDE.md を分割構成に再編（v0.5）
+- 2026-04-26: Phase 0 ヒアリング設計を ADR-0001 で確定（テンプレート一式作成済）
+- 2026-04-26: ADR-0002 により Phase 0 を skip、Phase 1 に直行する判断（rationale: 学生期間中は技術検証を優先、市場検証は社会人以降）
 
 ## 次に着手すべきこと
 
-1. Phase 0 の完了基準（`docs/roadmap.md` §1.1）に従い、
-   想定 ICP の開発者 5 名以上にヒアリング
-2. ヒアリング結果を `docs/decisions/0001-market-validation.md` に
-   ADR として記録
-3. ピボット判断、または Phase 1 着手の決定
+`docs/roadmap.md` §1.2 のチェックリスト先頭から:
+
+1. モノレポ初期化（pnpm + Turborepo）
+2. `packages/agent` の骨格を作成（Analyze + Plan + Migrate + Verify の 4 段）
+3. `apps/cli` の `pnpm migrate <repo-url>` エンドポイント
+4. 検証対象 1 件目: `vercel/next.js` の `examples/with-typescript` を fork して動作確認
+5. ADR-0002 §1 の kill criteria（コスト $30 / 4 週間 で進捗評価）を運用に組み込む
 
 ## 未解決の質問
 
-なし（適宜追記）
+- Phase 1 着手前に技術選定 ADR が必要な範囲（Claude Agent SDK のバージョン、moduleresolution、Turborepo or Nx 等）→ 着手時に都度判断
 
 ## 関連リンク
 
 - 憲章: `CLAUDE.md`
 - ロードマップ: `docs/roadmap.md`
-- 直近の ADR: `docs/decisions/`
+- ADR-0002（Phase 0 skip 判断）: `docs/decisions/0002-skip-phase-0.md`
+- ADR-0001（superseded、参照保持）: `docs/decisions/0001-market-validation.md`
+- agent 設計: `docs/agent.md`
+- アーキテクチャ: `docs/architecture.md`
