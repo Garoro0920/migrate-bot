@@ -5,9 +5,32 @@ export interface RepoLocation {
   readonly source: string;
 }
 
+export type BlockerType =
+  | 'custom-server'
+  | 'monorepo'
+  | 'size-overflow'
+  | 'mixed-app-router'
+  | 'broken-lockfile'
+  | 'unsupported-dep';
+
 export interface Blocker {
-  readonly type: string;
+  readonly type: BlockerType;
   readonly evidence: string;
+}
+
+export type FileKind =
+  | 'static-page'
+  | 'ssr-page'
+  | 'ssg-page'
+  | 'api-route'
+  | 'app'
+  | 'document'
+  | 'error'
+  | 'unknown';
+
+export interface FileClassification {
+  readonly path: string;
+  readonly kind: FileKind;
 }
 
 export interface AnalyzeResult {
@@ -16,6 +39,7 @@ export interface AnalyzeResult {
   readonly fileCount: number;
   readonly recommendedPlan: Plan;
   readonly blockers: readonly Blocker[];
+  readonly classifications: readonly FileClassification[];
 }
 
 export type TaskKind = 'codemod' | 'agent' | 'hybrid';

@@ -1,3 +1,4 @@
+import { runAnalyze } from './commands/analyze';
 import { runMigrate } from './commands/migrate';
 
 interface ParsedArgs {
@@ -15,14 +16,16 @@ function parseCli(argv: readonly string[]): ParsedArgs {
 function printHelp(): void {
   process.stdout.write(
     [
-      'migrate-bot CLI (Phase 1 skeleton)',
+      'migrate-bot CLI (Phase 1)',
       '',
-      'Usage:',
-      '  migrate <repo-url>     Run the migration pipeline against a Next.js repository',
-      '  help                   Show this help',
+      'Commands:',
+      '  analyze [--no-llm] [--json] <repo-path>   Run the Analyze stage on a local repo',
+      '  migrate <repo-url>                         Run the migration pipeline (skeleton)',
+      '  help                                       Show this help',
       '',
       'Examples:',
-      '  pnpm --filter @migrate-bot/cli migrate https://github.com/vercel/next.js',
+      '  pnpm --filter @migrate-bot/cli analyze --no-llm ./packages/agent/test-fixtures/pages-router-minimal',
+      '  ANTHROPIC_API_KEY=sk-... pnpm --filter @migrate-bot/cli analyze ./path/to/repo',
       '',
     ].join('\n'),
   );
@@ -32,6 +35,8 @@ async function main(): Promise<number> {
   const { command, args } = parseCli(process.argv);
 
   switch (command) {
+    case 'analyze':
+      return runAnalyze(args);
     case 'migrate':
       return runMigrate(args);
     case 'help':
