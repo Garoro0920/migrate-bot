@@ -19,6 +19,12 @@ coverage/
 .env.local
 .env.*.local
 
+# Private keys (GitHub App, etc.) — これらは絶対にコミット禁止
+*.pem
+*.key
+*.p12
+*.pfx
+
 # Cloudflare / Fly local state
 .wrangler/
 .fly/
