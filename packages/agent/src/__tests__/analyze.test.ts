@@ -22,19 +22,18 @@ describe('analyze (skipLlm)', () => {
   });
 });
 
-describe('analyze (other stages still stub)', () => {
-  it('plan throws not-implemented', async () => {
-    const { plan } = await import('../plan');
-    await expect(
-      plan({
-        nextVersion: '',
-        pagesFiles: [],
-        fileCount: 0,
-        recommendedPlan: 'small',
-        blockers: [],
-        classifications: [],
-        usage: { costUsd: 0, callCount: 0 },
-      }),
-    ).rejects.toThrow(/not implemented/);
+describe('downstream stages still stub', () => {
+  it('migrate throws not-implemented', async () => {
+    const { migrate } = await import('../migrate');
+    await expect(migrate({ localPath: FIXTURE, source: 'fixture' }, { tasks: [] })).rejects.toThrow(
+      /not implemented/,
+    );
+  });
+
+  it('verify throws not-implemented', async () => {
+    const { verify } = await import('../verify');
+    await expect(verify({ localPath: FIXTURE, source: 'fixture' })).rejects.toThrow(
+      /not implemented/,
+    );
   });
 });

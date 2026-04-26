@@ -1,5 +1,6 @@
 import { runAnalyze } from './commands/analyze';
 import { runMigrate } from './commands/migrate';
+import { runPlan } from './commands/plan';
 import { runStats } from './commands/stats';
 import { loadDotenv } from './env';
 import { getDotenvPath } from './paths';
@@ -25,6 +26,7 @@ function printHelp(): void {
       '',
       'Commands:',
       '  analyze [--no-llm] [--json] <repo-path>   Run the Analyze stage on a local repo',
+      '  plan [--no-llm] [--json] <repo-path>      Run Analyze + Plan and print the migration task list',
       '  stats                                      Show cumulative API usage and ADR-0002 kill criteria',
       '  migrate <repo-url>                         Run the migration pipeline (skeleton)',
       '  help                                       Show this help',
@@ -43,6 +45,8 @@ async function main(): Promise<number> {
   switch (command) {
     case 'analyze':
       return runAnalyze(args);
+    case 'plan':
+      return runPlan(args);
     case 'stats':
       return runStats(args);
     case 'migrate':

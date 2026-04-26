@@ -27,6 +27,9 @@
 - 2026-04-26: Analyze 段階実装完了（repo-info, static blockers, sizing, Haiku ファイル分類）。fixture でテスト 23/23 green (commit `681f3b9`)
 - 2026-04-26: 実 API 呼び出し成功（fixture を Haiku で正しく分類、4/4 一致）
 - 2026-04-26: API コスト累計トラッキング実装（pricing, usage JSONL, stats CLI、ADR-0002 §1.1 kill criteria 進捗を可視化）
+- 2026-04-26: Anthropic 公式で MODEL_PRICING を検証、Opus 4.7 のレートを $15/$75 → $5/$25 に修正
+- 2026-04-26: CLI が `.env.local` 自動読込、usage log を project root 起点に解決
+- 2026-04-26: Plan 段階を deterministic に実装（CLI に `plan` サブコマンド追加）
 
 ## Phase 1 §1.2 の進捗
 
@@ -37,11 +40,12 @@
 - [x] docs/prompts/analyze-classify.md v0.1（Haiku 向け、frontmatter 規則準拠）
 - [x] API コスト累計トラッキング (`packages/agent/src/observability/`、`.migrate-bot/usage.jsonl`、CLI `stats`)
 - [x] 実 API での fixture 動作確認（4/4 正解、コスト 1 セント未満）
+- [x] Plan 段階（deterministic、API コストゼロ。FileKind から TaskKind と依存順を決定）
 - [ ] 検証対象（実 API 利用、実リポジトリ）:
   - [ ] `vercel/next.js` の `examples/with-typescript`
   - [ ] `vercel/next.js` の `examples/blog-starter`
   - [ ] 自作の中規模 sample repo（30〜100 ファイル）
-- [ ] Plan 段階実装
+- [x] Plan 段階実装
 - [ ] Migrate 段階実装
 - [ ] Verify 段階実装（出力 branch で `next build` と型検査が通る）
 - [ ] 1 ジョブのトークン使用量・所要時間・コストを計測しレポート
