@@ -21,10 +21,37 @@ export type CommandRunner = (
   cwd: string,
 ) => Promise<CommandResult>;
 
+let pnpmDirectAvailable: boolean | undefined;
+
+async function detectPnpmDirect(): Promise<boolean> {
+  if (pnpmDirectAvailable !== undefined) return pnpmDirectAvailable;
+  try {
+    await execFileAsync('pnpm', ['--version'], { shell: true });
+    pnpmDirectAvailable = true;
+  } catch {
+    pnpmDirectAvailable = false;
+  }
+  return pnpmDirectAvailable;
+}
+
 const defaultRunner: CommandRunner = async (cmd, args, cwd) => {
-  const { stdout, stderr } = await execFileAsync(cmd, [...args], {
+  let actualCmd = cmd;
+  let actualArgs: string[] = [...args];
+
+  // `pnpm` が PATH にない環境 (Windows + corepack のみセットアップ等) では
+  // corepack 経由でフォールバック実行する。
+  if (cmd === 'pnpm' && !(await detectPnpmDirect())) {
+    actualCmd = 'corepack';
+    actualArgs = ['pnpm', ...args];
+  }
+
+  // shell: true は Windows での corepack.cmd / pnpm.cmd の解決のために必要。
+  // 引数は固定文字列のみ (cwd は exec の cwd 引数で渡し interpolate しない) なので
+  // shell injection リスクはない。
+  const { stdout, stderr } = await execFileAsync(actualCmd, actualArgs, {
     cwd,
     maxBuffer: 1024 * 1024 * 16,
+    shell: true,
   });
   return { stdout, stderr };
 };
