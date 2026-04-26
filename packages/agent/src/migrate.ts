@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { topologicalSort } from './migrate/topological-sort';
 import { type TransformOutcome, transformFile } from './migrate/transform';
@@ -29,11 +29,16 @@ export async function migrate(
   const changes: FileChange[] = [];
   const failedTaskIds: string[] = [];
   const usageRecords: UsageRecord[] = [];
+  const writtenTargets = new Set<string>();
 
   for (const task of orderedTasks) {
-    if (options.skipLlm === true) {
-      // skipLlm では実行はしないが、何が起きるかを理解できるように "intended" として扱う。
-      // failedTaskIds でも changes でもなく、単に対象外。
+    if (options.skipLlm === true) continue;
+
+    // 衝突検知: 別タスクが既に同じ targetPath に書き込んでいる場合 (例: _app.tsx と _document.tsx
+    // が両方 app/layout.tsx を target にする) は、後発タスクをスキップ。
+    // source は手動マージ余地のため削除しない。
+    if (writtenTargets.has(task.targetPath)) {
+      failedTaskIds.push(task.id);
       continue;
     }
 
@@ -48,9 +53,15 @@ export async function migrate(
       continue;
     }
 
-    const change = await applyChange(repo, task, outcome.content);
-    changes.push(change);
+    const writeChange = await applyChange(repo, task, outcome.content);
+    changes.push(writeChange);
+    writtenTargets.add(task.targetPath);
     usageRecords.push(outcome.usage);
+
+    // Pages Router → App Router 移行では source ファイルを残すと next build が
+    // mixed-app-router エラーで落ちる。task が成功したら source は削除する。
+    const deleteChange = await deleteSource(repo, task);
+    if (deleteChange) changes.push(deleteChange);
   }
 
   const totalCost = usageRecords.reduce((sum, r) => sum + r.costUsd, 0);
@@ -104,4 +115,14 @@ async function applyChange(
   await mkdir(dirname(targetFullPath), { recursive: true });
   await writeFile(targetFullPath, content, 'utf-8');
   return { path: task.targetPath, kind: 'add' };
+}
+
+async function deleteSource(repo: RepoLocation, task: MigrationTask): Promise<FileChange | null> {
+  const sourceFullPath = join(repo.localPath, task.sourcePath);
+  try {
+    await unlink(sourceFullPath);
+    return { path: task.sourcePath, kind: 'delete' };
+  } catch {
+    return null;
+  }
 }

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -55,7 +55,7 @@ describe('migrate orchestration', () => {
     await rm(logDir, { recursive: true, force: true });
   });
 
-  it('writes transformed files for successful tasks', async () => {
+  it('writes target file and deletes source on success', async () => {
     await mkdir(join(workDir, 'pages'), { recursive: true });
     await writeFile(
       join(workDir, 'pages', 'index.tsx'),
@@ -82,14 +82,21 @@ describe('migrate orchestration', () => {
       logPath: join(logDir, 'usage.jsonl'),
     });
 
-    expect(result.changes).toHaveLength(1);
+    // 1 add (target) + 1 delete (source)
+    expect(result.changes).toHaveLength(2);
+    const adds = result.changes.filter((c) => c.kind === 'add');
+    const deletes = result.changes.filter((c) => c.kind === 'delete');
+    expect(adds).toEqual([{ path: 'app/page.tsx', kind: 'add' }]);
+    expect(deletes).toEqual([{ path: 'pages/index.tsx', kind: 'delete' }]);
     expect(result.failedTaskIds).toEqual([]);
-    expect(result.usage.callCount).toBe(1);
+
     const written = await readFile(join(workDir, 'app', 'page.tsx'), 'utf-8');
     expect(written).toContain('Page');
+    // source must be gone
+    await expect(access(join(workDir, 'pages', 'index.tsx'))).rejects.toThrow();
   });
 
-  it('records aborted tasks as failed and skips writing', async () => {
+  it('records aborted tasks as failed, leaves source intact', async () => {
     await mkdir(join(workDir, 'pages'), { recursive: true });
     await writeFile(join(workDir, 'pages', 'weird.tsx'), '// custom');
 
@@ -109,6 +116,48 @@ describe('migrate orchestration', () => {
     expect(result.changes).toEqual([]);
     expect(result.failedTaskIds).toEqual(['t1']);
     expect(result.usage.callCount).toBe(1);
+    // source must still exist
+    await expect(access(join(workDir, 'pages', 'weird.tsx'))).resolves.toBeUndefined();
+  });
+
+  it('skips a task when its targetPath was already written by an earlier task', async () => {
+    await mkdir(join(workDir, 'pages'), { recursive: true });
+    await writeFile(join(workDir, 'pages', '_app.tsx'), 'app source');
+    await writeFile(join(workDir, 'pages', '_document.tsx'), 'document source');
+
+    // First task succeeds, second collides on app/layout.tsx
+    createMessages.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'tool_use',
+          id: 't',
+          name: 'write_transformed_file',
+          input: { content: '// merged layout from _app' },
+        },
+      ],
+      usage: USAGE,
+    });
+
+    const plan: MigrationPlan = {
+      tasks: [
+        task('t1', 'pages/_app.tsx', 'app/layout.tsx'),
+        task('t2', 'pages/_document.tsx', 'app/layout.tsx', ['t1']),
+      ],
+    };
+
+    const result = await migrate({ localPath: workDir, source: workDir }, plan, {
+      logPath: join(logDir, 'usage.jsonl'),
+    });
+
+    // task1 succeeds (add + delete), task2 is skipped (no transform call)
+    expect(result.failedTaskIds).toEqual(['t2']);
+    expect(result.changes.some((c) => c.path === 'app/layout.tsx' && c.kind === 'add')).toBe(true);
+    expect(result.changes.some((c) => c.path === 'pages/_app.tsx' && c.kind === 'delete')).toBe(
+      true,
+    );
+    // pages/_document.tsx is preserved for manual merge
+    await expect(access(join(workDir, 'pages', '_document.tsx'))).resolves.toBeUndefined();
+    expect(createMessages).toHaveBeenCalledTimes(1);
   });
 
   it('retries with the configured retry model when the first call throws', async () => {
@@ -136,7 +185,8 @@ describe('migrate orchestration', () => {
       retryWith: 'claude-opus-4-7',
     });
 
-    expect(result.changes).toHaveLength(1);
+    // 1 add + 1 delete
+    expect(result.changes).toHaveLength(2);
     expect(result.failedTaskIds).toEqual([]);
     expect(createMessages).toHaveBeenCalledTimes(2);
   });
