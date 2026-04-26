@@ -9,7 +9,7 @@
 
 ## 現在のフェーズ
 
-**Phase 1: ローカル PoC**
+**Phase 1: ローカル PoC（完了基準到達）**
 
 詳細 → `docs/roadmap.md` §1.2
 
@@ -17,81 +17,89 @@
 
 ## 進行中タスク
 
-- Phase 1 §1.2 「検証対象（小規模から順に）」: 1 件目 `vercel/next.js` の `examples/with-typescript` を実 API で Analyze 通過させる
+なし（Phase 1 §1.2 完了基準を満たした状態。Phase 2 着手前に operator 確認待ち）
 
 ## 直近の重要判断
 
 - 2026-04-26: 単一 CLAUDE.md を分割構成に再編（v0.5）
-- 2026-04-26: ADR-0002 により Phase 0 を skip、Phase 1 に直行（rationale: 学生期間中は技術検証を優先、市場検証は社会人以降）
-- 2026-04-26: モノレポ初期化 + agent/cli 骨格 (commit `f9ed516`)
-- 2026-04-26: Analyze 段階実装完了（repo-info, static blockers, sizing, Haiku ファイル分類）。fixture でテスト 23/23 green (commit `681f3b9`)
-- 2026-04-26: 実 API 呼び出し成功（fixture を Haiku で正しく分類、4/4 一致）
-- 2026-04-26: API コスト累計トラッキング実装（pricing, usage JSONL, stats CLI、ADR-0002 §1.1 kill criteria 進捗を可視化）
-- 2026-04-26: Anthropic 公式で MODEL_PRICING を検証、Opus 4.7 のレートを $15/$75 → $5/$25 に修正
-- 2026-04-26: CLI が `.env.local` 自動読込、usage log を project root 起点に解決
-- 2026-04-26: Plan 段階を deterministic に実装（CLI に `plan` サブコマンド追加）
-- 2026-04-26: Migrate 段階を実装（Sonnet 4.6 + Opus 4.7 リトライ、tool use で write_transformed_file/abort）。CLI `migrate` を tmp ワーキングコピー方式で本実装に置換。fixture で 4/4 成功 (cost $0.0279)
-- 2026-04-26: Verify 段階を実装（pnpm install / tsc --noEmit / next build を child_process で実行、CommandRunner DI）。Phase 1 §1.2 の主要 4 段階すべて実装完了
+- 2026-04-26: ADR-0002 により Phase 0 を skip、Phase 1 に直行
+- 2026-04-26: モノレポ初期化 + agent/cli 骨格 (`f9ed516`)
+- 2026-04-26: Analyze 段階実装 (`681f3b9`)、API コスト累計トラッキング実装 (`5b4e49c`)
+- 2026-04-26: MODEL_PRICING 公式検証、Opus 4.7 を $5/$25 に訂正 (`0c141bc`)
+- 2026-04-26: `.env.local` 自動読込 + project root 起点パス解決 (`aea4ed1`)
+- 2026-04-26: Plan 段階 deterministic 実装 (`7416f0a`)
+- 2026-04-26: Migrate 段階実装、tool use + Sonnet/Opus リトライ (`75504b6`)
+- 2026-04-26: Verify 段階実装、CommandRunner DI (`c07e235`)
+- 2026-04-26: source 削除 + 衝突検知 (`5d847ab`)
+- 2026-04-26: API route の /index 削減バグ修正 (`08f239c`)
+- 2026-04-26: Windows での verify shell:true / corepack フォールバック (`2c6494a`)
+- **2026-04-26: `vercel/next.js` の `examples/with-typescript` で end-to-end pipeline 成功**:
+  - 5/5 タスク変換成功、0 failed
+  - `pnpm install` + `tsc --noEmit` + `next build` がすべて pass
+  - 累計コスト約 $0.13（fixture 試行 + 実 example 2 回 = analyze ~$0.008、migrate ~$0.12）
+  - **Phase 1 §1.2 「出力 branch で `next build` と型検査が通る」要件達成**
 
-## Phase 1 §1.2 の進捗
+## Phase 1 §1.2 の完了状況
 
 - [x] モノレポ初期化（pnpm + Turborepo）
-- [x] `packages/agent` 骨格 + Analyze 実装（repo-info / blockers / sizing / classify / orchestrator）
-- [x] `apps/cli` 骨格 + analyze サブコマンド (`--no-llm` `--json` 対応)
-- [x] テスト fixture (`packages/agent/test-fixtures/pages-router-minimal`)
-- [x] docs/prompts/analyze-classify.md v0.1（Haiku 向け、frontmatter 規則準拠）
-- [x] API コスト累計トラッキング (`packages/agent/src/observability/`、`.migrate-bot/usage.jsonl`、CLI `stats`)
-- [x] 実 API での fixture 動作確認（4/4 正解、コスト 1 セント未満）
-- [x] Plan 段階（deterministic、API コストゼロ。FileKind から TaskKind と依存順、target path を決定）
-- [x] Migrate 段階（Sonnet 4.6 デフォルト、Opus 4.7 リトライ、tool_use で構造化出力、ファイル書込、cp で tmp ワーキングコピー）
-- [x] Verify 段階（pnpm install + tsc --noEmit + next build を子プロセスで実行、CommandRunner DI でテスト可能）
-- [ ] 検証対象（実 API 利用、実リポジトリ）:
-  - [ ] `vercel/next.js` の `examples/with-typescript`
-  - [ ] `vercel/next.js` の `examples/blog-starter`
-  - [ ] 自作の中規模 sample repo（30〜100 ファイル）
-- [x] Plan 段階実装
-- [x] Migrate 段階実装
-- [x] Verify 段階実装（CLI command 提供、実環境で動作させて初めて pass/fail がつく性質）
-- [ ] 1 ジョブのトークン使用量・所要時間・コストを計測しレポート
-- [ ] `docs/business.md` §4.1 のコスト想定値を実測ベースで再評価
+- [x] `packages/agent` に Analyze + Plan + Migrate + Verify 実装
+- [x] `apps/cli` に `pnpm migrate <repo-path>` 実装
+- [x] 検証対象:
+  - [x] `vercel/next.js` の `examples/with-typescript`（5 ファイル）→ pass
+  - [ ] `vercel/next.js` の `examples/blog-starter`（次セッション、追加検証）
+  - [ ] 自作の中規模 sample repo（30〜100 ファイル）（追加検証）
+- [x] **出力 branch で `next build` と型検査が通る**（with-typescript で達成）
+- [ ] 1 ジョブのトークン使用量・所要時間・コストを計測しレポート（部分達成、フォーマル文書化が残）
+- [ ] `docs/business.md` §4.1 のコスト想定値を実測ベースで再評価（次セッション）
+
+## 既知の制約・将来の宿題
+
+- `pages/_document.tsx + _app.tsx` の同一 target 衝突: 後発タスク skip + manual merge 余地。fixture と with-typescript には _document.tsx がないため未検証
+- LLM が path alias (`@/...`) を使うと tsconfig 設定との整合性が必要。with-typescript には alias 設定済で問題なかったが、未設定 repo では破綻しうる
+- Migrate のプロンプト (`docs/prompts/migrate.md` v0.1) は eval ハーネスを通していない（`docs/development.md` §3.4 のゲートは Phase 5 以降の運用で本格適用）
+
+## コスト実測データポイント
+
+ADR-0002 §1.1 の kill criteria（$30 / $80）監視に向けた基準値。
+
+| 対象 | ファイル数 | analyze | migrate | 合計 |
+|---|---|---|---|---|
+| 自作 fixture (4 files) | 4 | $0.0014 | $0.0265 | $0.0279 |
+| with-typescript (5 files) | 5 | $0.0026 | $0.0461 | $0.0487 |
+
+線形に近い (1 ファイル ~$0.01)。Small プラン上限 100 files で extrapolate すると ~$1。
+business.md §4.1 の Small 上限 $20 想定はかなり保守的（20 倍マージン）。
+詳細評価は中規模 sample repo の検証後に。
 
 ## 次に着手すべきこと
 
-1. `vercel/next.js` の `examples/with-typescript` を `cloneRepo` で取得 → analyze 実行（実リポジトリでの初回検証）
-2. `pricing.ts` の MODEL_PRICING 値を https://www.anthropic.com/pricing で検証・最新化
-3. Plan 段階のプロンプト設計と実装着手
+選択肢（operator 確認待ち）:
+1. **Phase 1 残検証の追加**: `examples/blog-starter` や中規模 sample で 2〜3 件目検証、`docs/business.md` §4.1 の正式更新
+2. **Phase 2 着手準備**: GitHub App 登録、Cloudflare Workers + Hono、Drizzle + D1 設計（`docs/roadmap.md` §1.3）
+3. **PoC の OSS 公開検討**: ADR-0002 §1.4 の市場シグナル取得（GitHub star / issue / discussion 観察）
 
 ## 開発コマンド
 
-要件: Node.js 22 LTS、corepack 有効化済み。
+要件: Node.js 22 LTS、corepack 有効化済み、`.env.local` に `ANTHROPIC_API_KEY`。
 
-```sh
+PowerShell:
+
+```powershell
 corepack pnpm install
 corepack pnpm typecheck
 corepack pnpm lint
 corepack pnpm test
 
-# Analyze 実行（LLM スキップ、API キー不要）
-corepack pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze \
-  --no-llm "$(pwd)/packages/agent/test-fixtures/pages-router-minimal"
-
-# Analyze 実行（LLM 利用、ANTHROPIC_API_KEY が必要）
-ANTHROPIC_API_KEY=sk-... corepack pnpm --filter @migrate-bot/cli exec tsx src/index.ts analyze \
-  /path/to/repo
-
-# 累計コストと kill criteria 進捗を確認 (ADR-0002 §1.1)
-corepack pnpm --filter @migrate-bot/cli exec tsx src/index.ts stats
+# pipeline 実行 (analyze + plan + migrate + verify は別コマンド)
+corepack pnpm --filter '@migrate-bot/cli' exec tsx src/index.ts migrate <repo-path>
+corepack pnpm --filter '@migrate-bot/cli' exec tsx src/index.ts verify <working-dir>
+corepack pnpm --filter '@migrate-bot/cli' exec tsx src/index.ts stats
 ```
-
-## 未解決の質問
-
-- Phase 1 着手前に技術選定 ADR が必要な範囲（Claude Agent SDK のバージョン、moduleresolution、Turborepo or Nx 等）→ 着手時に都度判断
 
 ## 関連リンク
 
 - 憲章: `CLAUDE.md`
-- ロードマップ: `docs/roadmap.md`
+- ロードマップ: `docs/roadmap.md` §1.2
 - ADR-0002（Phase 0 skip 判断）: `docs/decisions/0002-skip-phase-0.md`
-- ADR-0001（superseded、参照保持）: `docs/decisions/0001-market-validation.md`
 - agent 設計: `docs/agent.md`
 - アーキテクチャ: `docs/architecture.md`
