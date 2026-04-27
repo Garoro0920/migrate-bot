@@ -1,66 +1,93 @@
 import type { JobState } from '@migrate-bot/shared';
-import type { JobStore } from './job-store';
+import type { InternalApiClient, RemoteJob } from './internal-api';
 
-// agent パイプライン呼び出しを抽象化。テスト時はモックを差し込み、
-// 本番では @migrate-bot/agent の analyze/plan/migrate/verify を呼ぶ。
+// runner の orchestration。状態遷移は InternalApiClient 経由 (apps/api を HTTP
+// で叩く) で D1 に書く。agent パイプラインの呼び出しは PipelineRunner で抽象化、
+// テストではモック、本番では @migrate-bot/agent を呼ぶ。
+
+export interface PipelineUsage {
+  readonly tokensInput: number;
+  readonly tokensOutput: number;
+  readonly costUsd: number;
+}
 
 export interface PipelineRunner {
-  analyze(repoFullName: string): Promise<void>;
+  analyze(repoFullName: string): Promise<{ usage?: PipelineUsage }>;
   plan(): Promise<void>;
-  migrate(): Promise<void>;
+  migrate(): Promise<{ usage?: PipelineUsage }>;
   verify(): Promise<void>;
+  createPR(job: RemoteJob): Promise<{ prUrl: string }>;
 }
 
 export interface RunOutcome {
   readonly finalState: JobState;
   readonly aborted: boolean;
+  readonly prUrl?: string;
 }
 
 export interface RunOptions {
   readonly jobId: string;
-  readonly store: JobStore;
+  readonly api: InternalApiClient;
   readonly pipeline: PipelineRunner;
 }
 
 export async function runJob(options: RunOptions): Promise<RunOutcome> {
-  const { jobId, store, pipeline } = options;
-  let job = await store.load(jobId);
+  const { jobId, api, pipeline } = options;
+  const job = await api.loadJob(jobId);
 
   // queued -> analyzing
-  job = await store.transition({ jobId, toState: 'analyzing', reason: 'runner started' });
+  await api.transitionJob({ jobId, toState: 'analyzing', reason: 'runner started' });
+  let analyzeResult: { usage?: PipelineUsage };
   try {
-    await pipeline.analyze(job.repoFullName);
+    analyzeResult = await pipeline.analyze(job.repoFullName);
   } catch (err) {
-    job = await store.transition({
+    await api.transitionJob({
       jobId,
       toState: 'aborted_blocker',
       reason: `analyze failed: ${describeError(err)}`,
     });
-    job = await store.transition({ jobId, toState: 'refunding', reason: 'analyze aborted' });
-    return { finalState: job.state, aborted: true };
+    await api.transitionJob({ jobId, toState: 'refunding', reason: 'analyze aborted' });
+    return { finalState: 'refunding', aborted: true };
   }
+  await recordIfPresent(api, jobId, analyzeResult.usage);
 
-  job = await store.transition({ jobId, toState: 'planning', reason: 'analyze ok' });
+  await api.transitionJob({ jobId, toState: 'planning', reason: 'analyze ok' });
   await pipeline.plan();
 
-  job = await store.transition({ jobId, toState: 'migrating', reason: 'plan ready' });
-  await pipeline.migrate();
+  await api.transitionJob({ jobId, toState: 'migrating', reason: 'plan ready' });
+  const migrateResult = await pipeline.migrate();
+  await recordIfPresent(api, jobId, migrateResult.usage);
 
-  job = await store.transition({ jobId, toState: 'verifying', reason: 'migrate done' });
+  await api.transitionJob({ jobId, toState: 'verifying', reason: 'migrate done' });
   try {
     await pipeline.verify();
   } catch (err) {
-    job = await store.transition({
+    await api.transitionJob({
       jobId,
       toState: 'failed_ci',
       reason: `verify failed: ${describeError(err)}`,
     });
-    job = await store.transition({ jobId, toState: 'refunding', reason: 'ci failed' });
-    return { finalState: job.state, aborted: true };
+    await api.transitionJob({ jobId, toState: 'refunding', reason: 'ci failed' });
+    return { finalState: 'refunding', aborted: true };
   }
 
-  job = await store.transition({ jobId, toState: 'pr_ready', reason: 'verify pass' });
-  return { finalState: job.state, aborted: false };
+  const pr = await pipeline.createPR(job);
+  await api.transitionJob({ jobId, toState: 'pr_ready', reason: 'verify pass' });
+  return { finalState: 'pr_ready', aborted: false, prUrl: pr.prUrl };
+}
+
+async function recordIfPresent(
+  api: InternalApiClient,
+  jobId: string,
+  usage?: PipelineUsage,
+): Promise<void> {
+  if (!usage) return;
+  await api.recordUsage({
+    jobId,
+    tokensInput: usage.tokensInput,
+    tokensOutput: usage.tokensOutput,
+    costUsd: usage.costUsd,
+  });
 }
 
 function describeError(err: unknown): string {
