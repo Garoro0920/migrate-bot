@@ -28,13 +28,17 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - ✅ flyctl secrets 3 件設定済 (ANTHROPIC_API_KEY / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
   - ⚠ Cloudflare/Fly.io 共に Spend limit 設定 UI 不明、月次手動確認運用
   - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留)
-- **Phase 2 後半 (Claude Code 作業、次のセッション以降)**:
-  - D1 schema migration 生成 + 適用 (drizzle-kit + wrangler d1 execute)
-  - apps/api: D1 client 配線、webhook handler から Queue 投入
-  - Queue consumer: D1 から job 取得、Fly.io Machines API で runner 起動
-  - apps/runner: D1 (HTTP 中継) 接続、agent パイプライン統合、git push + draft PR 作成
-  - wrangler deploy + flyctl deploy
-  - Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
+- **Phase 2 後半 (Claude Code 作業、進行中)**:
+  - ✅ D1 schema migration 生成 (`packages/db/migrations/0000_initial.sql`)
+  - ✅ DB client / repository 関数 (`packages/db/src/client.ts` `repository.ts`)
+  - ✅ apps/api webhook → DB 配線 (installation events を D1 に書込)
+  - ⏸ **次回ここから**: D1 への migration 適用 (operator が `wrangler d1 execute` 実行)
+  - ⏸ Queue producer 配線 (admin-trigger or Stripe webhook 経路から jobs 作成 + 投入)
+  - ⏸ Queue consumer + Fly.io Machines API client (job → runner 起動)
+  - ⏸ runner ↔ DB アクセス機構: API 内部エンドポイント方式を採用予定 (runner が apps/api の認証済 internal endpoint に POST、Worker が D1 操作)
+  - ⏸ runner agent パイプライン統合
+  - ⏸ wrangler deploy + flyctl deploy
+  - ⏸ Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
 
 ## 直近の重要判断
 
@@ -65,6 +69,11 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 - 2026-04-27: Fly.io アカウント作成 + 2FA + クレカ登録、flyctl install/login。app `migrate-bot-runner-dev` 作成 (region nrt、shared-cpu-1x 512mb、`aa40b07`)
 - 2026-04-27: flyctl secrets 設定 (ANTHROPIC_API_KEY / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
 - **2026-04-27: Phase 2 外部サービス契約 (§0〜§3.4) 完了**。次は Claude Code が Phase 2 後半コード wiring を実装
+- 2026-04-27: Phase 2 後半 wiring 着手。3 commit:
+  - `e41653b` drizzle-kit で migration SQL 生成 + テストもこの SQL を使用
+  - `b1b3217` packages/db に D1/SQLite client + repository 関数 (upsertInstallation / createJob / transitionJob 等、12 tests)
+  - `f5ebfc4` apps/api webhook handler を D1 配線 (installation event → DB、handlers.ts に pure 関数分離、7 tests)
+  - 累計 188 tests (74+27+36+17+21+13)、外部サービス未利用
 
 ## Phase 1 §1.2 の完了状況
 
