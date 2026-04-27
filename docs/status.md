@@ -20,10 +20,15 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 - **Phase 2 外部サービス契約 (operator 作業、進行中)**:
   - ✅ GitHub アカウント `Garoro0920` 作成 + private repo `Garoro0920/migrate-bot` 作成 + push 済
   - ✅ GitHub App `migrate-bot-dev` 登録済 (App ID: 3509236、private key は operator ローカル保管)
-  - ⏸ **次回ここから**: Cloudflare アカウント + Workers Paid + D1 + Queues + secrets (`docs/phase-2-deployment.md` §2)
-  - ⏸ Fly.io アカウント + flyctl + secrets (`docs/phase-2-deployment.md` §3)
+  - ✅ Cloudflare アカウント + Workers Paid + 2FA + wrangler login
+  - ✅ D1 database `migrate-bot-dev` 作成 (database_id `e5e26c30-31ba-498a-ab52-25f56163da74`)
+  - ✅ Cloudflare Queues `migrate-bot-jobs` 作成
+  - ✅ wrangler secrets 設定済 (GITHUB_WEBHOOK_SECRET / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
+  - ✅ `apps/api/wrangler.toml` で D1 + Queues binding を有効化 (`cb46239`)
+  - ⚠ Cloudflare Spend limit 設定 UI 不明、当面ダッシュボードで月次手動確認
+  - ⏸ **次回ここから**: Fly.io アカウント + flyctl + secrets (`docs/phase-2-deployment.md` §3) **または** Phase 2 後半コード wiring を先行
   - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留可)
-- Phase 2 後半 (Claude Code 作業、operator 契約完了後): D1 接続、Queue 連携、agent パイプライン runner 統合、デプロイ動作確認
+- Phase 2 後半 (Claude Code 作業): D1 接続コード、Queue producer 配線、agent パイプライン runner 統合、deploy + webhook 接続確認
 
 ## 直近の重要判断
 
@@ -47,6 +52,10 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 - 2026-04-26: 月額 $10〜$15 の固定費に operator 合意 (憲章 §6)
 - 2026-04-26: GitHub アカウント `Garoro0920` で private repo 作成・push、git config を新アカウントに切替 (旧 `Ga1or0920/migrate-bot` は GitHub 上に残存、operator が必要に応じて削除)
 - 2026-04-26: GitHub App `migrate-bot-dev` 登録 (App ID 3509236)、.gitignore に *.pem 等の秘密鍵パターン追加 (`f4578f2`)
+- 2026-04-27: Cloudflare アカウント作成 + Workers Paid + 2FA。wrangler 4.85.0 を `apps/api` の devDep に追加 (`25c9bc0`)、workerd ローカルランタイムも有効化
+- 2026-04-27: D1 `migrate-bot-dev` (e5e26c30-...) + Queue `migrate-bot-jobs` 作成、wrangler.toml で binding 有効化 (`cb46239`)
+- 2026-04-27: wrangler secrets 設定 (GITHUB_WEBHOOK_SECRET / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)。値は Claude Code 非共有
+- 2026-04-27: pnpm `--filter` が Windows の Application Data / Local Settings junction で 4 並列実行する不具合判明。回避策として直接 `<package>/node_modules/.bin/<tool>.CMD` を呼ぶ運用に切替
 
 ## Phase 1 §1.2 の完了状況
 
