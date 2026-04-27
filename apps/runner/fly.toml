@@ -1,30 +1,30 @@
-# Fly.io Machines 設定。Phase 2 後半で `fly launch` 後に値を埋める。
-# 1 ジョブ = 1 マシン (architecture.md §1.2)。auto_stop で完了後に停止。
+# fly.toml — migrate-bot-runner-dev (Fly.io Machines)
 #
-# 参考: https://fly.io/docs/reference/configuration/
-
-app = "migrate-bot-runner-dev"
-primary_region = "nrt"
-
-[build]
-dockerfile = "Dockerfile"
-
-[env]
-NODE_ENV = "production"
-
-# Machines は API から起動 (worker consumer から machine.start)。
-# auto_start = true で受信時に起動、auto_stop_machines = true で完了後に停止。
-[http_service]
-auto_start_machines = true
-auto_stop_machines = true
-min_machines_running = 0
-
-[[vm]]
-size = "shared-cpu-1x"
-memory = "512mb"
-
-# Secrets (`fly secrets set ANTHROPIC_API_KEY=...`):
+# 1 ジョブ = 1 マシン (architecture.md §1.2)。
+# 起動は consumer Worker が Machines API 経由で行うため [http_service] は不要。
+# Phase 2 後半で apps/api の queue consumer から machine 作成 + 1 回限りの実行 +
+# auto-destroy のフローを wiring する。
+#
+# Secrets (operator が flyctl secrets set で設定済 / 設定予定):
 # - ANTHROPIC_API_KEY
-# - DATABASE_URL (D1 client は別経路、HTTP API or proxy)
 # - GITHUB_APP_ID
 # - GITHUB_APP_PRIVATE_KEY
+# - DATABASE_HTTP_URL (D1 を HTTP API 経由で叩く中継 Worker のエンドポイント、
+#   Phase 2 後半で別途用意)
+#
+# See https://fly.io/docs/reference/configuration/
+
+app = 'migrate-bot-runner-dev'
+primary_region = 'nrt'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  NODE_ENV = 'production'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'
+  cpus = 1
+  memory_mb = 512
