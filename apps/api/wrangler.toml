@@ -1,6 +1,6 @@
-# Cloudflare Workers 設定。Phase 2 後半でデプロイ時に値を埋める。
-# operator は wrangler login → wrangler secret put GITHUB_WEBHOOK_SECRET
-# を実行してから wrangler deploy する想定。
+# Cloudflare Workers 設定。
+# operator は事前に wrangler login + d1 create + queues create + secret put を済ませる。
+# 詳細手順は docs/phase-2-deployment.md §2。
 #
 # 参考: https://developers.cloudflare.com/workers/wrangler/configuration/
 
@@ -9,28 +9,33 @@ main = "src/index.ts"
 compatibility_date = "2026-04-26"
 compatibility_flags = ["nodejs_compat"]
 
-# 本番デプロイは別 environment にする (architecture.md §3.1: dev/prod 2 つ)。
-# 今は dev のみ宣言。
-[env.prod]
-name = "migrate-bot-api-prod"
-
-# D1 binding (architecture.md §5)。database_id は wrangler d1 create で確定後に埋める。
-# 開発用と本番用を別 DB にする。
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "migrate-bot-dev"
-# database_id = "<filled-after-wrangler-d1-create>"
+# D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
+[[d1_databases]]
+binding = "DB"
+database_name = "migrate-bot-dev"
+database_id = "e5e26c30-31ba-498a-ab52-25f56163da74"
 
 # Cloudflare Queues binding (architecture.md §1.1)。
-# 受信側 (このワーカー) は producer、別 worker が consumer になる。
-# [[queues.producers]]
-# binding = "JOBS_QUEUE"
-# queue = "migrate-bot-jobs"
+# このワーカーは producer。consumer は別 worker (Phase 2 後半で apps/api-consumer などに分離検討)。
+[[queues.producers]]
+binding = "JOBS_QUEUE"
+queue = "migrate-bot-jobs"
 
-# 環境変数 (公開可)。
-# [vars]
-
-# Secrets (`wrangler secret put GITHUB_WEBHOOK_SECRET` で個別に設定):
+# Secrets (デプロイ前に operator が wrangler secret put で設定):
 # - GITHUB_WEBHOOK_SECRET
 # - GITHUB_APP_ID
 # - GITHUB_APP_PRIVATE_KEY
+
+# 本番 environment (architecture.md §3.1: dev/prod 2 つ)。
+# Phase 4 ローンチ前に別 D1 + 別 Queue + 別 secrets を用意する想定。
+[env.prod]
+name = "migrate-bot-api-prod"
+
+# [[env.prod.d1_databases]]
+# binding = "DB"
+# database_name = "migrate-bot-prod"
+# database_id = "<prod-only, fill before launch>"
+
+# [[env.prod.queues.producers]]
+# binding = "JOBS_QUEUE"
+# queue = "migrate-bot-jobs-prod"
