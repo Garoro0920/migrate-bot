@@ -33,11 +33,14 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - ✅ DB client / repository 関数 (`b1b3217`、12 tests)
   - ✅ apps/api webhook → D1 配線 (`f5ebfc4`、7 tests)
   - ✅ D1 dev DB に migration 適用 (operator が wrangler d1 execute 実行、10 queries → 7 tables)
-  - ✅ apps/api admin/trigger + admin/jobs/:id with bearer auth (`295d34f`、17 tests)
+  - ✅ apps/api admin/trigger with bearer auth (`295d34f`、9 tests)
   - ✅ Fly.io Machines API client + Cloudflare Queues consumer (`4b368ec`、12 tests)
   - ✅ wrangler.toml に queues.consumers + vars 追記 (`65d20a7`)
-  - ⏸ **次回ここから**: apps/api に /internal/jobs/:id 系エンドポイント (runner 用 read/write/transition/usage)
-  - ⏸ apps/runner: HTTP client で /internal/* を叩く層 + agent パイプライン統合
+  - ✅ apps/api /internal/jobs/{id, /transition, /usage} (`d2ecd04`、8 tests、admin/jobs を移動)
+  - ✅ apps/runner InternalApiClient HTTP client (`b3f4341`、5 tests)
+  - ✅ apps/runner orchestration を InternalApiClient ベースに書換 + createPR stage 追加 (`fc7407d`、6 tests)
+  - ⏸ **次回ここから**: agent パイプライン本実装統合 (defaultPipeline の noop を @migrate-bot/agent.analyze/plan/migrate/verify 呼び出しに置換)
+  - ⏸ Octokit createDraftPR 統合 (現状 prUrl 固定、git push + PR 作成本実装)
   - ⏸ wrangler secrets 追加 (INTERNAL_API_TOKEN + FLY_API_TOKEN) → wrangler deploy
   - ⏸ flyctl deploy (apps/runner image を Fly registry に push)
   - ⏸ Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
