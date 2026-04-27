@@ -29,15 +29,17 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - ⚠ Cloudflare/Fly.io 共に Spend limit 設定 UI 不明、月次手動確認運用
   - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留)
 - **Phase 2 後半 (Claude Code 作業、進行中)**:
-  - ✅ D1 schema migration 生成 (`packages/db/migrations/0000_initial.sql`)
-  - ✅ DB client / repository 関数 (`packages/db/src/client.ts` `repository.ts`)
-  - ✅ apps/api webhook → DB 配線 (installation events を D1 に書込)
-  - ⏸ **次回ここから**: D1 への migration 適用 (operator が `wrangler d1 execute` 実行)
-  - ⏸ Queue producer 配線 (admin-trigger or Stripe webhook 経路から jobs 作成 + 投入)
-  - ⏸ Queue consumer + Fly.io Machines API client (job → runner 起動)
-  - ⏸ runner ↔ DB アクセス機構: API 内部エンドポイント方式を採用予定 (runner が apps/api の認証済 internal endpoint に POST、Worker が D1 操作)
-  - ⏸ runner agent パイプライン統合
-  - ⏸ wrangler deploy + flyctl deploy
+  - ✅ D1 schema migration 生成 + テスト連動 (`e41653b`)
+  - ✅ DB client / repository 関数 (`b1b3217`、12 tests)
+  - ✅ apps/api webhook → D1 配線 (`f5ebfc4`、7 tests)
+  - ✅ D1 dev DB に migration 適用 (operator が wrangler d1 execute 実行、10 queries → 7 tables)
+  - ✅ apps/api admin/trigger + admin/jobs/:id with bearer auth (`295d34f`、17 tests)
+  - ✅ Fly.io Machines API client + Cloudflare Queues consumer (`4b368ec`、12 tests)
+  - ✅ wrangler.toml に queues.consumers + vars 追記 (`65d20a7`)
+  - ⏸ **次回ここから**: apps/api に /internal/jobs/:id 系エンドポイント (runner 用 read/write/transition/usage)
+  - ⏸ apps/runner: HTTP client で /internal/* を叩く層 + agent パイプライン統合
+  - ⏸ wrangler secrets 追加 (INTERNAL_API_TOKEN + FLY_API_TOKEN) → wrangler deploy
+  - ⏸ flyctl deploy (apps/runner image を Fly registry に push)
   - ⏸ Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
 
 ## 直近の重要判断
