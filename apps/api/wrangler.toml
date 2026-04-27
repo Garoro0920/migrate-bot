@@ -9,22 +9,41 @@ main = "src/index.ts"
 compatibility_date = "2026-04-26"
 compatibility_flags = ["nodejs_compat"]
 
+# 公開可能な変数 (operator が値を埋める)。
+# - FLY_APP_NAME: Fly.io 上の runner app 名
+# - RUNNER_IMAGE: Fly.io にデプロイ済 runner image (flyctl deploy 後の registry tag)
+# - INTERNAL_API_URL: この Worker の公開 URL (deploy 後に確定)
+[vars]
+FLY_APP_NAME = "migrate-bot-runner-dev"
+RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:latest"
+INTERNAL_API_URL = "https://migrate-bot-api-dev.<your-subdomain>.workers.dev"
+
 # D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
 [[d1_databases]]
 binding = "DB"
 database_name = "migrate-bot-dev"
 database_id = "e5e26c30-31ba-498a-ab52-25f56163da74"
 
-# Cloudflare Queues binding (architecture.md §1.1)。
-# このワーカーは producer。consumer は別 worker (Phase 2 後半で apps/api-consumer などに分離検討)。
+# Cloudflare Queues producer (webhook handler / admin/trigger からの送信)。
 [[queues.producers]]
 binding = "JOBS_QUEUE"
 queue = "migrate-bot-jobs"
 
+# Cloudflare Queues consumer (同じ Worker で受信して Fly.io machine を起動)。
+# max_batch_size=1 + max_concurrency=3 で 3 並列まで (agent.md §1.10)。
+[[queues.consumers]]
+queue = "migrate-bot-jobs"
+max_batch_size = 1
+max_batch_timeout = 30
+max_retries = 3
+max_concurrency = 3
+
 # Secrets (デプロイ前に operator が wrangler secret put で設定):
-# - GITHUB_WEBHOOK_SECRET
-# - GITHUB_APP_ID
-# - GITHUB_APP_PRIVATE_KEY
+# - GITHUB_WEBHOOK_SECRET   (GitHub App の webhook secret)
+# - GITHUB_APP_ID           (App ID 3509236)
+# - GITHUB_APP_PRIVATE_KEY  (App の .pem 全体)
+# - INTERNAL_API_TOKEN      (admin/trigger と /internal 認証用、ランダム 32 byte hex)
+# - FLY_API_TOKEN           (Fly.io API token、`flyctl auth token` で取得)
 
 # 本番 environment (architecture.md §3.1: dev/prod 2 つ)。
 # Phase 4 ローンチ前に別 D1 + 別 Queue + 別 secrets を用意する想定。
@@ -38,4 +57,7 @@ name = "migrate-bot-api-prod"
 
 # [[env.prod.queues.producers]]
 # binding = "JOBS_QUEUE"
+# queue = "migrate-bot-jobs-prod"
+
+# [[env.prod.queues.consumers]]
 # queue = "migrate-bot-jobs-prod"
