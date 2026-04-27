@@ -23,10 +23,11 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@migrate-bot/shared": "workspace:*",
     "drizzle-orm": "0.45.2"
   },
   "devDependencies": {
-    "@migrate-bot/shared": "workspace:*",
+    "@cloudflare/workers-types": "4.20260426.1",
     "@types/better-sqlite3": "^7",
     "@types/node": "^22",
     "better-sqlite3": "12.9.0",

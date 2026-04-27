@@ -40,16 +40,12 @@
       "indexes": {
         "customers_email_unique": {
           "name": "customers_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         },
         "customers_stripe_customer_id_unique": {
           "name": "customers_stripe_customer_id_unique",
-          "columns": [
-            "stripe_customer_id"
-          ],
+          "columns": ["stripe_customer_id"],
           "isUnique": true
         }
       },
@@ -171,9 +167,7 @@
       "indexes": {
         "installations_github_installation_id_unique": {
           "name": "installations_github_installation_id_unique",
-          "columns": [
-            "github_installation_id"
-          ],
+          "columns": ["github_installation_id"],
           "isUnique": true
         }
       },
@@ -235,12 +229,8 @@
           "name": "job_events_job_id_jobs_id_fk",
           "tableFrom": "job_events",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -379,9 +369,7 @@
       "indexes": {
         "jobs_trace_id_unique": {
           "name": "jobs_trace_id_unique",
-          "columns": [
-            "trace_id"
-          ],
+          "columns": ["trace_id"],
           "isUnique": true
         }
       },
@@ -390,12 +378,8 @@
           "name": "jobs_installation_id_installations_id_fk",
           "tableFrom": "jobs",
           "tableTo": "installations",
-          "columnsFrom": [
-            "installation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["installation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -403,12 +387,8 @@
           "name": "jobs_customer_id_customers_id_fk",
           "tableFrom": "jobs",
           "tableTo": "customers",
-          "columnsFrom": [
-            "customer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["customer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -463,12 +443,8 @@
           "name": "refunds_job_id_jobs_id_fk",
           "tableFrom": "refunds",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

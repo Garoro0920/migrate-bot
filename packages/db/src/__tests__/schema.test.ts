@@ -18,10 +18,7 @@ import {
 // drizzle-kit generate で生成された本番マイグレーションをそのままテストでも使う。
 // 二重保守の解消、本番と同じ DDL で型・FK・制約を検証できる。
 const here = dirname(fileURLToPath(import.meta.url));
-const MIGRATION_SQL = readFileSync(
-  resolve(here, '../../migrations/0000_initial.sql'),
-  'utf-8',
-);
+const MIGRATION_SQL = readFileSync(resolve(here, '../../migrations/0000_initial.sql'), 'utf-8');
 
 describe('schema CRUD against in-memory SQLite (uses drizzle-kit migration SQL)', () => {
   let sqlite: Database.Database;

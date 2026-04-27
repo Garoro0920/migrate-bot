@@ -126,13 +126,16 @@ importers:
 
   packages/db:
     dependencies:
+      '@migrate-bot/shared':
+        specifier: workspace:*
+        version: link:../shared
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@cloudflare/workers-types@4.20260426.1)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.9.0)
     devDependencies:
-      '@migrate-bot/shared':
-        specifier: workspace:*
-        version: link:../shared
+      '@cloudflare/workers-types':
+        specifier: 4.20260426.1
+        version: 4.20260426.1
       '@types/better-sqlite3':
         specifier: ^7
         version: 7.6.13
