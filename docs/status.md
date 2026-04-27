@@ -17,18 +17,24 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 
 ## 進行中タスク
 
-- **Phase 2 外部サービス契約 (operator 作業、進行中)**:
-  - ✅ GitHub アカウント `Garoro0920` 作成 + private repo `Garoro0920/migrate-bot` 作成 + push 済
-  - ✅ GitHub App `migrate-bot-dev` 登録済 (App ID: 3509236、private key は operator ローカル保管)
+- **Phase 2 外部サービス契約 (operator 作業、完了)**:
+  - ✅ GitHub アカウント `Garoro0920` + private repo + push
+  - ✅ GitHub App `migrate-bot-dev` (App ID 3509236)
   - ✅ Cloudflare アカウント + Workers Paid + 2FA + wrangler login
-  - ✅ D1 database `migrate-bot-dev` 作成 (database_id `e5e26c30-31ba-498a-ab52-25f56163da74`)
-  - ✅ Cloudflare Queues `migrate-bot-jobs` 作成
-  - ✅ wrangler secrets 設定済 (GITHUB_WEBHOOK_SECRET / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
-  - ✅ `apps/api/wrangler.toml` で D1 + Queues binding を有効化 (`cb46239`)
-  - ⚠ Cloudflare Spend limit 設定 UI 不明、当面ダッシュボードで月次手動確認
-  - ⏸ **次回ここから**: Fly.io アカウント + flyctl + secrets (`docs/phase-2-deployment.md` §3) **または** Phase 2 後半コード wiring を先行
-  - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留可)
-- Phase 2 後半 (Claude Code 作業): D1 接続コード、Queue producer 配線、agent パイプライン runner 統合、deploy + webhook 接続確認
+  - ✅ D1 `migrate-bot-dev` (e5e26c30-...) + Queues `migrate-bot-jobs`
+  - ✅ wrangler secrets 3 件設定済
+  - ✅ Fly.io アカウント + 2FA + クレカ + flyctl login
+  - ✅ Fly.io app `migrate-bot-runner-dev` 作成 (region nrt, shared-cpu-1x 512mb)
+  - ✅ flyctl secrets 3 件設定済 (ANTHROPIC_API_KEY / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
+  - ⚠ Cloudflare/Fly.io 共に Spend limit 設定 UI 不明、月次手動確認運用
+  - ⏸ GitHub App `migrate-bot-prod` (Phase 4 直前まで保留)
+- **Phase 2 後半 (Claude Code 作業、次のセッション以降)**:
+  - D1 schema migration 生成 + 適用 (drizzle-kit + wrangler d1 execute)
+  - apps/api: D1 client 配線、webhook handler から Queue 投入
+  - Queue consumer: D1 から job 取得、Fly.io Machines API で runner 起動
+  - apps/runner: D1 (HTTP 中継) 接続、agent パイプライン統合、git push + draft PR 作成
+  - wrangler deploy + flyctl deploy
+  - Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
 
 ## 直近の重要判断
 
@@ -56,6 +62,9 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
 - 2026-04-27: D1 `migrate-bot-dev` (e5e26c30-...) + Queue `migrate-bot-jobs` 作成、wrangler.toml で binding 有効化 (`cb46239`)
 - 2026-04-27: wrangler secrets 設定 (GITHUB_WEBHOOK_SECRET / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)。値は Claude Code 非共有
 - 2026-04-27: pnpm `--filter` が Windows の Application Data / Local Settings junction で 4 並列実行する不具合判明。回避策として直接 `<package>/node_modules/.bin/<tool>.CMD` を呼ぶ運用に切替
+- 2026-04-27: Fly.io アカウント作成 + 2FA + クレカ登録、flyctl install/login。app `migrate-bot-runner-dev` 作成 (region nrt、shared-cpu-1x 512mb、`aa40b07`)
+- 2026-04-27: flyctl secrets 設定 (ANTHROPIC_API_KEY / GITHUB_APP_ID / GITHUB_APP_PRIVATE_KEY)
+- **2026-04-27: Phase 2 外部サービス契約 (§0〜§3.4) 完了**。次は Claude Code が Phase 2 後半コード wiring を実装
 
 ## Phase 1 §1.2 の完了状況
 
