@@ -1,13 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  createSqliteClient,
-  installations,
-  jobs,
-  loadJob,
-  type SqliteClient,
-} from '@migrate-bot/db';
+import { createSqliteClient, installations, jobs, type SqliteClient } from '@migrate-bot/db';
 import { InMemoryQueue, type JobQueueMessage } from '@migrate-bot/shared';
 import Database from 'better-sqlite3';
 import { eq } from 'drizzle-orm';
@@ -179,51 +173,5 @@ describe('admin router', () => {
     const jobsAll = await db.select().from(jobs);
     expect(jobsAll).toHaveLength(2);
     expect(queue.size()).toBe(2);
-  });
-
-  it('GET /admin/jobs/:id returns the job for valid id', async () => {
-    const triggered = await app.request(
-      '/admin/trigger',
-      {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${TOKEN}`,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          githubInstallationId: 1,
-          accountLogin: 'a',
-          repoFullName: 'a/b',
-          plan: 'small',
-        }),
-      },
-      { INTERNAL_API_TOKEN: TOKEN },
-    );
-    const triggeredJson = (await triggered.json()) as { jobId: string };
-
-    const res = await app.request(
-      `/admin/jobs/${triggeredJson.jobId}`,
-      {
-        method: 'GET',
-        headers: { authorization: `Bearer ${TOKEN}` },
-      },
-      { INTERNAL_API_TOKEN: TOKEN },
-    );
-    expect(res.status).toBe(200);
-    const job = (await res.json()) as { state: string };
-    expect(job.state).toBe('queued');
-
-    // sanity: loadJob direct
-    const direct = await loadJob(db, triggeredJson.jobId);
-    expect(direct?.state).toBe('queued');
-  });
-
-  it('GET /admin/jobs/:id returns 404 for unknown id', async () => {
-    const res = await app.request(
-      '/admin/jobs/non-existent',
-      { method: 'GET', headers: { authorization: `Bearer ${TOKEN}` } },
-      { INTERNAL_API_TOKEN: TOKEN },
-    );
-    expect(res.status).toBe(404);
   });
 });

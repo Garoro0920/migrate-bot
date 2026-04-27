@@ -1,10 +1,4 @@
-import {
-  type AnyDbClient,
-  createD1Client,
-  createJob,
-  loadJob,
-  upsertInstallation,
-} from '@migrate-bot/db';
+import { type AnyDbClient, createD1Client, createJob, upsertInstallation } from '@migrate-bot/db';
 import type { JobQueueMessage, QueueProducer } from '@migrate-bot/shared';
 import { Hono } from 'hono';
 import { checkBearerAuth } from '../auth';
@@ -93,18 +87,6 @@ export function createAdminRouter(): Hono<AdminContext> {
       installationId: inst.id,
       installation: { created: inst.created, githubId: body.githubInstallationId },
     });
-  });
-
-  app.get('/jobs/:id', async (c) => {
-    const auth = c.req.header('authorization') ?? null;
-    if (!checkBearerAuth(auth, c.env.INTERNAL_API_TOKEN)) {
-      return c.json({ error: 'unauthorized' }, 401);
-    }
-    const db = resolveDb(c);
-    if (!db) return c.json({ error: 'DB binding unavailable' }, 503);
-    const job = await loadJob(db, c.req.param('id'));
-    if (!job) return c.json({ error: 'not found' }, 404);
-    return c.json(job);
   });
 
   return app;
