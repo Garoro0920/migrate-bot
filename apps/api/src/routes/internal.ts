@@ -10,6 +10,8 @@ import { JOB_STATES, type JobState } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { checkBearerAuth } from '../auth';
+import { processRefund } from '../refund';
+import { createStripeClient, type StripeClient } from '../stripe';
 
 // runner (Fly.io Machine) から呼ばれる internal API。
 // Bearer auth (INTERNAL_API_TOKEN) で apps/runner と shared secret 認証。
@@ -20,12 +22,16 @@ import { checkBearerAuth } from '../auth';
 export interface InternalEnv {
   readonly INTERNAL_API_TOKEN: string;
   readonly DB?: D1Database;
+  // Stripe key は refund 経路でのみ必要。テストでは stripe variable に DI する。
+  readonly STRIPE_SECRET_KEY?: string;
+  readonly STRIPE_WEBHOOK_SECRET?: string;
 }
 
 export interface InternalContext {
   Bindings: InternalEnv;
   Variables: {
     readonly db?: AnyDbClient;
+    readonly stripe?: StripeClient;
   };
 }
 
@@ -111,6 +117,20 @@ export function createInternalRouter(): Hono<InternalContext> {
         reason: body.reason,
         ...(body.prUrl !== undefined ? { prUrl: body.prUrl } : {}),
       });
+
+      // 課金済 job が refunding に入った直後に Stripe 返金を試みる。
+      // 失敗した場合は job を refunding のまま残し、ログのみ。手動 retry できる。
+      if (body.toState === 'refunding') {
+        const stripe = resolveStripe(c);
+        if (stripe) {
+          try {
+            await processRefund(db, stripe, jobId, body.reason);
+          } catch (err) {
+            console.error('refund failed', { jobId, error: err });
+          }
+        }
+      }
+
       return c.json({ ok: true, ...result });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -150,4 +170,18 @@ function resolveDb(c: { var: InternalContext['Variables']; env: InternalEnv }): 
   if (c.var.db) return c.var.db;
   if (c.env.DB) return createD1Client(c.env.DB);
   return null;
+}
+
+function resolveStripe(c: {
+  var: InternalContext['Variables'];
+  env: InternalEnv;
+}): StripeClient | null {
+  if (c.var.stripe) return c.var.stripe;
+  if (c.env.STRIPE_SECRET_KEY === undefined || c.env.STRIPE_WEBHOOK_SECRET === undefined) {
+    return null;
+  }
+  return createStripeClient({
+    secretKey: c.env.STRIPE_SECRET_KEY,
+    webhookSecret: c.env.STRIPE_WEBHOOK_SECRET,
+  });
 }

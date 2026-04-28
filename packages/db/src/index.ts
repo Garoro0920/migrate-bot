@@ -10,6 +10,7 @@ export {
   type CreateOrderInput,
   createJob,
   createOrder,
+  getOrderByJobId,
   getOrderByStripeSessionId,
   type Job,
   linkOrderToJob,

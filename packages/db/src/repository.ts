@@ -246,6 +246,11 @@ export async function getOrderByStripeSessionId(
   return rows[0] ?? null;
 }
 
+export async function getOrderByJobId(db: AnyDbClient, jobId: string): Promise<Order | null> {
+  const rows = await db.select().from(orders).where(eq(orders.jobId, jobId)).limit(1);
+  return rows[0] ?? null;
+}
+
 export interface MarkOrderPaidInput {
   readonly orderId: string;
   readonly stripePaymentIntentId: string;
