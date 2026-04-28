@@ -30,7 +30,10 @@ primary_region = 'nrt'
   NODE_ENV = 'production'
 
 [[vm]]
-  size = 'shared-cpu-1x'
-  memory = '512mb'
-  cpus = 1
-  memory_mb = 512
+  # 512MB では next build (verify stage) が OOM kill されたので 2GB に拡張。
+  # CPU も 2 にして build 時間を短縮。flyctl deploy が auto-launch する standby
+  # machine もこの値で作られる (consumer Worker は queue-consumer.ts で個別指定)。
+  size = 'shared-cpu-2x'
+  memory = '2gb'
+  cpus = 2
+  memory_mb = 2048

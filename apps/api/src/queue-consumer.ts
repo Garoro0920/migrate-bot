@@ -46,8 +46,8 @@ export async function processJobMessage(
       restart: { policy: 'no' },
       guest: {
         cpu_kind: 'shared',
-        cpus: 1,
-        memory_mb: 512,
+        cpus: 2,
+        memory_mb: 2048,
       },
     },
   });
