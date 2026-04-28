@@ -58,8 +58,18 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - `ba92a5c` agent: deterministic な相対 import path 後処理 (10 unit tests)
     - `4bd6252` runner: git invocation から `shell:true` 削除
     - `5beac95` runner: `@octokit/rest` の Octokit を App constructor に注入
-  - ⏸ pr_url を D1 に書き込む transition payload 拡張 (今回 Phase 2 完了直後に着手)
+  - ✅ pr_url を D1 に書き込む transition payload 拡張 (`aeb4f94`)
   - ⏸ webhook 経由 (= GitHub App webhook URL) の E2E 確認 (admin/trigger では成功済)
+- **Phase 3 課金統合 (Claude Code 作業、コード完了)**:
+  - ✅ orders table schema + drizzle migration (`aa322c5`)
+  - ✅ orders repository + 15 tests (`8fa5137`)
+  - ✅ Stripe SDK wrapper for Workers (`8a919a6`、6 tests)
+  - ✅ POST /checkout/create-session route (`195b1ef`、5 tests)
+  - ✅ POST /webhooks/stripe with checkout/refund handlers (`db1eed1`、7 tests)
+  - ✅ Refund flow on job failure (`c0529d1`、5 tests)
+  - ✅ Resend email notifications at payment / pr_ready / refunded (`70cdfc3`、13 tests)
+  - 累計 +52 tests (246 → 298)
+  - ⏸ Phase 3 operator 作業 (Stripe / Resend アカウント + secrets + wrangler deploy)
 
 ## 直近の重要判断
 
