@@ -1,0 +1,36 @@
+# fly.toml — migrate-bot-runner-dev (Fly.io Machines)
+#
+# このファイルが monorepo root にあるのは flyctl の制約による:
+# - fly.toml 内の相対パス (dockerfile 等) は必ず fly.toml の dir 基準で解決される
+# - build context も fly.toml の dir
+# 結果、apps/runner/Dockerfile が COPY する monorepo 全体のファイルを context に
+# 含めるには、fly.toml を root に置く必要がある。実体的なアプリは apps/runner/。
+#
+# 1 ジョブ = 1 マシン (architecture.md §1.2)。
+# 起動は consumer Worker が Machines API 経由で行うため [http_service] は不要。
+#
+# Secrets (operator が flyctl secrets set で設定済):
+# - ANTHROPIC_API_KEY
+# - GITHUB_APP_ID
+# - GITHUB_APP_PRIVATE_KEY
+# - INTERNAL_API_TOKEN (apps/api /internal 認証共有秘密)
+#
+# Deploy: `flyctl deploy --app migrate-bot-runner-dev --no-public-ips` を
+# monorepo root から実行する。
+#
+# See https://fly.io/docs/reference/configuration/
+
+app = 'migrate-bot-runner-dev'
+primary_region = 'nrt'
+
+[build]
+  dockerfile = 'apps/runner/Dockerfile'
+
+[env]
+  NODE_ENV = 'production'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'
+  cpus = 1
+  memory_mb = 512
