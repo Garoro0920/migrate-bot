@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-04-26
+> Last updated: 2026-04-28
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -39,9 +39,11 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - ✅ apps/api /internal/jobs/{id, /transition, /usage} (`d2ecd04`、8 tests、admin/jobs を移動)
   - ✅ apps/runner InternalApiClient HTTP client (`b3f4341`、5 tests)
   - ✅ apps/runner orchestration を InternalApiClient ベースに書換 + createPR stage 追加 (`fc7407d`、6 tests)
-  - ⏸ **次回ここから**: agent パイプライン本実装統合 (defaultPipeline の noop を @migrate-bot/agent.analyze/plan/migrate/verify 呼び出しに置換)
-  - ⏸ Octokit createDraftPR 統合 (現状 prUrl 固定、git push + PR 作成本実装)
-  - ⏸ wrangler secrets 追加 (INTERNAL_API_TOKEN + FLY_API_TOKEN) → wrangler deploy
+  - ✅ apps/runner pipeline 本実装 (createRealPipeline) + index.ts 配線 + 13 tests
+    - agent.analyze/plan/migrate/verify 統合、blockers/failed task/typecheck/build を error に変換
+    - Octokit createDraftPR + git config/diff/add/commit/checkout/push を closure 内で実行
+    - 累計 runner 28 tests (15+13)
+  - ⏸ **次回ここから**: wrangler secrets 追加 (INTERNAL_API_TOKEN + FLY_API_TOKEN) → wrangler deploy
   - ⏸ flyctl deploy (apps/runner image を Fly registry に push)
   - ⏸ Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
 
