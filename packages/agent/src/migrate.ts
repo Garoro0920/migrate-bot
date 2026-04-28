@@ -1,5 +1,6 @@
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { rewriteImports } from './migrate/rewrite-imports';
 import { topologicalSort } from './migrate/topological-sort';
 import { type TransformOutcome, transformFile } from './migrate/transform';
 import type { UsageRecord } from './observability/usage';
@@ -53,7 +54,10 @@ export async function migrate(
       continue;
     }
 
-    const writeChange = await applyChange(repo, task, outcome.content);
+    // LLM が時々相対 import 深さを誤るので deterministic に補正。source content は
+    // task の source ファイルから読み直す (fs read は安価)。
+    const correctedContent = await applyImportRewrite(repo, task, outcome.content);
+    const writeChange = await applyChange(repo, task, correctedContent);
     changes.push(writeChange);
     writtenTargets.add(task.targetPath);
     usageRecords.push(outcome.usage);
@@ -122,6 +126,25 @@ async function applyChange(
   await mkdir(dirname(targetFullPath), { recursive: true });
   await writeFile(targetFullPath, content, 'utf-8');
   return { path: task.targetPath, kind: 'add' };
+}
+
+async function applyImportRewrite(
+  repo: RepoLocation,
+  task: MigrationTask,
+  llmContent: string,
+): Promise<string> {
+  try {
+    const sourceContent = await readFile(join(repo.localPath, task.sourcePath), 'utf-8');
+    return rewriteImports({
+      sourceContent,
+      targetContent: llmContent,
+      sourcePath: task.sourcePath,
+      targetPath: task.targetPath,
+    });
+  } catch {
+    // source 読み直しに失敗した場合は LLM 出力をそのまま使う (致命的ではない)
+    return llmContent;
+  }
 }
 
 async function deleteSource(repo: RepoLocation, task: MigrationTask): Promise<FileChange | null> {
