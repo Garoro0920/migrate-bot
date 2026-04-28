@@ -62,7 +62,36 @@ export const refunds = sqliteTable('refunds', {
     .references(() => jobs.id),
   amountUsd: real('amount_usd').notNull(),
   reason: text('reason').notNull(),
+  stripeRefundId: text('stripe_refund_id').unique(),
   createdAt: integer('created_at').notNull().default(nowEpochMs),
+});
+
+// Stripe Checkout で開始される注文。state machine:
+//   pending --(stripe paid)--> paid --(job created)--> linked to a job
+//   pending --(stripe expired)--> expired
+//   pending --(stripe failed)--> failed
+//   paid --(job failed_ci/aborted_blocker)--> refunded
+// idempotency は stripe_session_id (unique) で確保。
+export const orders = sqliteTable('orders', {
+  id: text('id').primaryKey(),
+  customerId: text('customer_id')
+    .notNull()
+    .references(() => customers.id),
+  installationId: text('installation_id')
+    .notNull()
+    .references(() => installations.id),
+  repoFullName: text('repo_full_name').notNull(),
+  plan: text('plan', { enum: ['small', 'medium', 'large', 'enterprise'] }).notNull(),
+  amountUsdCents: integer('amount_usd_cents').notNull(),
+  state: text('state', {
+    enum: ['pending', 'paid', 'failed', 'expired', 'refunded'],
+  }).notNull(),
+  stripeSessionId: text('stripe_session_id').notNull().unique(),
+  stripePaymentIntentId: text('stripe_payment_intent_id'),
+  jobId: text('job_id').references(() => jobs.id),
+  createdAt: integer('created_at').notNull().default(nowEpochMs),
+  paidAt: integer('paid_at'),
+  refundedAt: integer('refunded_at'),
 });
 
 export const evalRuns = sqliteTable('eval_runs', {
@@ -86,5 +115,8 @@ export type JobEvent = typeof jobEvents.$inferSelect;
 export type NewJobEvent = typeof jobEvents.$inferInsert;
 export type Refund = typeof refunds.$inferSelect;
 export type NewRefund = typeof refunds.$inferInsert;
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+export type OrderState = Order['state'];
 export type EvalRun = typeof evalRuns.$inferSelect;
 export type NewEvalRun = typeof evalRuns.$inferInsert;
