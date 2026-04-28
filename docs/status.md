@@ -9,11 +9,15 @@
 
 ## 現在のフェーズ
 
-**Phase 3: 課金統合 (着手)**
+**Phase 3: 課金統合 (完了基準達成、Phase 4 着手前段階)**
 
 2026-04-28 ADR-0003 で「学生期間中に Phase 3/4 前倒し、市場検証 skip 継続」を決定。
-Phase 1 (ローカル PoC) と Phase 2 (GitHub App 化) は完了基準達成済。最初の 3 件は
-ベータ割引でローンチし、ローンチ後 30 日の売上を事後シグナルとする方針。
+同日中に Phase 3 のコード + dev 環境動作確認まで完走:
+
+- Stripe Test mode で実際にテストカード決済 ($99 = small plan)
+- webhook → order paid → job 作成 → Fly machine → agent → draft PR #4 作成
+- `pr_ready` 状態到達 (cost $0.0480、Phase 1 と同等)
+- Resend で `paymentReceived` + `prReady` の 2 通メール配信成功
 
 詳細 → `docs/roadmap.md` §1.4、ADR-0003
 
@@ -60,7 +64,7 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - `5beac95` runner: `@octokit/rest` の Octokit を App constructor に注入
   - ✅ pr_url を D1 に書き込む transition payload 拡張 (`aeb4f94`)
   - ⏸ webhook 経由 (= GitHub App webhook URL) の E2E 確認 (admin/trigger では成功済)
-- **Phase 3 課金統合 (Claude Code 作業、コード完了)**:
+- **Phase 3 課金統合 (完了)**:
   - ✅ orders table schema + drizzle migration (`aa322c5`)
   - ✅ orders repository + 15 tests (`8fa5137`)
   - ✅ Stripe SDK wrapper for Workers (`8a919a6`、6 tests)
@@ -69,7 +73,17 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
   - ✅ Refund flow on job failure (`c0529d1`、5 tests)
   - ✅ Resend email notifications at payment / pr_ready / refunded (`70cdfc3`、13 tests)
   - 累計 +52 tests (246 → 298)
-  - ⏸ Phase 3 operator 作業 (Stripe / Resend アカウント + secrets + wrangler deploy)
+  - ✅ Phase 3 operator 作業完了 (Stripe / Resend dev アカウント + secrets + 0001_orders 適用)
+  - ✅ E2E 完走 (2026-04-28、Stripe テスト card $99 → draft PR #4 → 2 通メール届く)
+  - ⏸ Resend ドメイン検証 (任意のメアドに送るには必要、Phase 4 のドメイン取得時に実施)
+- **Phase 4 ローンチ準備 (未着手)**:
+  - ⏸ 法務文書 4 点 (ToS / PP / 返金ポリシー / 特商法表記) 起草 → operator レビュー
+  - ⏸ Landing page (`apps/web/` 新規 or apps/api 内静的 HTML)
+  - ⏸ ドメイン取得 + custom domain 設定 (固定費発生、§6 確認必須)
+  - ⏸ Sentry / UptimeRobot / 監視整備
+  - ⏸ Stripe Live activation 申請 (上記完了後)
+  - ⏸ Resend ドメイン検証
+  - ⏸ ローンチ告知文ドラフト (HN / Reddit / X)
 
 ## 直近の重要判断
 
