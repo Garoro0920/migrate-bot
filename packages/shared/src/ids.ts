@@ -10,6 +10,7 @@ export type JobId = Brand<string, 'JobId'>;
 export type TraceId = Brand<string, 'TraceId'>;
 export type InstallationId = Brand<string, 'InstallationId'>;
 export type CustomerId = Brand<string, 'CustomerId'>;
+export type OrderId = Brand<string, 'OrderId'>;
 
 export function newJobId(): JobId {
   return randomUUID() as JobId;
@@ -25,4 +26,8 @@ export function newInstallationId(): InstallationId {
 
 export function newCustomerId(): CustomerId {
   return randomUUID() as CustomerId;
+}
+
+export function newOrderId(): OrderId {
+  return randomUUID() as OrderId;
 }

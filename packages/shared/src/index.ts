@@ -10,7 +10,9 @@ export {
   newCustomerId,
   newInstallationId,
   newJobId,
+  newOrderId,
   newTraceId,
+  type OrderId,
   type TraceId,
 } from './ids';
 export {

@@ -7,14 +7,27 @@ export {
 } from './client';
 export {
   type CreateJobInput,
+  type CreateOrderInput,
   createJob,
+  createOrder,
+  getOrderByStripeSessionId,
   type Job,
+  linkOrderToJob,
   loadJob,
+  loadOrder,
   markInstallationRevoked,
+  markOrderExpired,
+  markOrderFailed,
+  type MarkOrderPaidInput,
+  markOrderPaid,
+  markOrderRefunded,
+  type Order,
   recordJobUsage,
   type TransitionJobInput,
   transitionJob,
+  type UpsertCustomerInput,
   type UpsertInstallationInput,
+  upsertCustomerByEmail,
   upsertInstallation,
 } from './repository';
 export * from './schema';

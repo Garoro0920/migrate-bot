@@ -4,11 +4,21 @@ import {
   newCustomerId,
   newInstallationId,
   newJobId,
+  newOrderId,
   newTraceId,
 } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
 import type { AnyDbClient } from './client';
-import { customers, installations, type Job, jobEvents, jobs, type NewJob } from './schema';
+import {
+  customers,
+  installations,
+  type Job,
+  jobEvents,
+  jobs,
+  type NewJob,
+  type Order,
+  orders,
+} from './schema';
 
 // 高レベル repository 関数。dialect を意識せず select/insert/update を行うため
 // 純粋に drizzle のクエリビルダだけを使う (raw SQL は使わない)。
@@ -152,5 +162,148 @@ export async function recordJobUsage(
     .where(eq(jobs.id, jobId));
 }
 
-export type { Job };
-export { customers };
+// ─── customers ──────────────────────────────────────────────────────────────
+
+export interface UpsertCustomerInput {
+  readonly email: string;
+  readonly stripeCustomerId?: string;
+}
+
+export async function upsertCustomerByEmail(
+  db: AnyDbClient,
+  input: UpsertCustomerInput,
+): Promise<{ id: string; created: boolean }> {
+  const existing = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.email, input.email))
+    .limit(1);
+  const first = existing[0];
+  if (first) {
+    if (input.stripeCustomerId !== undefined && first.stripeCustomerId !== input.stripeCustomerId) {
+      await db
+        .update(customers)
+        .set({ stripeCustomerId: input.stripeCustomerId })
+        .where(eq(customers.id, first.id));
+    }
+    return { id: first.id, created: false };
+  }
+  const id = newCustomerId();
+  await db.insert(customers).values({
+    id,
+    email: input.email,
+    ...(input.stripeCustomerId !== undefined ? { stripeCustomerId: input.stripeCustomerId } : {}),
+  });
+  return { id, created: true };
+}
+
+// ─── orders ─────────────────────────────────────────────────────────────────
+
+export interface CreateOrderInput {
+  readonly customerId: string;
+  readonly installationId: string;
+  readonly repoFullName: string;
+  readonly plan: 'small' | 'medium' | 'large' | 'enterprise';
+  readonly amountUsdCents: number;
+  readonly stripeSessionId: string;
+}
+
+export async function createOrder(
+  db: AnyDbClient,
+  input: CreateOrderInput,
+): Promise<{ orderId: string }> {
+  const orderId = newOrderId();
+  await db.insert(orders).values({
+    id: orderId,
+    customerId: input.customerId,
+    installationId: input.installationId,
+    repoFullName: input.repoFullName,
+    plan: input.plan,
+    amountUsdCents: input.amountUsdCents,
+    state: 'pending',
+    stripeSessionId: input.stripeSessionId,
+  });
+  return { orderId };
+}
+
+export async function loadOrder(db: AnyDbClient, orderId: string): Promise<Order | null> {
+  const rows = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function getOrderByStripeSessionId(
+  db: AnyDbClient,
+  stripeSessionId: string,
+): Promise<Order | null> {
+  const rows = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.stripeSessionId, stripeSessionId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export interface MarkOrderPaidInput {
+  readonly orderId: string;
+  readonly stripePaymentIntentId: string;
+  readonly jobId?: string;
+}
+
+// 二重支払/重複イベントへの idempotency: state が既に paid 以降ならスキップ。
+export async function markOrderPaid(
+  db: AnyDbClient,
+  input: MarkOrderPaidInput,
+): Promise<{ alreadyHandled: boolean }> {
+  const order = await loadOrder(db, input.orderId);
+  if (!order) throw new Error(`order not found: ${input.orderId}`);
+  if (order.state !== 'pending') return { alreadyHandled: true };
+  await db
+    .update(orders)
+    .set({
+      state: 'paid',
+      stripePaymentIntentId: input.stripePaymentIntentId,
+      paidAt: Date.now(),
+      ...(input.jobId !== undefined ? { jobId: input.jobId } : {}),
+    })
+    .where(eq(orders.id, input.orderId));
+  return { alreadyHandled: false };
+}
+
+export async function linkOrderToJob(
+  db: AnyDbClient,
+  orderId: string,
+  jobId: string,
+): Promise<void> {
+  await db.update(orders).set({ jobId }).where(eq(orders.id, orderId));
+}
+
+export async function markOrderRefunded(
+  db: AnyDbClient,
+  orderId: string,
+): Promise<{ alreadyHandled: boolean }> {
+  const order = await loadOrder(db, orderId);
+  if (!order) throw new Error(`order not found: ${orderId}`);
+  if (order.state === 'refunded') return { alreadyHandled: true };
+  await db
+    .update(orders)
+    .set({ state: 'refunded', refundedAt: Date.now() })
+    .where(eq(orders.id, orderId));
+  return { alreadyHandled: false };
+}
+
+export async function markOrderExpired(db: AnyDbClient, orderId: string): Promise<void> {
+  const order = await loadOrder(db, orderId);
+  if (!order) throw new Error(`order not found: ${orderId}`);
+  if (order.state !== 'pending') return;
+  await db.update(orders).set({ state: 'expired' }).where(eq(orders.id, orderId));
+}
+
+export async function markOrderFailed(db: AnyDbClient, orderId: string): Promise<void> {
+  const order = await loadOrder(db, orderId);
+  if (!order) throw new Error(`order not found: ${orderId}`);
+  if (order.state !== 'pending') return;
+  await db.update(orders).set({ state: 'failed' }).where(eq(orders.id, orderId));
+}
+
+export type { Job, Order };
+export { customers, orders };
