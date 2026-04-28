@@ -72,7 +72,12 @@ export async function runJob(options: RunOptions): Promise<RunOutcome> {
   }
 
   const pr = await pipeline.createPR(job);
-  await api.transitionJob({ jobId, toState: 'pr_ready', reason: 'verify pass' });
+  await api.transitionJob({
+    jobId,
+    toState: 'pr_ready',
+    reason: 'verify pass',
+    prUrl: pr.prUrl,
+  });
   return { finalState: 'pr_ready', aborted: false, prUrl: pr.prUrl };
 }
 

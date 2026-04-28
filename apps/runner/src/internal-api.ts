@@ -27,7 +27,12 @@ export interface RemoteJob {
 
 export interface InternalApiClient {
   loadJob(jobId: string): Promise<RemoteJob>;
-  transitionJob(input: { jobId: string; toState: JobState; reason: string }): Promise<void>;
+  transitionJob(input: {
+    jobId: string;
+    toState: JobState;
+    reason: string;
+    prUrl?: string;
+  }): Promise<void>;
   recordUsage(input: {
     jobId: string;
     tokensInput: number;
@@ -82,7 +87,11 @@ export function createInternalApiClient(opts: InternalApiClientOptions): Interna
     async transitionJob(input) {
       await call(`/internal/jobs/${encodeURIComponent(input.jobId)}/transition`, {
         method: 'POST',
-        body: JSON.stringify({ toState: input.toState, reason: input.reason }),
+        body: JSON.stringify({
+          toState: input.toState,
+          reason: input.reason,
+          ...(input.prUrl !== undefined ? { prUrl: input.prUrl } : {}),
+        }),
       });
     },
 

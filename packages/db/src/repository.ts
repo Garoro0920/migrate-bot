@@ -96,6 +96,7 @@ export interface TransitionJobInput {
   readonly jobId: string;
   readonly toState: JobState;
   readonly reason: string;
+  readonly prUrl?: string;
 }
 
 export async function transitionJob(
@@ -119,6 +120,7 @@ export async function transitionJob(
       state: input.toState,
       ...(startedAt !== undefined ? { startedAt } : {}),
       ...(completedAt !== undefined ? { completedAt } : {}),
+      ...(input.prUrl !== undefined ? { prUrl: input.prUrl } : {}),
     })
     .where(eq(jobs.id, input.jobId));
 

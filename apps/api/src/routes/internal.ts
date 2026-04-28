@@ -32,6 +32,7 @@ export interface InternalContext {
 interface TransitionBody {
   readonly toState: JobState;
   readonly reason: string;
+  readonly prUrl?: string;
 }
 
 interface UsageBody {
@@ -47,7 +48,10 @@ function isJobState(v: unknown): v is JobState {
 function isTransitionBody(v: unknown): v is TransitionBody {
   if (typeof v !== 'object' || v === null) return false;
   const o = v as Record<string, unknown>;
-  return isJobState(o.toState) && typeof o.reason === 'string';
+  if (!isJobState(o.toState)) return false;
+  if (typeof o.reason !== 'string') return false;
+  if (o.prUrl !== undefined && typeof o.prUrl !== 'string') return false;
+  return true;
 }
 
 function isUsageBody(v: unknown): v is UsageBody {
@@ -105,6 +109,7 @@ export function createInternalRouter(): Hono<InternalContext> {
         jobId,
         toState: body.toState,
         reason: body.reason,
+        ...(body.prUrl !== undefined ? { prUrl: body.prUrl } : {}),
       });
       return c.json({ ok: true, ...result });
     } catch (err) {

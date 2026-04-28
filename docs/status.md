@@ -9,7 +9,12 @@
 
 ## 現在のフェーズ
 
-**Phase 2: GitHub App 化（着手中、コード側 foundation 完了）**
+**Phase 2: GitHub App 化（完了基準達成、Phase 3 検討前段階）**
+
+2026-04-28 dev 環境で webhook → Queue → Fly.io Machine → runner → agent →
+draft PR の E2E が `vercel/next.js examples/with-typescript` ベースの
+`Garoro0920/migrate-bot-e2e-test` で通過。draft PR #1 が GitHub に作成され、
+job state が `pr_ready` に到達 (cost $0.0495、tokens 12,576)。
 
 詳細 → `docs/roadmap.md` §1.3
 
@@ -40,12 +45,22 @@ Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip�
   - ✅ apps/runner InternalApiClient HTTP client (`b3f4341`、5 tests)
   - ✅ apps/runner orchestration を InternalApiClient ベースに書換 + createPR stage 追加 (`fc7407d`、6 tests)
   - ✅ apps/runner pipeline 本実装 (createRealPipeline) + index.ts 配線 + 13 tests
-    - agent.analyze/plan/migrate/verify 統合、blockers/failed task/typecheck/build を error に変換
-    - Octokit createDraftPR + git config/diff/add/commit/checkout/push を closure 内で実行
-    - 累計 runner 28 tests (15+13)
-  - ⏸ **次回ここから**: wrangler secrets 追加 (INTERNAL_API_TOKEN + FLY_API_TOKEN) → wrangler deploy
-  - ⏸ flyctl deploy (apps/runner image を Fly registry に push)
-  - ⏸ Phase 2 完了基準確認 (テスト repo で webhook → Queue → Fly.io job → draft PR)
+  - ✅ E2E 通過 (2026-04-28、6 回目の試行で `pr_ready`、cost $0.0495、tokens 12,576)
+    - 1 回目: 403 (FLY_API_TOKEN が session token で Machines API 権限なし)
+    - 2 回目: invalid installationId (jobs.installation_id は内部 UUID FK、runner は GitHub integer ID 必要)
+    - 3 回目: OOM at next build (512MB 不足)
+    - 4 回目: verify failed (LLM が `pages/users/[id].tsx` → `app/users/[id]/page.tsx` の階層深化を import path に反映できず)
+    - 5 回目: git commit が `shell:true` で argv 再 split → "[migrate-bot]" のみ commit message、残りは pathspec
+    - 6 回目: `octokit.rest.pulls.create` が undefined (`@octokit/app` のデフォルトは core Octokit、`.rest` plugin は別途注入必要)
+    - 7 回目: pr_ready 到達。draft PR #1 が `Garoro0920/migrate-bot-e2e-test` に作成された
+  - 解決 commit:
+    - `8d680a2` /internal/jobs response に githubInstallationId を join 追加
+    - `3fb6e0b` Fly machine memory 512MB → 2GB、CPU 1 → 2
+    - `ba92a5c` agent: deterministic な相対 import path 後処理 (10 unit tests)
+    - `4bd6252` runner: git invocation から `shell:true` 削除
+    - `5beac95` runner: `@octokit/rest` の Octokit を App constructor に注入
+  - ⏸ pr_url を D1 に書き込む transition payload 拡張 (今回 Phase 2 完了直後に着手)
+  - ⏸ webhook 経由 (= GitHub App webhook URL) の E2E 確認 (admin/trigger では成功済)
 
 ## 直近の重要判断
 
