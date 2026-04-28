@@ -1,0 +1,19 @@
+# build context を monorepo root にした際の image 肥大化防止。
+# apps/runner/Dockerfile が COPY する範囲外を全部除外する。
+
+**/node_modules
+**/dist
+**/.turbo
+**/.migrate-bot
+**/.env
+**/.env.local
+**/*.test.ts
+**/test-fixtures
+**/__tests__
+.git
+.github
+.vscode
+.idea
+docs
+**/*.md
+!apps/runner/Dockerfile

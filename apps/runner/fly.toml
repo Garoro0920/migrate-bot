@@ -18,7 +18,9 @@ app = 'migrate-bot-runner-dev'
 primary_region = 'nrt'
 
 [build]
-  dockerfile = 'Dockerfile'
+  # build context は monorepo root。flyctl deploy は monorepo root から
+  # `--config apps/runner/fly.toml` で起動する想定 (--config 指定時 cwd が context になる)。
+  dockerfile = 'apps/runner/Dockerfile'
 
 [env]
   NODE_ENV = 'production'
