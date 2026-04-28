@@ -104,28 +104,33 @@ export function createRealPipeline(deps: RealPipelineDeps): PipelineRunner {
       const cwd = cloned.localPath;
       const { owner, repo } = splitRepoFullName(job.repoFullName);
 
+      // shell: true は使わない。bash が引数を再 split して commit message が
+      // pathspec 扱いされる事故が発生する (E2E で確認済)。Fly.io の Linux 環境では
+      // git は PATH 上にあるので execFile から直接呼べる。
+
       // git config (per-repo only — global を汚さない)
-      await exec('git', ['config', 'user.email', authorEmail], { cwd, shell: true });
-      await exec('git', ['config', 'user.name', authorName], { cwd, shell: true });
+      await exec('git', ['config', 'user.email', authorEmail], { cwd });
+      await exec('git', ['config', 'user.name', authorName], { cwd });
 
       // 変更があるかチェック (diff があれば commit、無ければ skip)
       try {
-        await exec('git', ['diff', '--quiet'], { cwd, shell: true });
+        await exec('git', ['diff', '--quiet'], { cwd });
         // diff なし
       } catch {
         // diff あり → add + commit
-        await exec('git', ['add', '-A'], { cwd, shell: true });
-        await exec('git', ['commit', '-m', '[migrate-bot] migrate Pages Router → App Router'], {
-          cwd,
-          shell: true,
-        });
+        await exec('git', ['add', '-A'], { cwd });
+        await exec(
+          'git',
+          ['commit', '-m', '[migrate-bot] migrate Pages Router -> App Router'],
+          { cwd },
+        );
       }
 
       // branch 作成 + push
-      await exec('git', ['checkout', '-b', branchName], { cwd, shell: true });
+      await exec('git', ['checkout', '-b', branchName], { cwd });
       const token = await deps.factory.getInstallationToken(deps.installationId);
       const remoteUrl = `https://x-access-token:${token}@github.com/${job.repoFullName}.git`;
-      await exec('git', ['push', remoteUrl, branchName], { cwd, shell: true });
+      await exec('git', ['push', remoteUrl, branchName], { cwd });
 
       const pr = await createDraftPR({
         factory: deps.factory,
