@@ -9,16 +9,15 @@
 
 ## 現在のフェーズ
 
-**Phase 2: GitHub App 化（完了基準達成、Phase 3 検討前段階）**
+**Phase 3: 課金統合 (着手)**
 
-2026-04-28 dev 環境で webhook → Queue → Fly.io Machine → runner → agent →
-draft PR の E2E が `vercel/next.js examples/with-typescript` ベースの
-`Garoro0920/migrate-bot-e2e-test` で通過。draft PR #1 が GitHub に作成され、
-job state が `pr_ready` に到達 (cost $0.0495、tokens 12,576)。
+2026-04-28 ADR-0003 で「学生期間中に Phase 3/4 前倒し、市場検証 skip 継続」を決定。
+Phase 1 (ローカル PoC) と Phase 2 (GitHub App 化) は完了基準達成済。最初の 3 件は
+ベータ割引でローンチし、ローンチ後 30 日の売上を事後シグナルとする方針。
 
-詳細 → `docs/roadmap.md` §1.3
+詳細 → `docs/roadmap.md` §1.4、ADR-0003
 
-Phase 1 は完了基準達成済 (§1.2)。Phase 0 は ADR-0002 により skip。
+Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
 
 ## 進行中タスク
 
