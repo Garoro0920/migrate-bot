@@ -8,6 +8,8 @@ name = "migrate-bot-api-dev"
 main = "src/index.ts"
 compatibility_date = "2026-04-26"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
 
 # 公開可能な変数 (operator が値を埋める)。
 # - FLY_APP_NAME: Fly.io 上の runner app 名
@@ -18,7 +20,7 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 FLY_APP_NAME = "migrate-bot-runner-dev"
 RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:deployment-01KQ9F0SAA2W3J2Q7EQNF5N2F9"
-INTERNAL_API_URL = "https://migrate-bot-api-dev.<your-subdomain>.workers.dev"
+INTERNAL_API_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev"
 
 # D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
 [[d1_databases]]
