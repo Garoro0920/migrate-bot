@@ -38,6 +38,9 @@ importers:
       hono:
         specifier: 4.12.15
         version: 4.12.15
+      stripe:
+        specifier: ^22.1.0
+        version: 22.1.0(@types/node@22.19.17)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: 4.20260426.1
@@ -1832,6 +1835,15 @@ packages:
     resolution: {integrity: sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==}
     engines: {node: '>=0.10.0'}
 
+  stripe@22.1.0:
+    resolution: {integrity: sha512-w/xHyJGxXWnLPbNHG13sz/fae0MrFGC80Oz7YbICQymbfpqfEcsoG+6yG+9BWb81PWc4rrkeSO4wmTcmefmbLw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@types/node': '>=18'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+
   supports-color@10.2.2:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
@@ -3285,6 +3297,10 @@ snapshots:
       safe-buffer: 5.2.1
 
   strip-json-comments@2.0.1: {}
+
+  stripe@22.1.0(@types/node@22.19.17):
+    optionalDependencies:
+      '@types/node': 22.19.17
 
   supports-color@10.2.2: {}
 
