@@ -1,11 +1,13 @@
 import {
   type AnyDbClient,
   createD1Client,
+  installations,
   loadJob,
   recordJobUsage,
   transitionJob,
 } from '@migrate-bot/db';
 import { JOB_STATES, type JobState } from '@migrate-bot/shared';
+import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { checkBearerAuth } from '../auth';
 
@@ -74,7 +76,15 @@ export function createInternalRouter(): Hono<InternalContext> {
     if (!db) return c.json({ error: 'DB binding unavailable' }, 503);
     const job = await loadJob(db, c.req.param('id'));
     if (!job) return c.json({ error: 'not found' }, 404);
-    return c.json(job);
+    // runner needs the GitHub installation id (integer) to authenticate via Octokit;
+    // jobs.installation_id is the internal UUID FK, so join installations here.
+    const instRows = await db
+      .select()
+      .from(installations)
+      .where(eq(installations.id, job.installationId))
+      .limit(1);
+    const githubInstallationId = instRows[0]?.githubInstallationId ?? null;
+    return c.json({ ...job, githubInstallationId });
   });
 
   app.post('/jobs/:id/transition', async (c) => {

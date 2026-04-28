@@ -77,7 +77,8 @@ function makeFactory(octokit?: OctokitLike): InstallationOctokitFactory {
 function makeJob(overrides: Partial<RemoteJob> = {}): RemoteJob {
   return {
     id: 'job-1',
-    installationId: '42',
+    installationId: 'inst-uuid',
+    githubInstallationId: 42,
     customerId: null,
     repoFullName: 'octocat/hello',
     plan: 'small',

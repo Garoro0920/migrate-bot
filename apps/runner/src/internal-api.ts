@@ -5,7 +5,10 @@ import type { JobState } from '@migrate-bot/shared';
 
 export interface RemoteJob {
   readonly id: string;
+  // 内部 UUID (installations 表の主キー)
   readonly installationId: string;
+  // GitHub の installation ID (integer)。runner は Octokit 認証にこちらを使う。
+  readonly githubInstallationId: number;
   readonly customerId: string | null;
   readonly repoFullName: string;
   readonly plan: 'small' | 'medium' | 'large' | 'enterprise';

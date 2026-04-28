@@ -48,10 +48,12 @@ async function main(): Promise<number> {
 
   // installationId を取るために 1 度 job を pre-load する。runJob 内でも loadJob が
   // 走るので 1 往復多いが、それ以外の wiring は単純化される。
+  // 注: jobs.installation_id は内部 UUID。Octokit には GitHub の integer ID が必要なので
+  // /internal/jobs/:id 側で join 済の githubInstallationId を使う。
   const job = await api.loadJob(env.JOB_ID);
-  const installationId = Number(job.installationId);
+  const installationId = job.githubInstallationId;
   if (!Number.isFinite(installationId)) {
-    throw new Error(`invalid installationId: ${job.installationId}`);
+    throw new Error(`invalid githubInstallationId: ${job.githubInstallationId}`);
   }
 
   const factory = new OctokitAppFactory({

@@ -55,6 +55,7 @@ function makeJob(overrides: Partial<RemoteJob> = {}): RemoteJob {
   return {
     id: 'job-1',
     installationId: 'inst-1',
+    githubInstallationId: 12345,
     customerId: null,
     repoFullName: 'octocat/hello',
     plan: 'small',
