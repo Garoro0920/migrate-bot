@@ -200,6 +200,9 @@ export async function upsertCustomerByEmail(
 // ─── orders ─────────────────────────────────────────────────────────────────
 
 export interface CreateOrderInput {
+  // 省略時は newOrderId() で生成。Stripe Checkout の client_reference_id に
+  // pre-generated id を使うために caller が指定するケースに対応。
+  readonly orderId?: string;
   readonly customerId: string;
   readonly installationId: string;
   readonly repoFullName: string;
@@ -212,7 +215,7 @@ export async function createOrder(
   db: AnyDbClient,
   input: CreateOrderInput,
 ): Promise<{ orderId: string }> {
-  const orderId = newOrderId();
+  const orderId = input.orderId ?? newOrderId();
   await db.insert(orders).values({
     id: orderId,
     customerId: input.customerId,
