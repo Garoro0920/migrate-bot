@@ -19,7 +19,7 @@ preview_urls = false
 # - INTERNAL_API_URL: この Worker の公開 URL (deploy 後に確定)
 [vars]
 FLY_APP_NAME = "migrate-bot-runner-dev"
-RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:deployment-01KQ9F0SAA2W3J2Q7EQNF5N2F9"
+RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:deployment-01KQ9HBWATZCW4X78Y5Q90FV9K"
 INTERNAL_API_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev"
 
 # D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
