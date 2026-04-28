@@ -1,5 +1,6 @@
 import { retryWithBackoff } from '@migrate-bot/shared';
 import { App } from '@octokit/app';
+import { Octokit } from '@octokit/rest';
 
 // GitHub App として認証し、特定 installation の権限で REST API を叩く wrapper。
 // runner が draft PR 作成・branch 確認に使う最小機能のみ。
@@ -49,7 +50,10 @@ export class OctokitAppFactory implements InstallationOctokitFactory {
   private readonly tokenCache = new Map<number, { token: string; expiresAt: number }>();
 
   constructor(auth: GitHubAppAuth) {
-    this.app = new App({ appId: auth.appId, privateKey: auth.privateKey });
+    // Octokit を明示注入しないと App のデフォルトは core Octokit (= .rest なし) で、
+    // octokit.rest.pulls.create が undefined になる。@octokit/rest の Octokit を渡すと
+    // .rest plugin が installation Octokit にも継承される。
+    this.app = new App({ appId: auth.appId, privateKey: auth.privateKey, Octokit });
   }
 
   async forInstallation(installationId: number): Promise<OctokitLike> {
