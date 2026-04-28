@@ -21,6 +21,10 @@ preview_urls = false
 FLY_APP_NAME = "migrate-bot-runner-dev"
 RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:deployment-01KQ9RN4G0R3BM93ZR0TW233GV"
 INTERNAL_API_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev"
+# Phase 4 で landing page URL に置き換える placeholder。Test mode では Stripe が
+# このページにリダイレクトするだけで、ページ自体の実体は重要ではない。
+CHECKOUT_SUCCESS_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev/checkout/success"
+CHECKOUT_CANCEL_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev/checkout/cancel"
 
 # D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
 [[d1_databases]]
