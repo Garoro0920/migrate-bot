@@ -10,7 +10,7 @@ function buildAnalysis(classifications: readonly FileClassification[]): AnalyzeR
     recommendedPlan: 'small',
     blockers: [],
     classifications,
-    usage: { costUsd: 0, callCount: 0 },
+    usage: { costUsd: 0, callCount: 0, tokensInput: 0, tokensOutput: 0 },
   };
 }
 

@@ -36,6 +36,8 @@ export interface FileClassification {
 export interface AnalyzeUsage {
   readonly costUsd: number;
   readonly callCount: number;
+  readonly tokensInput: number;
+  readonly tokensOutput: number;
 }
 
 export interface AnalyzeResult {
@@ -74,6 +76,8 @@ export interface FileChange {
 export interface MigrateUsage {
   readonly costUsd: number;
   readonly callCount: number;
+  readonly tokensInput: number;
+  readonly tokensOutput: number;
 }
 
 export interface MigrateResult {

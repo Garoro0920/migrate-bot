@@ -65,10 +65,17 @@ export async function migrate(
   }
 
   const totalCost = usageRecords.reduce((sum, r) => sum + r.costUsd, 0);
+  const totalTokensInput = usageRecords.reduce((sum, r) => sum + r.inputTokens, 0);
+  const totalTokensOutput = usageRecords.reduce((sum, r) => sum + r.outputTokens, 0);
   return {
     changes,
     failedTaskIds,
-    usage: { costUsd: totalCost, callCount: usageRecords.length },
+    usage: {
+      costUsd: totalCost,
+      callCount: usageRecords.length,
+      tokensInput: totalTokensInput,
+      tokensOutput: totalTokensOutput,
+    },
   };
 }
 

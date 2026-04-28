@@ -43,6 +43,8 @@ export async function analyze(
   const usage: AnalyzeUsage = {
     costUsd: classifyOutcome.usage?.costUsd ?? 0,
     callCount: classifyOutcome.usage ? 1 : 0,
+    tokensInput: classifyOutcome.usage?.inputTokens ?? 0,
+    tokensOutput: classifyOutcome.usage?.outputTokens ?? 0,
   };
 
   return {
