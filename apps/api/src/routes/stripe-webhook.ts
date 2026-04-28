@@ -13,6 +13,8 @@ import type { JobQueueMessage, QueueProducer } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type Stripe from 'stripe';
+import { createResendClient, type EmailClient } from '../email';
+import { notifyPaymentReceived } from '../notifications';
 import { type CloudflareQueue, wrapCloudflareQueue } from '../queue';
 import { createStripeClient, type StripeClient } from '../stripe';
 
@@ -33,6 +35,8 @@ export interface StripeWebhookEnv {
   readonly STRIPE_WEBHOOK_SECRET: string;
   readonly DB?: D1Database;
   readonly JOBS_QUEUE?: CloudflareQueue<JobQueueMessage>;
+  readonly RESEND_API_KEY?: string;
+  readonly EMAIL_FROM_ADDRESS?: string;
 }
 
 export interface StripeWebhookContext {
@@ -41,6 +45,7 @@ export interface StripeWebhookContext {
     readonly db?: AnyDbClient;
     readonly stripe?: StripeClient;
     readonly jobsQueue?: QueueProducer<JobQueueMessage>;
+    readonly email?: EmailClient;
   };
 }
 
@@ -71,6 +76,18 @@ function resolveQueue(c: {
   if (c.var.jobsQueue) return c.var.jobsQueue;
   if (c.env.JOBS_QUEUE) return wrapCloudflareQueue(c.env.JOBS_QUEUE);
   return null;
+}
+
+function resolveEmail(c: {
+  var: StripeWebhookContext['Variables'];
+  env: StripeWebhookEnv;
+}): EmailClient | null {
+  if (c.var.email) return c.var.email;
+  if (!c.env.RESEND_API_KEY || !c.env.EMAIL_FROM_ADDRESS) return null;
+  return createResendClient({
+    apiKey: c.env.RESEND_API_KEY,
+    fromAddress: c.env.EMAIL_FROM_ADDRESS,
+  });
 }
 
 export function createStripeWebhookRouter(): Hono<StripeWebhookContext> {
@@ -126,6 +143,7 @@ async function handleCheckoutCompleted(
   db: AnyDbClient,
   session: Stripe.Checkout.Session,
 ): Promise<void> {
+  const email = resolveEmail(c);
   const orderId = session.client_reference_id;
   if (!orderId) {
     throw new Error(`checkout.session.completed without client_reference_id: ${session.id}`);
@@ -178,6 +196,11 @@ async function handleCheckoutCompleted(
     installationId: inst.githubInstallationId,
     traceId,
   });
+
+  // Notify customer that their migration job has started.
+  if (email) {
+    await notifyPaymentReceived(db, email, orderId);
+  }
 }
 
 async function handleCheckoutExpired(

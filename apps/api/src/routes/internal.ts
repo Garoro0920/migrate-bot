@@ -10,6 +10,8 @@ import { JOB_STATES, type JobState } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { checkBearerAuth } from '../auth';
+import { createResendClient, type EmailClient } from '../email';
+import { notifyPrReady, notifyRefunded } from '../notifications';
 import { processRefund } from '../refund';
 import { createStripeClient, type StripeClient } from '../stripe';
 
@@ -25,6 +27,8 @@ export interface InternalEnv {
   // Stripe key は refund 経路でのみ必要。テストでは stripe variable に DI する。
   readonly STRIPE_SECRET_KEY?: string;
   readonly STRIPE_WEBHOOK_SECRET?: string;
+  readonly RESEND_API_KEY?: string;
+  readonly EMAIL_FROM_ADDRESS?: string;
 }
 
 export interface InternalContext {
@@ -32,6 +36,7 @@ export interface InternalContext {
   Variables: {
     readonly db?: AnyDbClient;
     readonly stripe?: StripeClient;
+    readonly email?: EmailClient;
   };
 }
 
@@ -125,9 +130,22 @@ export function createInternalRouter(): Hono<InternalContext> {
         if (stripe) {
           try {
             await processRefund(db, stripe, jobId, body.reason);
+            // refund 成功時に refunded メールを送信 (refunded 状態に進んでいる)
+            const email = resolveEmail(c);
+            if (email) {
+              await notifyRefunded(db, email, jobId, body.reason);
+            }
           } catch (err) {
             console.error('refund failed', { jobId, error: err });
           }
+        }
+      }
+
+      // 顧客に PR 準備完了を通知
+      if (body.toState === 'pr_ready') {
+        const email = resolveEmail(c);
+        if (email) {
+          await notifyPrReady(db, email, jobId);
         }
       }
 
@@ -183,5 +201,17 @@ function resolveStripe(c: {
   return createStripeClient({
     secretKey: c.env.STRIPE_SECRET_KEY,
     webhookSecret: c.env.STRIPE_WEBHOOK_SECRET,
+  });
+}
+
+function resolveEmail(c: {
+  var: InternalContext['Variables'];
+  env: InternalEnv;
+}): EmailClient | null {
+  if (c.var.email) return c.var.email;
+  if (!c.env.RESEND_API_KEY || !c.env.EMAIL_FROM_ADDRESS) return null;
+  return createResendClient({
+    apiKey: c.env.RESEND_API_KEY,
+    fromAddress: c.env.EMAIL_FROM_ADDRESS,
   });
 }
