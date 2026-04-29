@@ -83,8 +83,13 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
   - ✅ prod env config templates + `docs/phase-4-deployment.md` (`70ccae3`)
   - ✅ CLI admin-trigger を HTTP 化 (`5779e25`、+6 tests、累計 322)
   - ✅ wrangler d1 migrations apply 用 migrations_dir 設定 (`70ccae3`)
+  - ✅ ドメイン名 `migrate-bot.dev` 確定 + placeholder 一括反映 (`b24de9b`、+2 tests、累計 324)
+    - 商標調査結果: USPTO TMview / J-PlatPat / EUIPO すべてクリア
+    - Foster LLP の MIGRATE は移民法務専用で業種完全に異なる
+    - operator が Cloudflare Registrar で取得作業中
+  - ✅ apps/web に `/checkout/success` `/checkout/cancel` 追加 (`b24de9b`)
   - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo WHITE 神戸中央想定、§6 確認必須)
-  - ⏸ operator: ドメイン名候補 + 商標調査 (P0-2)
+  - ⏸ operator: ドメイン取得 (P0-2、`migrate-bot.dev` for $12.20/年、§6 承認済)
   - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
   - ⏸ operator: 税理士相談アポ取り (P0-4)
   - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
