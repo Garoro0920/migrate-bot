@@ -79,16 +79,21 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
 - **Phase 4 ローンチ準備 (進行中)**:
   - ✅ 法務文書 4 点起草 (`beea7a9`、`docs/templates/legal/`、要 operator + 弁護士レビュー)
   - ✅ Landing page MVP + 法務 4 ページ HTML 配信 (`65371df`、`apps/web/`、+18 tests)
-  - ⏸ operator: 私書箱代行サービス契約 (P0-1、§6 確認必須)
+  - ✅ Sentry instrumentation 全 3 app (`6f1eb2c`、SENTRY_DSN 未設定なら no-op)
+  - ✅ prod env config templates + `docs/phase-4-deployment.md` (`70ccae3`)
+  - ✅ CLI admin-trigger を HTTP 化 (`5779e25`、+6 tests、累計 322)
+  - ✅ wrangler d1 migrations apply 用 migrations_dir 設定 (`70ccae3`)
+  - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo WHITE 神戸中央想定、§6 確認必須)
   - ⏸ operator: ドメイン名候補 + 商標調査 (P0-2)
   - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
   - ⏸ operator: 税理士相談アポ取り (P0-4)
   - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
   - ⏸ DNS + Resend ドメイン検証 (P1-2 / P2-2)
   - ⏸ 法務レビュー結果反映 + landing 公開 (P2-1 / P2-3)
+  - ⏸ 本番 GitHub App / Cloudflare D1 / Queue / Fly app 作成 (`docs/phase-4-deployment.md` §6-§8)
   - ⏸ Stripe Live activation 申請 (P3-1)
   - ⏸ デモ動画 + ローンチ告知文 (P4)
-  - ⏸ Sentry コード統合 (任意、operator GO 後)
+  - ⏸ Sentry プロジェクト作成 + DSN secret 登録 (operator)
 
 ## 直近の重要判断
 
