@@ -32,7 +32,7 @@ function printHelp(): void {
       '  migrate [--no-llm] [--json] <repo-path>   Run the full Analyze + Plan + Migrate pipeline',
       '  verify [--skip-*] [--json] <repo-path>    Run pnpm install + tsc --noEmit + next build',
       '  stats                                      Show cumulative API usage and ADR-0002 kill criteria',
-      '  admin-trigger <inst-id> <owner/repo>      Enqueue a job (dev tool, in-memory queue only)',
+      '  admin-trigger <inst-id> <owner/repo>      POST to <api>/admin/trigger (env: MIGRATE_BOT_API_URL, MIGRATE_BOT_API_TOKEN)',
       '  help                                       Show this help',
       '',
       'Notes:',

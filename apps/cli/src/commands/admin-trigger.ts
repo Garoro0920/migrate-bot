@@ -1,17 +1,11 @@
-import {
-  InMemoryQueue,
-  type JobQueueMessage,
-  type JobState,
-  newJobId,
-  newTraceId,
-  type QueueProducer,
-} from '@migrate-bot/shared';
-
-// 開発・運用補助コマンド。本番デプロイ後は wrangler/fly の Web ダッシュボード
-// から jobId をデバッグするのに使う想定。
+// 開発・運用補助コマンド。本番 Worker (apps/api) の /admin/trigger 経由で
+// 移行ジョブを起動する。Phase 4 ベータ顧客 (Stripe Live activation 前) を
+// operator が手動で投入する用途を想定。
 //
-// 現状 (Phase 2b): InMemoryQueue を使い、構造を確認するだけの dry-run。
-// Phase 2 後半で D1 への INSERT + Cloudflare Queues 投入に置き換える。
+// 使用例:
+//   MIGRATE_BOT_API_URL=https://migrate-bot-api-dev.example.workers.dev \
+//   MIGRATE_BOT_API_TOKEN=<INTERNAL_API_TOKEN> \
+//   pnpm cli admin-trigger 127730344 octocat/hello --plan small --json
 
 interface ParsedAdminArgs {
   readonly installationId: string | undefined;
@@ -22,7 +16,7 @@ interface ParsedAdminArgs {
 
 const PLANS = ['small', 'medium', 'large', 'enterprise'] as const;
 
-function parseArgs(args: readonly string[]): ParsedAnswer {
+function parseArgs(args: readonly string[]): ParsedAdminArgs {
   let installationId: string | undefined;
   let repo: string | undefined;
   let plan: ParsedAdminArgs['plan'] = 'small';
@@ -46,21 +40,44 @@ function parseArgs(args: readonly string[]): ParsedAnswer {
   return { installationId, repo, plan, json };
 }
 
-type ParsedAnswer = ParsedAdminArgs;
+interface TriggerResponse {
+  readonly ok: boolean;
+  readonly jobId: string;
+  readonly traceId: string;
+  readonly installationId: string;
+  readonly installation?: { readonly created: boolean; readonly githubId: number };
+}
 
 export interface RunAdminTriggerDeps {
-  readonly queue: QueueProducer<JobQueueMessage>;
+  readonly fetch?: typeof fetch;
+  readonly env?: Record<string, string | undefined>;
 }
 
 export async function runAdminTrigger(
   args: readonly string[],
-  deps: RunAdminTriggerDeps = { queue: new InMemoryQueue<JobQueueMessage>() },
+  deps: RunAdminTriggerDeps = {},
 ): Promise<number> {
+  const fetchFn = deps.fetch ?? fetch;
+  const env = deps.env ?? process.env;
   const parsed = parseArgs(args);
   if (!parsed.installationId || !parsed.repo) {
     process.stderr.write(
       'Usage: admin-trigger [--plan small|medium|large|enterprise] [--json] <installationId> <owner/repo>\n',
     );
+    process.stderr.write(
+      '  Required env: MIGRATE_BOT_API_URL, MIGRATE_BOT_API_TOKEN\n',
+    );
+    return 1;
+  }
+
+  const apiUrl = env.MIGRATE_BOT_API_URL?.replace(/\/$/, '');
+  const apiToken = env.MIGRATE_BOT_API_TOKEN;
+  if (!apiUrl) {
+    process.stderr.write('MIGRATE_BOT_API_URL env var is required\n');
+    return 1;
+  }
+  if (!apiToken) {
+    process.stderr.write('MIGRATE_BOT_API_TOKEN env var is required\n');
     return 1;
   }
 
@@ -69,38 +86,52 @@ export async function runAdminTrigger(
     process.stderr.write(`installationId must be a number, got: ${parsed.installationId}\n`);
     return 1;
   }
+  const slashIdx = parsed.repo.indexOf('/');
+  if (slashIdx <= 0 || slashIdx === parsed.repo.length - 1) {
+    process.stderr.write(`repo must be in 'owner/repo' format, got: ${parsed.repo}\n`);
+    return 1;
+  }
+  const accountLogin = parsed.repo.slice(0, slashIdx);
 
-  const jobId = newJobId();
-  const traceId = newTraceId();
+  let response: Response;
+  try {
+    response = await fetchFn(`${apiUrl}/admin/trigger`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${apiToken}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        githubInstallationId: installationId,
+        accountLogin,
+        repoFullName: parsed.repo,
+        plan: parsed.plan,
+      }),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`network error calling ${apiUrl}/admin/trigger: ${msg}\n`);
+    return 2;
+  }
 
-  await deps.queue.send({
-    jobId,
-    installationId,
-    traceId,
-  });
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    process.stderr.write(`admin/trigger returned ${response.status}: ${body.slice(0, 500)}\n`);
+    return response.status === 401 ? 1 : 2;
+  }
 
-  const result = {
-    jobId,
-    traceId,
-    installationId,
-    repo: parsed.repo,
-    plan: parsed.plan,
-    state: 'queued' satisfies JobState,
-    note: 'Phase 2b: in-memory queue only. Production wiring (D1 + Cloudflare Queues) is Phase 2 後半.',
-  };
-
+  const result = (await response.json()) as TriggerResponse;
   if (parsed.json) {
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } else {
     const lines = [
-      '[migrate-bot] admin-trigger (dry-run)',
+      '[migrate-bot] admin-trigger',
       `  jobId:          ${result.jobId}`,
       `  traceId:        ${result.traceId}`,
       `  installationId: ${result.installationId}`,
-      `  repo:           ${result.repo}`,
-      `  plan:           ${result.plan}`,
-      `  state:          ${result.state}`,
-      `  note: ${result.note}`,
+      `  repo:           ${parsed.repo}`,
+      `  plan:           ${parsed.plan}`,
+      `  state:          queued (now in Cloudflare Queue, runner will pick up)`,
       '',
     ];
     process.stdout.write(lines.join('\n'));
