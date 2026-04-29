@@ -1,6 +1,6 @@
 # Cloudflare Workers 設定。
 # operator は事前に wrangler login + d1 create + queues create + secret put を済ませる。
-# 詳細手順は docs/phase-2-deployment.md §2。
+# 詳細手順は docs/phase-2-deployment.md §2 と docs/phase-4-deployment.md。
 #
 # 参考: https://developers.cloudflare.com/workers/wrangler/configuration/
 
@@ -17,20 +17,24 @@ preview_urls = false
 #   Fly.io は :latest tag を自動付与しないので、毎回 deploy 後に tag を更新して
 #   wrangler deploy する。長期的には image lookup を動的にするか release script を書く。
 # - INTERNAL_API_URL: この Worker の公開 URL (deploy 後に確定)
+# - ENVIRONMENT: Sentry / ログで dev / prod を区別するためのタグ
 [vars]
 FLY_APP_NAME = "migrate-bot-runner-dev"
 RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-dev:deployment-01KQ9RN4G0R3BM93ZR0TW233GV"
 INTERNAL_API_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev"
+ENVIRONMENT = "dev"
 # Phase 4 で landing page URL に置き換える placeholder。Test mode では Stripe が
 # このページにリダイレクトするだけで、ページ自体の実体は重要ではない。
 CHECKOUT_SUCCESS_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev/checkout/success"
 CHECKOUT_CANCEL_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev/checkout/cancel"
 
 # D1 binding (architecture.md §5)。dev DB の database_id は 2026-04-27 に確定。
+# migrations_dir 指定で `wrangler d1 migrations apply migrate-bot-dev --remote` が使える。
 [[d1_databases]]
 binding = "DB"
 database_name = "migrate-bot-dev"
 database_id = "e5e26c30-31ba-498a-ab52-25f56163da74"
+migrations_dir = "../../packages/db/migrations"
 
 # Cloudflare Queues producer (webhook handler / admin/trigger からの送信)。
 [[queues.producers]]
@@ -47,21 +51,50 @@ max_retries = 3
 max_concurrency = 3
 
 # Secrets (デプロイ前に operator が wrangler secret put で設定):
-# - GITHUB_WEBHOOK_SECRET   (GitHub App の webhook secret)
-# - GITHUB_APP_ID           (App ID 3509236)
-# - GITHUB_APP_PRIVATE_KEY  (App の .pem 全体)
-# - INTERNAL_API_TOKEN      (admin/trigger と /internal 認証用、ランダム 32 byte hex)
-# - FLY_API_TOKEN           (Fly.io API token、`flyctl auth token` で取得)
+# 共通 (dev / prod 両方で必要):
+# - GITHUB_WEBHOOK_SECRET   GitHub App の webhook secret
+# - GITHUB_APP_ID           App ID
+# - GITHUB_APP_PRIVATE_KEY  App の .pem 全体
+# - INTERNAL_API_TOKEN      admin/trigger と /internal 認証用、ランダム 32 byte hex
+# - FLY_API_TOKEN           Fly.io API token (flyctl tokens create deploy --app <APP> --expiry 8760h)
+# - STRIPE_SECRET_KEY       Stripe secret key (test: sk_test_..., prod: sk_live_...)
+# - STRIPE_WEBHOOK_SECRET   Stripe webhook signing secret (whsec_...)
+# - RESEND_API_KEY          Resend API key
+# - EMAIL_FROM_ADDRESS      "migrate-bot <noreply@<DOMAIN>>"
+# 任意:
+# - SENTRY_DSN              Sentry プロジェクトの DSN (未設定なら例外送信を skip)
 
+# ──────────────────────────────────────────────────────────────────────
 # 本番 environment (architecture.md §3.1: dev/prod 2 つ)。
-# Phase 4 ローンチ前に別 D1 + 別 Queue + 別 secrets を用意する想定。
+# Phase 4 ローンチ前に operator が以下を作成:
+#   1. wrangler d1 create migrate-bot-prod
+#      → database_id を控える
+#   2. wrangler queues create migrate-bot-jobs-prod
+#   3. GitHub App "migrate-bot-prod" を新規作成 (App ID 別)
+#   4. Fly.io app "migrate-bot-runner-prod" を新規作成
+#   5. 上記 secrets を `wrangler secret put <NAME> --env=prod` で全件登録
+#   6. 下の comment-out をすべて解除し、placeholder を実値に置換
+#   7. wrangler deploy --env=prod
+# 詳細手順は docs/phase-4-deployment.md。
+# ──────────────────────────────────────────────────────────────────────
 [env.prod]
 name = "migrate-bot-api-prod"
+workers_dev = false  # prod は custom domain で公開
+preview_urls = false
+
+[env.prod.vars]
+FLY_APP_NAME = "migrate-bot-runner-prod"
+RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-prod:<DEPLOYMENT_TAG>"
+INTERNAL_API_URL = "https://api.<DOMAIN>"
+ENVIRONMENT = "prod"
+CHECKOUT_SUCCESS_URL = "https://<DOMAIN>/checkout/success"
+CHECKOUT_CANCEL_URL = "https://<DOMAIN>/checkout/cancel"
 
 # [[env.prod.d1_databases]]
 # binding = "DB"
 # database_name = "migrate-bot-prod"
-# database_id = "<prod-only, fill before launch>"
+# database_id = "<PROD_D1_DATABASE_ID>"  # wrangler d1 create migrate-bot-prod の出力
+# migrations_dir = "../../packages/db/migrations"
 
 # [[env.prod.queues.producers]]
 # binding = "JOBS_QUEUE"
@@ -69,3 +102,7 @@ name = "migrate-bot-api-prod"
 
 # [[env.prod.queues.consumers]]
 # queue = "migrate-bot-jobs-prod"
+# max_batch_size = 1
+# max_batch_timeout = 30
+# max_retries = 3
+# max_concurrency = 3

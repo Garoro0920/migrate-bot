@@ -21,6 +21,17 @@ GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot-dev/installations/
 CONTACT_EMAIL = "Ga1or0920.main@gmail.com"
 # landing page で参照されるブランド名
 BRAND_NAME = "migrate-bot"
+ENVIRONMENT = "dev"
 
+# Phase 4 ローンチ用の prod environment (詳細は docs/phase-4-deployment.md)。
+# 公開後は custom domain (apex) でアクセス。
 [env.prod]
 name = "migrate-bot-web-prod"
+workers_dev = false
+preview_urls = false
+
+[env.prod.vars]
+GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot/installations/new"
+CONTACT_EMAIL = "support@<DOMAIN>"
+BRAND_NAME = "migrate-bot"
+ENVIRONMENT = "prod"
