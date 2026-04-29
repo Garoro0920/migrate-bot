@@ -3,7 +3,6 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   createSqliteClient,
-  installations,
   orders,
   type SqliteClient,
   upsertInstallation,
@@ -67,7 +66,7 @@ function makeStripeStub(
     verifyWebhookSignature:
       overrides.verifyWebhookSignature ?? vi.fn().mockRejectedValue(new Error('not used')),
     createRefund: overrides.createRefund ?? vi.fn().mockRejectedValue(new Error('not used')),
-  };
+  } as unknown as StripeClient;
 }
 
 describe('POST /checkout/create-session', () => {
