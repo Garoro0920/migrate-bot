@@ -76,14 +76,19 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
   - ✅ Phase 3 operator 作業完了 (Stripe / Resend dev アカウント + secrets + 0001_orders 適用)
   - ✅ E2E 完走 (2026-04-28、Stripe テスト card $99 → draft PR #4 → 2 通メール届く)
   - ⏸ Resend ドメイン検証 (任意のメアドに送るには必要、Phase 4 のドメイン取得時に実施)
-- **Phase 4 ローンチ準備 (未着手)**:
-  - ⏸ 法務文書 4 点 (ToS / PP / 返金ポリシー / 特商法表記) 起草 → operator レビュー
-  - ⏸ Landing page (`apps/web/` 新規 or apps/api 内静的 HTML)
-  - ⏸ ドメイン取得 + custom domain 設定 (固定費発生、§6 確認必須)
-  - ⏸ Sentry / UptimeRobot / 監視整備
-  - ⏸ Stripe Live activation 申請 (上記完了後)
-  - ⏸ Resend ドメイン検証
-  - ⏸ ローンチ告知文ドラフト (HN / Reddit / X)
+- **Phase 4 ローンチ準備 (進行中)**:
+  - ✅ 法務文書 4 点起草 (`beea7a9`、`docs/templates/legal/`、要 operator + 弁護士レビュー)
+  - ✅ Landing page MVP + 法務 4 ページ HTML 配信 (`65371df`、`apps/web/`、+18 tests)
+  - ⏸ operator: 私書箱代行サービス契約 (P0-1、§6 確認必須)
+  - ⏸ operator: ドメイン名候補 + 商標調査 (P0-2)
+  - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
+  - ⏸ operator: 税理士相談アポ取り (P0-4)
+  - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
+  - ⏸ DNS + Resend ドメイン検証 (P1-2 / P2-2)
+  - ⏸ 法務レビュー結果反映 + landing 公開 (P2-1 / P2-3)
+  - ⏸ Stripe Live activation 申請 (P3-1)
+  - ⏸ デモ動画 + ローンチ告知文 (P4)
+  - ⏸ Sentry コード統合 (任意、operator GO 後)
 
 ## 直近の重要判断
 
