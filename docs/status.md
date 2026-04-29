@@ -90,8 +90,17 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
   - ✅ apps/web に `/checkout/success` `/checkout/cancel` 追加 (`b24de9b`)
   - ✅ operator: ドメイン取得完了 (P0-2、`migrate-bot.dev`、Cloudflare Registrar)
   - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 神戸中央 問い合わせ済、応答待ち)
-  - ⏸ operator: 法務レビュー応答待ち (P0-3、STORIA + ココナラ 2 名 計 3 件 送信済)
-  - ⏸ operator: 税理士相談応答待ち (P0-4、freee 経由で 3 名 送信済 — スタートアップ税理士法人 / BlueWorksTax / ハートランド税理士法人)
+  - ⏸ operator: 法務レビュー応答待ち (P0-3):
+    - 南本町行政書士事務所(ココナラ): **辞退** — 4 文書フルレビューで ¥200K 提示 + 「弁護士の方が合うかも」
+    - Atlas行政書士法人(ココナラ): **辞退** — 詳細不明
+    - STORIA 法律事務所: 応答待ち(GW 明け 5/7 以降見込み)
+    - GVA 法律事務所: 応答待ち(追加送信済、IT/スタートアップ専門)
+    - 法律事務所 ZeLo: 応答待ち(追加送信済、IPO 経験)
+    - → **5 社送信、3 社応答待ち**(行政書士辞退で弁護士に振った形)
+  - ⏸ operator: 税理士相談応答待ち (P0-4、freee 経由で 3 名 送信済)
+    - スタートアップ税理士法人(東京)
+    - BlueWorksTax(東京、IT 特化)
+    - ハートランド税理士法人(大阪、関西で対面可)
   - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
   - ⏸ operator: 税理士相談アポ取り (P0-4)
   - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
