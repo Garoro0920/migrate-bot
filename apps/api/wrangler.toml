@@ -60,7 +60,7 @@ max_concurrency = 3
 # - STRIPE_SECRET_KEY       Stripe secret key (test: sk_test_..., prod: sk_live_...)
 # - STRIPE_WEBHOOK_SECRET   Stripe webhook signing secret (whsec_...)
 # - RESEND_API_KEY          Resend API key
-# - EMAIL_FROM_ADDRESS      "migrate-bot <noreply@<DOMAIN>>"
+# - EMAIL_FROM_ADDRESS      "migrate-bot <noreply@migrate-bot.dev>"
 # 任意:
 # - SENTRY_DSN              Sentry プロジェクトの DSN (未設定なら例外送信を skip)
 
@@ -85,10 +85,10 @@ preview_urls = false
 [env.prod.vars]
 FLY_APP_NAME = "migrate-bot-runner-prod"
 RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-prod:<DEPLOYMENT_TAG>"
-INTERNAL_API_URL = "https://api.<DOMAIN>"
+INTERNAL_API_URL = "https://api.migrate-bot.dev"
 ENVIRONMENT = "prod"
-CHECKOUT_SUCCESS_URL = "https://<DOMAIN>/checkout/success"
-CHECKOUT_CANCEL_URL = "https://<DOMAIN>/checkout/cancel"
+CHECKOUT_SUCCESS_URL = "https://migrate-bot.dev/checkout/success"
+CHECKOUT_CANCEL_URL = "https://migrate-bot.dev/checkout/cancel"
 
 # [[env.prod.d1_databases]]
 # binding = "DB"

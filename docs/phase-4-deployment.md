@@ -78,7 +78,7 @@ CLAUDE.md §6 確認必須項目。
 - `<CONTACT_PHONE>`: 携帯番号 (「請求あり次第開示」運用なら公開せず)
 - `<EFFECTIVE_DATE>`: 公開日 (ISO 8601、例: 2026-05-15)
 - `<GOVERNING_LAW>`: 弁護士確認後の値 (推奨: "Japan")
-- `<DOMAIN>`: §4 で取得したドメイン
+- `migrate-bot.dev`: §4 で取得したドメイン
 
 埋めた後、`apps/web/scripts/embed-legal.mjs` を実行 (or `pnpm build:legal`)
 して `legal-content.gen.ts` を再生成、wrangler deploy。
@@ -100,15 +100,15 @@ CLAUDE.md §6 確認必須 (月額固定費発生)。
 
 ### §4.2 DNS 設定 (Cloudflare Dashboard)
 
-1. landing page (`apps/web`) に apex (`<DOMAIN>`) を割当:
-   - Cloudflare Workers → migrate-bot-web-prod → Custom Domains → Add `<DOMAIN>`
-2. apps/api に subdomain (`api.<DOMAIN>`) を割当:
-   - Cloudflare Workers → migrate-bot-api-prod → Custom Domains → Add `api.<DOMAIN>`
+1. landing page (`apps/web`) に apex (`migrate-bot.dev`) を割当:
+   - Cloudflare Workers → migrate-bot-web-prod → Custom Domains → Add `migrate-bot.dev`
+2. apps/api に subdomain (`api.migrate-bot.dev`) を割当:
+   - Cloudflare Workers → migrate-bot-api-prod → Custom Domains → Add `api.migrate-bot.dev`
 3. 共通 DNS records:
    - MX: `route1.mx.cloudflare.net` priority 50 (Email Routing 用)
    - TXT (SPF): Resend 検証 §5.1 で取得
    - TXT/CNAME (DKIM): Resend 検証 §5.1 で取得
-   - TXT (DMARC): `v=DMARC1; p=none; rua=mailto:dmarc@<DOMAIN>`
+   - TXT (DMARC): `v=DMARC1; p=none; rua=mailto:dmarc@migrate-bot.dev`
 
 ---
 
@@ -116,10 +116,10 @@ CLAUDE.md §6 確認必須 (月額固定費発生)。
 
 ### §5.1 Resend ドメイン検証
 
-1. Resend Dashboard → Domains → Add Domain → `<DOMAIN>` 入力
+1. Resend Dashboard → Domains → Add Domain → `migrate-bot.dev` 入力
 2. 表示される SPF / DKIM レコードを Cloudflare DNS に追加
 3. Resend で Verify ボタン → 数分で Verified
-4. 検証後、`EMAIL_FROM_ADDRESS` を `migrate-bot <noreply@<DOMAIN>>` に変更:
+4. 検証後、`EMAIL_FROM_ADDRESS` を `migrate-bot <noreply@migrate-bot.dev>` に変更:
    ```powershell
    cd apps/api
    corepack pnpm exec wrangler secret put EMAIL_FROM_ADDRESS --env=prod
@@ -128,8 +128,8 @@ CLAUDE.md §6 確認必須 (月額固定費発生)。
 ### §5.2 Cloudflare Email Routing
 
 1. Cloudflare Dashboard → Email → Email Routing → Enable
-2. `support@<DOMAIN>` を operator の Gmail に転送
-3. 同じく `noreply@<DOMAIN>` を operator の Gmail に転送 (送信専用なので受信は不要だが、bounce 受け用)
+2. `support@migrate-bot.dev` を operator の Gmail に転送
+3. 同じく `noreply@migrate-bot.dev` を operator の Gmail に転送 (送信専用なので受信は不要だが、bounce 受け用)
 
 ---
 
@@ -139,7 +139,7 @@ CLAUDE.md §6 確認必須 (月額固定費発生)。
 
 1. https://github.com/settings/apps/new で新規作成
 2. App name: `migrate-bot` (dev は `migrate-bot-dev`、prod は `migrate-bot`)
-3. Webhook URL: `https://api.<DOMAIN>/webhooks/github`
+3. Webhook URL: `https://api.migrate-bot.dev/webhooks/github`
 4. Webhook secret: ランダム 32 byte hex を生成 (dev と別値)
 5. Permissions:
    - Contents: Read and write
@@ -178,7 +178,7 @@ corepack pnpm exec wrangler queues create migrate-bot-jobs-prod
 
 `apps/api/wrangler.toml` の `[env.prod]` 配下のコメントアウトを外し、
 - `<PROD_D1_DATABASE_ID>` を §7.1 で取得した値に置換
-- `<DOMAIN>` を §4 で取得したドメインに置換
+- `migrate-bot.dev` を §4 で取得したドメインに置換
 - `<DEPLOYMENT_TAG>` は §8 deploy 後に置換 (毎 deploy 後の更新が必要)
 
 ### §7.3 prod secrets を設定
@@ -224,10 +224,10 @@ corepack pnpm exec wrangler deploy --env=prod
 corepack pnpm exec wrangler secret put SENTRY_DSN --env=prod
 ```
 
-deploy 後、`api.<DOMAIN>` と `<DOMAIN>` (apex) が稼働していることを確認:
+deploy 後、`api.migrate-bot.dev` と `migrate-bot.dev` (apex) が稼働していることを確認:
 ```powershell
-Invoke-RestMethod https://api.<DOMAIN>/health
-Invoke-RestMethod https://<DOMAIN>/health
+Invoke-RestMethod https://api.migrate-bot.dev/health
+Invoke-RestMethod https://migrate-bot.dev/health
 ```
 
 ---
@@ -282,8 +282,8 @@ flyctl machines destroy <id> --force --app migrate-bot-runner-prod
 ### §9.1 申請 (P3-1)
 
 §3 と §4 と §7.5 完了後、以下を Stripe Dashboard で確認できる状態にする:
-- `https://<DOMAIN>/` で landing page
-- `https://<DOMAIN>/legal/terms` 等で 4 法務文書
+- `https://migrate-bot.dev/` で landing page
+- `https://migrate-bot.dev/legal/terms` 等で 4 法務文書
 - 価格表が landing に表示
 - contact email が footer に表示
 
@@ -294,7 +294,7 @@ flyctl machines destroy <id> --force --app migrate-bot-runner-prod
 
 1. `STRIPE_SECRET_KEY` を Live mode の `sk_live_...` に更新
 2. Stripe Dashboard で本番 webhook endpoint 作成
-   - URL: `https://api.<DOMAIN>/webhooks/stripe`
+   - URL: `https://api.migrate-bot.dev/webhooks/stripe`
    - Events: `checkout.session.completed`, `checkout.session.expired`,
      `charge.refunded`
 3. Webhook secret (`whsec_...`) を `STRIPE_WEBHOOK_SECRET` に登録 (env=prod)
@@ -337,7 +337,7 @@ flyctl secrets set SENTRY_DSN="..." --app migrate-bot-runner-prod  # runner 用 
 ```powershell
 # 例: 存在しない job ID で internal API を叩く
 $token = "<INTERNAL_API_TOKEN>"
-Invoke-RestMethod -Uri "https://api.<DOMAIN>/internal/jobs/nonexistent" `
+Invoke-RestMethod -Uri "https://api.migrate-bot.dev/internal/jobs/nonexistent" `
   -Headers @{ Authorization = "Bearer $token" }
 ```
 

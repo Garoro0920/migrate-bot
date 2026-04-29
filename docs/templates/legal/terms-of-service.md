@@ -10,7 +10,7 @@
 > - `<EFFECTIVE_DATE>` — date this version takes effect
 > - `<GOVERNING_LAW>` — likely Japan (operator is Japan-based) but USD pricing
 >   to global customers complicates jurisdiction; lawyer to confirm
-> - `<DOMAIN>` — production domain once registered
+> - `migrate-bot.dev` — production domain once registered
 
 **Effective date: <EFFECTIVE_DATE>**
 
@@ -184,7 +184,7 @@ court of competent jurisdiction to protect its intellectual property.
 ## 14. Changes to these Terms
 
 We may update these Terms from time to time. The current version is always
-posted at https://<DOMAIN>/terms. Material changes will be announced by
+posted at https://migrate-bot.dev/terms. Material changes will be announced by
 email to active customers at least 14 days before they take effect.
 
 ## 15. Contact

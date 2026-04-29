@@ -176,7 +176,7 @@ court of competent jurisdiction to protect its intellectual property.
 ## 14. Changes to these Terms
 
 We may update these Terms from time to time. The current version is always
-posted at https://<DOMAIN>/terms. Material changes will be announced by
+posted at https://migrate-bot.dev/terms. Material changes will be announced by
 email to active customers at least 14 days before they take effect.
 
 ## 15. Contact
@@ -324,7 +324,7 @@ deletion.
 We may update this policy from time to time. Material changes will be
 announced by email to active customers at least 14 days before they take
 effect. The current version is always posted at
-https://<DOMAIN>/privacy.
+https://migrate-bot.dev/privacy.
 
 ## 10. Contact
 
@@ -408,7 +408,7 @@ applicable consumer-protection laws.
 ## 7. Changes
 
 We may update this Refund Policy from time to time. The current version is
-always posted at https://<DOMAIN>/refunds.
+always posted at https://migrate-bot.dev/refunds.
 `,
   'specified-commercial-transactions': `# 特定商取引法に基づく表記
 
@@ -421,8 +421,8 @@ always posted at https://<DOMAIN>/refunds.
 | **所在地** | <OPERATOR_ADDRESS><br>※請求があった場合に遅滞なく開示します |
 | **電話番号** | <CONTACT_PHONE><br>※請求があった場合に遅滞なく開示します |
 | **メールアドレス** | <CONTACT_EMAIL> |
-| **販売 URL** | https://<DOMAIN> |
-| **販売価格** | 各プラン詳細は https://<DOMAIN>/#pricing に表示。米ドル建て決済。日本円換算は決済時の Stripe レートを適用 |
+| **販売 URL** | https://migrate-bot.dev |
+| **販売価格** | 各プラン詳細は https://migrate-bot.dev/#pricing に表示。米ドル建て決済。日本円換算は決済時の Stripe レートを適用 |
 | **商品代金以外の必要料金** | 銀行送金・カード会社が課す為替手数料・利用料はお客様負担となる場合があります |
 | **支払方法** | クレジットカード(Visa / Mastercard / American Express / JCB / Discover、Stripe 経由) |
 | **支払時期** | 注文時に Stripe Checkout 経由で全額即時決済 |

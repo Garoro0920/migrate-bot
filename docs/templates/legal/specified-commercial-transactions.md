@@ -17,7 +17,7 @@
 >   開示する旨を明記すれば公開を「請求あり次第開示」に絞れる
 > - `<CONTACT_EMAIL>`
 > - `<EFFECTIVE_DATE>`
-> - `<DOMAIN>`
+> - `migrate-bot.dev`
 
 **最終更新: <EFFECTIVE_DATE>**
 
@@ -28,8 +28,8 @@
 | **所在地** | <OPERATOR_ADDRESS><br>※請求があった場合に遅滞なく開示します |
 | **電話番号** | <CONTACT_PHONE><br>※請求があった場合に遅滞なく開示します |
 | **メールアドレス** | <CONTACT_EMAIL> |
-| **販売 URL** | https://<DOMAIN> |
-| **販売価格** | 各プラン詳細は https://<DOMAIN>/#pricing に表示。米ドル建て決済。日本円換算は決済時の Stripe レートを適用 |
+| **販売 URL** | https://migrate-bot.dev |
+| **販売価格** | 各プラン詳細は https://migrate-bot.dev/#pricing に表示。米ドル建て決済。日本円換算は決済時の Stripe レートを適用 |
 | **商品代金以外の必要料金** | 銀行送金・カード会社が課す為替手数料・利用料はお客様負担となる場合があります |
 | **支払方法** | クレジットカード(Visa / Mastercard / American Express / JCB / Discover、Stripe 経由) |
 | **支払時期** | 注文時に Stripe Checkout 経由で全額即時決済 |

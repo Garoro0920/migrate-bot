@@ -121,3 +121,28 @@ describe('GET unknown path', () => {
     expect(html).toContain(`mailto:${ENV.CONTACT_EMAIL}`);
   });
 });
+
+describe('GET /checkout/success', () => {
+  it('returns 200 and confirms payment received', async () => {
+    const app = createApp();
+    const res = await app.request('/checkout/success', {}, ENV);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('Payment received');
+    expect(html).toContain('migration job has started');
+    expect(html).toContain(`mailto:${ENV.CONTACT_EMAIL}`);
+    expect(html).toContain('next build');
+  });
+});
+
+describe('GET /checkout/cancel', () => {
+  it('returns 200 and tells the user no charge was made', async () => {
+    const app = createApp();
+    const res = await app.request('/checkout/cancel', {}, ENV);
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('No charge made');
+    expect(html).toContain('cancelled');
+    expect(html).toContain(ENV.GITHUB_APP_INSTALL_URL);
+  });
+});

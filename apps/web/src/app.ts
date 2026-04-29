@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { renderCheckoutCancel, renderCheckoutSuccess } from './pages/checkout';
 import { renderLanding } from './pages/landing';
 import { renderLegalPage, type LegalSlug } from './pages/legal';
 
@@ -52,6 +53,27 @@ export function createApp(): Hono<AppContext> {
   // GitHub App install URL への redirect (Stripe success/cancel と同様、
   // landing からの CTA で使う短縮 URL)
   app.get('/install', (c) => c.redirect(c.env.GITHUB_APP_INSTALL_URL, 302));
+
+  // Stripe Checkout からのリダイレクト先 (apps/api の wrangler.toml で
+  // CHECKOUT_SUCCESS_URL / CHECKOUT_CANCEL_URL がここを指している)。
+  app.get('/checkout/success', (c) =>
+    c.html(
+      renderCheckoutSuccess({
+        contactEmail: c.env.CONTACT_EMAIL,
+        brandName: c.env.BRAND_NAME,
+        installUrl: c.env.GITHUB_APP_INSTALL_URL,
+      }),
+    ),
+  );
+  app.get('/checkout/cancel', (c) =>
+    c.html(
+      renderCheckoutCancel({
+        contactEmail: c.env.CONTACT_EMAIL,
+        brandName: c.env.BRAND_NAME,
+        installUrl: c.env.GITHUB_APP_INSTALL_URL,
+      }),
+    ),
+  );
 
   app.notFound((c) =>
     c.html(

@@ -5,7 +5,7 @@
 #   1. dev: workers.dev サブドメインで動作確認
 #   2. ドメイン取得後、Cloudflare Dashboard の Custom Domains で
 #      apex (例 migrate-bot.dev) → この Worker にバインド
-#   3. apps/api は api.<DOMAIN> 等のサブドメインに
+#   3. apps/api は api.migrate-bot.dev 等のサブドメインに
 
 name = "migrate-bot-web-dev"
 main = "src/index.ts"
@@ -17,7 +17,7 @@ preview_urls = false
 [vars]
 # GitHub App install URL (operator が App settings から確認した正規の URL に更新)
 GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot-dev/installations/new"
-# サポート連絡用 (Phase 4 のドメイン取得後に support@<DOMAIN> に置換)
+# サポート連絡用 (Phase 4 のドメイン取得後に support@migrate-bot.dev に置換)
 CONTACT_EMAIL = "Ga1or0920.main@gmail.com"
 # landing page で参照されるブランド名
 BRAND_NAME = "migrate-bot"
@@ -32,6 +32,6 @@ preview_urls = false
 
 [env.prod.vars]
 GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot/installations/new"
-CONTACT_EMAIL = "support@<DOMAIN>"
+CONTACT_EMAIL = "support@migrate-bot.dev"
 BRAND_NAME = "migrate-bot"
 ENVIRONMENT = "prod"

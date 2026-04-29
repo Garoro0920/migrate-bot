@@ -6,7 +6,7 @@
 > Placeholders to fill before publishing:
 > - `<CONTACT_EMAIL>`
 > - `<EFFECTIVE_DATE>`
-> - `<DOMAIN>`
+> - `migrate-bot.dev`
 
 **Effective date: <EFFECTIVE_DATE>**
 
@@ -83,4 +83,4 @@ applicable consumer-protection laws.
 ## 7. Changes
 
 We may update this Refund Policy from time to time. The current version is
-always posted at https://<DOMAIN>/refunds.
+always posted at https://migrate-bot.dev/refunds.

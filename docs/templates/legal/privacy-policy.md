@@ -8,7 +8,7 @@
 > - `<OPERATOR_LEGAL_NAME>`
 > - `<CONTACT_EMAIL>` — privacy contact email
 > - `<EFFECTIVE_DATE>`
-> - `<DOMAIN>`
+> - `migrate-bot.dev`
 > - `<OPERATOR_ADDRESS>` — required for APPI / 特商法 (mailbox service is fine)
 
 **Effective date: <EFFECTIVE_DATE>**
@@ -150,7 +150,7 @@ deletion.
 We may update this policy from time to time. Material changes will be
 announced by email to active customers at least 14 days before they take
 effect. The current version is always posted at
-https://<DOMAIN>/privacy.
+https://migrate-bot.dev/privacy.
 
 ## 10. Contact
 
