@@ -88,8 +88,10 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - Foster LLP の MIGRATE は移民法務専用で業種完全に異なる
     - operator が Cloudflare Registrar で取得作業中
   - ✅ apps/web に `/checkout/success` `/checkout/cancel` 追加 (`b24de9b`)
-  - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo WHITE 神戸中央想定、§6 確認必須)
-  - ⏸ operator: ドメイン取得 (P0-2、`migrate-bot.dev` for $12.20/年、§6 承認済)
+  - ✅ operator: ドメイン取得完了 (P0-2、`migrate-bot.dev`、Cloudflare Registrar)
+  - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 神戸中央 問い合わせ済、応答待ち)
+  - ⏸ operator: 法務レビュー応答待ち (P0-3、STORIA + ココナラ 2 名 計 3 件 送信済)
+  - ⏸ operator: 税理士相談応答待ち (P0-4、freee 経由で 3 名 送信済 — スタートアップ税理士法人 / BlueWorksTax / ハートランド税理士法人)
   - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
   - ⏸ operator: 税理士相談アポ取り (P0-4)
   - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
