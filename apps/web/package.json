@@ -1,0 +1,30 @@
+{
+  "name": "@migrate-bot/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:legal": "node scripts/embed-legal.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "predev": "node scripts/embed-legal.mjs",
+    "predeploy": "node scripts/embed-legal.mjs",
+    "pretypecheck": "node scripts/embed-legal.mjs",
+    "pretest": "node scripts/embed-legal.mjs"
+  },
+  "dependencies": {
+    "hono": "4.12.15",
+    "marked": "16.4.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260426.1",
+    "@types/node": "^22",
+    "typescript": "6.0.3",
+    "vitest": "4.1.5",
+    "wrangler": "4.85.0"
+  }
+}

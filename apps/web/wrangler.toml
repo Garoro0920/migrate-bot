@@ -1,0 +1,26 @@
+# Cloudflare Workers 設定 — migrate-bot landing page + 法務文書 公開用。
+# apps/api (バックエンド) とは独立した Worker。
+#
+# Phase 4 の流れ:
+#   1. dev: workers.dev サブドメインで動作確認
+#   2. ドメイン取得後、Cloudflare Dashboard の Custom Domains で
+#      apex (例 migrate-bot.dev) → この Worker にバインド
+#   3. apps/api は api.<DOMAIN> 等のサブドメインに
+
+name = "migrate-bot-web-dev"
+main = "src/index.ts"
+compatibility_date = "2026-04-26"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = false
+
+[vars]
+# GitHub App install URL (operator が App settings から確認した正規の URL に更新)
+GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot-dev/installations/new"
+# サポート連絡用 (Phase 4 のドメイン取得後に support@<DOMAIN> に置換)
+CONTACT_EMAIL = "Ga1or0920.main@gmail.com"
+# landing page で参照されるブランド名
+BRAND_NAME = "migrate-bot"
+
+[env.prod]
+name = "migrate-bot-web-prod"

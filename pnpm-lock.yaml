@@ -117,6 +117,31 @@ importers:
         specifier: 4.1.5
         version: 4.1.5(@types/node@22.19.17)(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(tsx@4.21.0))
 
+  apps/web:
+    dependencies:
+      hono:
+        specifier: 4.12.15
+        version: 4.12.15
+      marked:
+        specifier: 16.4.1
+        version: 16.4.1
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: 4.20260426.1
+        version: 4.20260426.1
+      '@types/node':
+        specifier: ^22
+        version: 22.19.17
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: 4.1.5
+        version: 4.1.5(@types/node@22.19.17)(vite@8.0.10(@types/node@22.19.17)(esbuild@0.27.7)(tsx@4.21.0))
+      wrangler:
+        specifier: 4.85.0
+        version: 4.85.0(@cloudflare/workers-types@4.20260426.1)
+
   packages/agent:
     dependencies:
       '@anthropic-ai/sdk':
@@ -1710,6 +1735,11 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
+  marked@16.4.1:
+    resolution: {integrity: sha512-ntROs7RaN3EvWfy3EZi14H4YxmT6A5YvywfhO+0pm+cH/dnSQRmdAmoFIc3B9aiwTehyk7pESH4ofyBY+V5hZg==}
+    engines: {node: '>= 20'}
+    hasBin: true
+
   mimic-response@3.1.0:
     resolution: {integrity: sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==}
     engines: {node: '>=10'}
@@ -3129,6 +3159,8 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  marked@16.4.1: {}
 
   mimic-response@3.1.0: {}
 
