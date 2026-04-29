@@ -17,6 +17,7 @@
     "pretest": "node scripts/embed-legal.mjs"
   },
   "dependencies": {
+    "@sentry/cloudflare": "^10.50.0",
     "hono": "4.12.15",
     "marked": "16.4.1"
   },

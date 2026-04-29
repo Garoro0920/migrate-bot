@@ -26,6 +26,9 @@
       "better-sqlite3",
       "esbuild",
       "workerd"
-    ]
+    ],
+    "overrides": {
+      "drizzle-orm": "0.45.2"
+    }
   }
 }

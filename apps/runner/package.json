@@ -14,7 +14,8 @@
     "@migrate-bot/db": "workspace:*",
     "@migrate-bot/shared": "workspace:*",
     "@octokit/app": "16.1.2",
-    "@octokit/rest": "22.0.1"
+    "@octokit/rest": "22.0.1",
+    "@sentry/node": "^10.50.0"
   },
   "devDependencies": {
     "@types/node": "^22",

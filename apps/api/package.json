@@ -16,6 +16,7 @@
     "@migrate-bot/db": "workspace:*",
     "@migrate-bot/shared": "workspace:*",
     "@octokit/webhooks": "14.2.0",
+    "@sentry/cloudflare": "^10.50.0",
     "drizzle-orm": "0.45.2",
     "hono": "4.12.15",
     "stripe": "^22.1.0"

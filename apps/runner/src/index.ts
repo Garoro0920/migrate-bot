@@ -5,11 +5,30 @@
 //   - INTERNAL_API_URL   apps/api の origin (https://.../)
 //   - ANTHROPIC_API_KEY  agent 用 (Phase 1 から共通)
 //   - GITHUB_APP_ID, GITHUB_APP_PRIVATE_KEY (Octokit 用)
+//   - SENTRY_DSN        (任意) 例外送信先
 
+import * as Sentry from '@sentry/node';
 import { OctokitAppFactory } from './github';
 import { createInternalApiClient } from './internal-api';
 import { createRealPipeline } from './pipeline';
 import { runJob } from './runner';
+
+// Sentry init は env を読む前に走らせる (env 読み込み中の例外も拾うため)。
+// SENTRY_DSN が無ければ no-op。
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.SENTRY_ENVIRONMENT ?? 'dev',
+    tracesSampleRate: 0.1,
+    sendDefaultPii: false,
+    initialScope: {
+      tags: {
+        jobId: process.env.JOB_ID ?? 'unknown',
+        traceId: process.env.TRACE_ID ?? 'unknown',
+      },
+    },
+  });
+}
 
 interface RunnerEnv {
   readonly JOB_ID: string;
@@ -73,8 +92,13 @@ async function main(): Promise<number> {
 
 main().then(
   (code) => process.exit(code),
-  (err: unknown) => {
+  async (err: unknown) => {
     process.stderr.write(`runner fatal: ${String(err)}\n`);
+    if (process.env.SENTRY_DSN) {
+      Sentry.captureException(err);
+      // flush は send 中に process が exit するのを防ぐ。2s 待って終了。
+      await Sentry.close(2000).catch(() => {});
+    }
     process.exit(1);
   },
 );
