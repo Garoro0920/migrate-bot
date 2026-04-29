@@ -5,6 +5,7 @@ const ENV: AppContext['Bindings'] = {
   GITHUB_APP_INSTALL_URL: 'https://github.com/apps/migrate-bot-test/installations/new',
   CONTACT_EMAIL: 'test@example.com',
   BRAND_NAME: 'migrate-bot',
+  PUBLIC_API_URL: 'https://api.example.com',
 };
 
 describe('GET /health', () => {
@@ -64,6 +65,12 @@ describe('GET /', () => {
   it('includes how-it-works and faq sections', () => {
     expect(html).toContain('id="how-it-works"');
     expect(html).toContain('id="faq"');
+  });
+  it('includes the pricing estimator section', () => {
+    expect(html).toContain('id="estimator"');
+    expect(html).toContain('id="estimator-form"');
+    expect(html).toContain(ENV.PUBLIC_API_URL);
+    expect(html).toContain('/pricing/estimate?repo=');
   });
 });
 

@@ -22,6 +22,8 @@ CONTACT_EMAIL = "Ga1or0920.main@gmail.com"
 # landing page で参照されるブランド名
 BRAND_NAME = "migrate-bot"
 ENVIRONMENT = "dev"
+# 公開 API base URL (landing の見積もりフォームから fetch する先)
+PUBLIC_API_URL = "https://migrate-bot-api-dev.ga1or0920-main.workers.dev"
 
 # Phase 4 ローンチ用の prod environment (詳細は docs/phase-4-deployment.md)。
 # 公開後は custom domain (apex) でアクセス。
@@ -35,3 +37,4 @@ GITHUB_APP_INSTALL_URL = "https://github.com/apps/migrate-bot/installations/new"
 CONTACT_EMAIL = "support@migrate-bot.dev"
 BRAND_NAME = "migrate-bot"
 ENVIRONMENT = "prod"
+PUBLIC_API_URL = "https://api.migrate-bot.dev"

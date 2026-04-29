@@ -7,6 +7,7 @@ export interface LandingOptions {
   readonly installUrl: string;
   readonly contactEmail: string;
   readonly brandName: string;
+  readonly publicApiUrl: string;
 }
 
 export function renderLanding(opts: LandingOptions): string {
@@ -14,6 +15,7 @@ export function renderLanding(opts: LandingOptions): string {
     renderHero(opts),
     renderTrustBar(),
     renderHowItWorks(),
+    renderEstimator(opts),
     renderPricing(opts),
     renderFaq(opts),
     renderCta(opts),
@@ -114,6 +116,77 @@ function renderHowItWorks(): string {
           </p>
         </div>
       </div>
+    </section>
+  `;
+}
+
+function renderEstimator(opts: LandingOptions): string {
+  return `
+    <section id="estimator" class="px-6 py-20 max-w-3xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center">Estimate your repo</h2>
+      <p class="mt-3 text-center text-slate-400">
+        Public GitHub repos only. We count files under <code class="bg-slate-800 px-1 rounded">pages/</code> and <code class="bg-slate-800 px-1 rounded">components/</code> to predict your plan.
+      </p>
+      <form id="estimator-form" class="mt-8 flex flex-col sm:flex-row gap-3">
+        <input
+          id="estimator-input"
+          type="text"
+          required
+          placeholder="vercel/next.js or owner/repo"
+          pattern="[A-Za-z0-9._-]+/[A-Za-z0-9._-]+"
+          class="flex-1 rounded-md border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-400"
+        />
+        <button
+          type="submit"
+          class="rounded-md bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-3 font-semibold whitespace-nowrap"
+        >Estimate</button>
+      </form>
+      <div id="estimator-result" class="mt-6 min-h-[60px]"></div>
+      <script>
+        (() => {
+          const form = document.getElementById('estimator-form');
+          const input = document.getElementById('estimator-input');
+          const out = document.getElementById('estimator-result');
+          const apiBase = ${JSON.stringify(opts.publicApiUrl)};
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const repo = input.value.trim();
+            if (!repo) return;
+            out.innerHTML = '<p class="text-slate-400 text-sm">Estimating…</p>';
+            try {
+              const res = await fetch(apiBase + '/pricing/estimate?repo=' + encodeURIComponent(repo));
+              const body = await res.json();
+              if (!res.ok) {
+                out.innerHTML = '<p class="text-amber-400 text-sm">' + (body.error || 'Error') + '</p>';
+                return;
+              }
+              const planBadge = {
+                small: 'bg-emerald-500/15 text-emerald-300',
+                medium: 'bg-indigo-500/15 text-indigo-300',
+                large: 'bg-violet-500/15 text-violet-300',
+                enterprise: 'bg-amber-500/15 text-amber-300',
+              }[body.plan] || 'bg-slate-700 text-slate-200';
+              const priceText = body.plan === 'enterprise'
+                ? '<span class="text-sm text-slate-400">Custom quote</span>'
+                : '<span class="text-2xl font-bold">$' + body.priceUsd + '</span>';
+              const truncatedNote = body.truncated
+                ? '<p class="mt-2 text-xs text-amber-400">Note: GitHub truncated the file tree; count is a lower bound.</p>'
+                : '';
+              out.innerHTML =
+                '<div class="rounded-xl border border-slate-800 bg-slate-900/50 p-6">' +
+                  '<div class="flex flex-wrap items-center gap-3">' +
+                    '<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ' + planBadge + '">' + body.plan + '</span>' +
+                    '<span class="text-slate-300">' + body.fileCount + ' files in pages/ + components/</span>' +
+                  '</div>' +
+                  '<div class="mt-4">' + priceText + '</div>' +
+                  truncatedNote +
+                '</div>';
+            } catch (err) {
+              out.innerHTML = '<p class="text-amber-400 text-sm">Network error: ' + err.message + '</p>';
+            }
+          });
+        })();
+      </script>
     </section>
   `;
 }

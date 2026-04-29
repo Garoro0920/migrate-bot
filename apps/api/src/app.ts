@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { type AdminContext, createAdminRouter } from './routes/admin';
 import { type CheckoutContext, createCheckoutRouter } from './routes/checkout';
 import { createInternalRouter, type InternalContext } from './routes/internal';
+import { createPricingRouter, type PricingContext } from './routes/pricing';
 import {
   createStripeWebhookRouter,
   type StripeWebhookContext,
@@ -15,12 +16,14 @@ export interface AppEnv {
     AdminContext['Bindings'] &
     InternalContext['Bindings'] &
     CheckoutContext['Bindings'] &
-    StripeWebhookContext['Bindings'];
+    StripeWebhookContext['Bindings'] &
+    PricingContext['Bindings'];
   Variables: GitHubWebhookContext['Variables'] &
     AdminContext['Variables'] &
     InternalContext['Variables'] &
     CheckoutContext['Variables'] &
-    StripeWebhookContext['Variables'];
+    StripeWebhookContext['Variables'] &
+    PricingContext['Variables'];
 }
 
 export function createApp(): Hono<AppEnv> {
@@ -34,6 +37,7 @@ export function createApp(): Hono<AppEnv> {
   app.route('/internal', createInternalRouter());
   app.route('/checkout', createCheckoutRouter());
   app.route('/webhooks/stripe', createStripeWebhookRouter());
+  app.route('/pricing', createPricingRouter());
 
   app.notFound((c) => c.json({ error: 'not found' }, 404));
 

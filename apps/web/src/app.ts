@@ -8,6 +8,7 @@ export interface WebEnv {
   readonly GITHUB_APP_INSTALL_URL: string;
   readonly CONTACT_EMAIL: string;
   readonly BRAND_NAME: string;
+  readonly PUBLIC_API_URL: string;
 }
 
 export interface AppContext {
@@ -32,6 +33,7 @@ export function createApp(): Hono<AppContext> {
         installUrl: c.env.GITHUB_APP_INSTALL_URL,
         contactEmail: c.env.CONTACT_EMAIL,
         brandName: c.env.BRAND_NAME,
+        publicApiUrl: c.env.PUBLIC_API_URL,
       }),
     );
   });
