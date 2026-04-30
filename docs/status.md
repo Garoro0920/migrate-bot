@@ -104,6 +104,15 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - `docs/legal-self-review-log.md` 新規作成 — 引用一次資料、pass 別作業記録、残存リスク、運用指針、将来弁護士レビュー時の引継ぎ事項
     - EEA/UK/CH 居住者拒否を 4 段防御で実装 (ToS §2 / Stripe Checkout custom_text / billing_address required / Landing 注記)
     - 残課題: 売上発生後 (月商 ¥10 万到達等) に弁護士レビュー予算化、6 ヶ月後に PPC ガイド最新版で再点検
+  - ✅ **prod E2E 完走** (2026-04-30、PR #6 作成):
+    - apps/api Worker deploy + Custom Domain 紐付け (`api.migrate-bot.dev`)
+    - apps/web Worker deploy + Custom Domain 紐付け (`migrate-bot.dev`)
+    - Resend ドメイン検証 + DKIM/SPF/DMARC + Cloudflare Email Routing (support@ / noreply@)
+    - Stripe Test webhook endpoint + STRIPE_WEBHOOK_SECRET prod 値
+    - EMAIL_FROM_ADDRESS = `migrate-bot <noreply@migrate-bot.dev>`
+    - admin/trigger → Queue → Fly machine → agent → draft PR + email まで完走 (1分35秒)
+    - 失敗 → 解決した tricky issue: **Fly app secret は Worker config.env を override する仕様**。Fly secret の値が Worker と一致していないと runner で env が空に見える。両方を同じ hex で再設定して解消 (`22a6d5b` 診断 log clean up)
+    - 既知の改善余地: machine が `sjc` region で起動 (Fly app primary_region 未設定、想定は nrt)。レイテンシ影響あるが機能はする → launch 後の改善
   - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 条件了承の返信送信済、契約は launch 1〜2 週間前)
   - ⏹ operator: 法務レビュー応答待ち (P0-3) — **Case C 採択により 不要化**:
     - 5 社送信、4 社辞退 (南本町 / Atlas / STORIA / GVA)、ZeLo のみ応答待ちだったが Case C で全 close 済
