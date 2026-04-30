@@ -11,12 +11,16 @@ export interface LayoutOptions {
   readonly contactEmail: string;
   readonly content: string; // 既に HTML 化された本文 (raw で埋め込む)
   readonly canonicalPath?: string;
+  // Karigo (神戸中央) 私書箱の住所を載せる法務ページは検索 index 不可。
+  // true なら robots meta を noindex,nofollow に切り替える。default false。
+  readonly noIndex?: boolean;
 }
 
 export function renderLayout(opts: LayoutOptions): string {
   const description =
     opts.description ??
     `${opts.brandName}: Next.js Pages Router → App Router migration as a single draft pull request.`;
+  const robots = opts.noIndex === true ? 'noindex, nofollow' : 'index, follow';
   return html`<!doctype html>
 <html lang="en">
   <head>
@@ -24,7 +28,7 @@ export function renderLayout(opts: LayoutOptions): string {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${opts.title}</title>
     <meta name="description" content="${description}" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="${robots}" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🤖%3C/text%3E%3C/svg%3E"

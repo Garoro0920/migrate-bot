@@ -72,6 +72,9 @@ describe('GET /', () => {
     expect(html).toContain(ENV.PUBLIC_API_URL);
     expect(html).toContain('/pricing/estimate?repo=');
   });
+  it('landing page is indexable by search engines', () => {
+    expect(html).toContain('name="robots" content="index, follow"');
+  });
 });
 
 describe('GET /install', () => {
@@ -115,6 +118,22 @@ describe('GET /legal/:slug', () => {
     const html = await res.text();
     expect(html).toContain('14');
     expect(html).toContain('next build');
+  });
+
+  // Karigo (神戸中央) 私書箱の利用条件 — 住所が表示されるページは検索 index 不可。
+  // 住所は §特定商取引法 ページ にのみ表示されるが、運用上 4 法務ページ全部に
+  // noindex を付与しておく (将来別ページに住所を追加しても安全)。
+  it.each([
+    '/legal/terms',
+    '/legal/privacy',
+    '/legal/refunds',
+    '/legal/specified-commercial-transactions',
+  ])('%s is excluded from search engine indexing', async (path) => {
+    const app = createApp();
+    const res = await app.request(path, {}, ENV);
+    const html = await res.text();
+    expect(html).toContain('name="robots" content="noindex, nofollow"');
+    expect(html).not.toContain('name="robots" content="index, follow"');
   });
 });
 

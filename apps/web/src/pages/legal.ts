@@ -64,6 +64,9 @@ export function renderLegalPage(opts: LegalPageOptions): string {
     brandName: opts.brandName,
     contactEmail: opts.contactEmail,
     content,
+    // 私書箱 (Karigo 神戸中央) の運用条件: 住所が掲載される法務ページは
+    // 検索 index 不可。robots meta で noindex,nofollow を返す。
+    noIndex: true,
   });
 }
 
