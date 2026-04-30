@@ -90,19 +90,20 @@ ENVIRONMENT = "prod"
 CHECKOUT_SUCCESS_URL = "https://migrate-bot.dev/checkout/success"
 CHECKOUT_CANCEL_URL = "https://migrate-bot.dev/checkout/cancel"
 
-# [[env.prod.d1_databases]]
-# binding = "DB"
-# database_name = "migrate-bot-prod"
-# database_id = "<PROD_D1_DATABASE_ID>"  # wrangler d1 create migrate-bot-prod の出力
-# migrations_dir = "../../packages/db/migrations"
+# 2026-04-30 wrangler d1 create migrate-bot-prod / queues create migrate-bot-jobs-prod 実施済。
+[[env.prod.d1_databases]]
+binding = "DB"
+database_name = "migrate-bot-prod"
+database_id = "d65c36a6-130e-4c95-99c2-ef02e3590447"
+migrations_dir = "../../packages/db/migrations"
 
-# [[env.prod.queues.producers]]
-# binding = "JOBS_QUEUE"
-# queue = "migrate-bot-jobs-prod"
+[[env.prod.queues.producers]]
+binding = "JOBS_QUEUE"
+queue = "migrate-bot-jobs-prod"
 
-# [[env.prod.queues.consumers]]
-# queue = "migrate-bot-jobs-prod"
-# max_batch_size = 1
-# max_batch_timeout = 30
-# max_retries = 3
-# max_concurrency = 3
+[[env.prod.queues.consumers]]
+queue = "migrate-bot-jobs-prod"
+max_batch_size = 1
+max_batch_timeout = 30
+max_retries = 3
+max_concurrency = 3
