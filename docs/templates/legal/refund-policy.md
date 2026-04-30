@@ -35,7 +35,8 @@ clear within 5–10 business days depending on your card issuer.
 
 ## 2. Not refund-eligible
 
-The following situations are **not** eligible for refund:
+Subject to Section 2A below, the following situations are **not**
+eligible for refund:
 
 - The CI / typecheck / build failures arise from changes you made to your
   repository after our migration job ran (including custom tests we did
@@ -49,10 +50,39 @@ The following situations are **not** eligible for refund:
 - You requested cancellation but the migration job had already completed
   successfully.
 
+## 2A. Carve-out for our intentional misconduct, gross negligence, or non-conformance
+
+Notwithstanding Section 2 and Section 3, the limitations in this Refund
+Policy do **not** apply to and do **not** waive any of the following:
+
+- Damage caused by **our intentional misconduct or gross negligence
+  (故意又は重大な過失)**;
+- A **non-conformance with the contract (契約不適合)** in the migration
+  output that exists at the time of delivery and that is attributable to
+  the Service. In such a case, you retain your rights under Civil Code
+  Articles 562 through 564 (代金減額請求権・履行追完請求権・解除権)
+  and equivalent statutory remedies, regardless of the outcome of our
+  automated verification step;
+- For Japan-resident consumer customers, any right under the Consumer
+  Contract Act (消費者契約法), including without limitation Articles
+  8, 8-2, 9, and 10. This Refund Policy is to be construed and applied
+  consistently with those provisions and shall not operate to
+  invalidate the consumer's statutory rights.
+
+If you believe Section 2A applies to your situation, contact
+<CONTACT_EMAIL> with the order details and a description of the
+non-conformance. We will respond within 2 business days and, where
+your claim is well-founded, issue a full or partial refund (or other
+remedy) consistent with applicable law.
+
 ## 3. Partial refunds
 
-We do not issue partial refunds. The unit of sale is the migration job; we
-either deliver a working draft PR or we refund the entire order price.
+As a general matter we do not issue partial refunds; the unit of sale is
+the migration job and we either deliver a working draft PR or refund the
+entire order price. **However, this Section 3 does not limit any right
+to partial-price reduction (代金減額請求権) under Civil Code Articles
+562–564 in cases of contract non-conformance, nor any other partial
+remedy required by applicable consumer-protection law.**
 
 ## 4. Cancellation before job completion
 

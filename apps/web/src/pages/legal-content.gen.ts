@@ -35,6 +35,11 @@ You represent that:
 - You are not a competitor of the Service intending to reverse-engineer it.
 - You will not use the Service from a country subject to a comprehensive U.S.
   trade embargo.
+- **You are not a resident of, and do not access the Service from, the
+  European Economic Area (EEA), the United Kingdom, or Switzerland.** The
+  Service is not currently offered to residents of those jurisdictions.
+  If you are unsure whether this restriction applies to you, please contact
+  us at <CONTACT_EMAIL> before paying.
 
 You are responsible for the security of your GitHub account and the
 correctness of your billing information.
@@ -127,38 +132,63 @@ but we will work in good faith to address service incidents.
 
 ## 9. Service availability and disclaimers
 
-THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY
-KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+The Service is provided on an "as is" and "as available" basis. Except to
+the extent prohibited by applicable consumer-protection law (including, for
+Japan-resident customers, the Consumer Contract Act, Articles 8 through
+10), we make no express or implied warranty of merchantability, fitness for
+a particular purpose, or non-infringement.
 
-We do not warrant that the migrated output will be free of bugs, will compile
-in every environment, or will be functionally identical to your original
-codebase. The output is provided as a *draft* pull request specifically so
-that you can review and adjust before merging.
+We do not warrant that the migrated output will be free of bugs, will
+compile in every environment, or will be functionally identical to your
+original codebase. The output is provided as a *draft* pull request
+specifically so that you can review and adjust before merging.
+
+**Nothing in this section excludes or limits our liability for damages
+caused by our intentional misconduct or gross negligence (故意又は重大な
+過失). The limitations in this Section 9 and Section 10 apply only to
+ordinary negligence (軽過失) and to the maximum extent permitted by
+applicable law.**
 
 ## 10. Limitation of liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL CUMULATIVE LIABILITY UNDER
-THESE TERMS SHALL NOT EXCEED THE AMOUNT YOU PAID US FOR THE INDIVIDUAL
-MIGRATION ORDER GIVING RISE TO THE CLAIM.
+Subject to Section 9 and to applicable consumer-protection law, our total
+cumulative liability under these Terms for any claim arising out of or
+relating to a particular migration order shall not exceed the amount you
+paid us for that order.
 
-WE WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR
-EXEMPLARY DAMAGES, INCLUDING WITHOUT LIMITATION LOST PROFITS, LOST DATA,
-LOST GOODWILL, OR BUSINESS INTERRUPTION, EVEN IF WE HAVE BEEN ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGES.
+To the maximum extent permitted by applicable law and except in the case
+of our intentional misconduct or gross negligence, we will not be liable
+for indirect, incidental, consequential, special, or exemplary damages,
+including without limitation lost profits, lost data, lost goodwill, or
+business interruption, even if we have been advised of the possibility of
+such damages.
 
-Some jurisdictions do not allow the exclusion or limitation of certain
-damages; these provisions shall apply to the maximum extent permitted by
-applicable law.
+**For Japan-resident consumer customers**: Pursuant to the Consumer
+Contract Act (消費者契約法) Articles 8 and 10, none of the limitations
+in this Section 10 shall apply where they would void the limitation
+under those Articles. In particular, this Section 10 does not exclude
+liability arising from our intentional misconduct or gross negligence,
+and does not impose any obligation that would unilaterally harm consumer
+interests in violation of Civil Code Article 1, Paragraph 2.
 
 ## 11. Indemnification
 
-You agree to indemnify and hold us harmless from claims, damages, and
-expenses (including reasonable attorneys' fees) arising from:
+To the extent permitted by applicable law, and only where you have acted
+intentionally or with negligence, you agree to indemnify and hold us
+harmless from third-party claims, damages, and reasonable expenses
+arising from:
 
-- Your breach of these Terms;
-- Your content or repository (including infringement of third-party rights);
-- Your violation of applicable law in connection with the Service.
+- Your material breach of these Terms;
+- Your repository content infringing on third-party rights or violating
+  applicable law (where you knew or should have known of the violation);
+- Your unauthorized or unlawful use of the Service.
+
+This Section 11 does not apply to claims caused in whole or in part by
+our intentional misconduct or gross negligence. For Japan-resident
+consumer customers, this Section 11 is to be construed and applied
+consistently with the Consumer Contract Act, Article 10, and shall not
+operate to unilaterally harm consumer interests beyond what general law
+would impose.
 
 ## 12. Termination
 
@@ -168,10 +198,21 @@ required by law. Sections 7, 9, 10, 11, and 13 survive termination.
 
 ## 13. Governing law and disputes
 
-These Terms are governed by the laws of <GOVERNING_LAW>, without regard to
-conflict-of-law principles. Any dispute will be resolved in the courts of
-<GOVERNING_LAW>, except that either party may seek equitable relief in any
-court of competent jurisdiction to protect its intellectual property.
+These Terms are governed by the laws of Japan, without regard to
+conflict-of-law principles. The Tokyo District Court (東京地方裁判所)
+shall have non-exclusive jurisdiction as the court of first instance for
+any dispute arising out of or in connection with these Terms or the
+Service.
+
+**For Japan-resident consumer customers**: Notwithstanding the above,
+nothing in this Section 13 limits a consumer's right under the Code of
+Civil Procedure (民事訴訟法) Article 3-4 to bring proceedings in the
+courts of the place of the consumer's domicile at the time of contract
+formation, or to invoke any other consumer-protection forum granted by
+Japanese law.
+
+Either party may seek equitable relief in any court of competent
+jurisdiction to protect its intellectual property.
 
 ## 14. Changes to these Terms
 
@@ -239,21 +280,45 @@ advertising.
 
 ## 3. Subprocessors
 
-We use the following third-party processors, each governed by their own
-privacy policy:
+We use the following third-party processors to operate the Service.
 
-| Subprocessor | Purpose | Data shared |
-|---|---|---|
-| Anthropic, PBC | LLM-based code transformation | Source file contents (during job) |
-| GitHub, Inc. | Repository hosting, App auth, PR creation | GitHub installation context, branch and PR metadata |
-| Stripe, Inc. | Payment processing | Customer email, billing details |
-| Cloudflare, Inc. | Web hosting, queue, database | All non-payment service data |
-| Fly.io | Job execution VM | Source code (during job only) |
-| Resend, Inc. | Transactional email delivery | Customer email and message content |
+**Legal characterization under APPI**: We engage each of the
+subprocessors below **as 委託 (entrustment of handling) under Japan's
+Act on the Protection of Personal Information (個人情報保護法) Article
+27, Paragraph 5, Item 1**. We do not provide your personal information
+to these subprocessors as third-party provision (第三者提供) requiring
+separate consent under APPI Article 27. Each subprocessor processes
+data on our instructions and for our purposes only, and we exercise the
+supervision required by APPI Article 25 (consignor's supervision
+obligation, 委託先監督義務) — including selecting subprocessors who
+publish DPAs and security certifications, and reviewing those terms
+before engagement.
 
-Anthropic's API terms (as of this policy's effective date) state that data
-sent to the Claude API is not used for model training. We rely on this
-contractual commitment.
+**Cross-border disclosure under APPI Article 28 / Rule 17**: Because
+these subprocessors are located outside Japan, the entrustment is also a
+cross-border transfer governed by APPI Article 28. The table below
+discloses, for each subprocessor: (i) the subprocessor's location, (ii)
+the personal-information protection regime of that location, and (iii)
+the protective measures the subprocessor has committed to, in accordance
+with APPI Rule 17, Paragraph 2.
+
+By using the Service you provide consent to (a) our entrustment of your
+personal information to the subprocessors below for the purposes
+described, and (b) the cross-border transfer of that information to the
+locations identified.
+
+| Subprocessor | Location | Purpose / data shared | Protection regime in that country | Subprocessor's protective measures |
+|---|---|---|---|---|
+| **Anthropic, PBC** | United States (operations); Republic of Ireland (DPA governing law for the EU SCC module) | LLM-based code transformation. Source file contents are sent during a job and are not retained on the API after the request completes. | The United States does not have a comprehensive federal personal-information protection statute equivalent to Japan's APPI; protection is provided through sectoral and state laws (e.g., the California Consumer Privacy Act). U.S. government agencies retain certain investigative powers over data held in the U.S. | Anthropic's Data Processing Addendum incorporates the EU Standard Contractual Clauses (Module 2 / Module 3) by reference. Anthropic's API terms contractually prohibit using API inputs to train models. Anthropic deletes API request payloads after processing except as required to operate the service or by law. |
+| **GitHub, Inc.** | United States | Repository hosting, App authentication, draft PR creation. Receives the GitHub installation context, branch and PR metadata, and the migration commits (which are derived from your repository content). | Same as above — sectoral / state regime in the U.S. | GitHub publishes a Data Protection Addendum incorporating EU SCCs and is ISO 27001 / SOC 2 certified. |
+| **Stripe, Inc.** | United States | Payment processing. Stripe receives customer email, billing details, and card data. We never see or store card numbers, CVC, or expiration. | Same as above. | Stripe is PCI DSS Level 1 certified and incorporates EU SCCs in its DPA. |
+| **Cloudflare, Inc.** | United States (HQ); global edge / Workers may execute in any region | Web hosting, queue, primary database (D1). Receives all non-payment service data and operational logs. | Same as above. | Cloudflare publishes a DPA incorporating EU SCCs and is ISO 27001 / SOC 2 / PCI DSS certified. D1 data is stored in a region we select (currently APAC for prod). |
+| **Fly.io** | United States | Job execution VM. The temporary VM clones your repository, runs the agent, and is destroyed at job end (typically minutes). | Same as above. | Fly.io publishes a DPA. VMs are isolated per job; secrets injected at boot and not persisted to image. |
+| **Resend, Inc.** | United States | Transactional email delivery. Receives the recipient email address and the message content (order confirmation, PR-ready notification, refund notification). | Same as above. | Resend publishes a DPA and incorporates EU SCCs. |
+
+If you do not consent to the entrustment and cross-border transfer
+described in this Section 3, please do not use the Service. To withdraw
+consent and request deletion after the fact, see Section 7.
 
 ## 4. Data retention
 
@@ -267,14 +332,29 @@ contractual commitment.
 
 ## 5. International data transfers
 
-Our infrastructure runs primarily on Cloudflare and Fly.io, which operate
-globally. Data may be processed in regions outside your country of
-residence, including the United States. We rely on the Standard Contractual
-Clauses or equivalent transfer mechanisms offered by our subprocessors.
+The Service is operated from Japan, but processing occurs in the United
+States and at globally distributed edge locations operated by our
+subprocessors (see Section 3 for the country-by-country breakdown).
 
-If you require data residency in a specific region (e.g., EU only), please
-contact <CONTACT_EMAIL> before paying. Some plans may not be available
-under residency restrictions.
+For Japan-resident users, by using the Service you provide consent under
+APPI Article 28 to the cross-border transfer of your personal information
+to the subprocessors and locations identified in Section 3. The
+country-of-location, the protection regime of that country, and the
+specific protective measures of each subprocessor are disclosed in
+Section 3 in accordance with APPI Rule 17.
+
+**The Service is not currently offered to residents of the European
+Economic Area, the United Kingdom, or Switzerland** (see Terms of Service
+Section 2). Accordingly, we do not undertake processing operations that
+would bring this Service within the territorial scope of the GDPR or the
+UK / Swiss equivalents. If you believe you have used the Service from one
+of those jurisdictions in error, please contact <CONTACT_EMAIL> and we
+will delete your data and refund any payment.
+
+If you are a resident of a jurisdiction whose law restricts cross-border
+transfer of personal data and you require data residency in a specific
+region, please contact <CONTACT_EMAIL> before paying. We may not be able
+to support every residency requirement.
 
 ## 6. Security
 
@@ -301,16 +381,32 @@ Depending on your jurisdiction, you may have the right to:
 To exercise any of these rights, contact <CONTACT_EMAIL>. We will respond
 within 30 days (or sooner where required by applicable law).
 
-For California residents (CCPA): we do not sell personal information. You
-have rights to know, delete, and opt out (no sale to opt out from).
+**For California residents (CCPA / CPRA)**: we do not sell or share your
+personal information for cross-context behavioral advertising. You have
+the right to know, delete, correct, and limit use of sensitive personal
+information.
 
-For EU/UK residents (GDPR): we process data under the legal bases of
-**contract performance** (to provide the Service you paid for) and
-**legitimate interest** (security and abuse prevention).
+**For EU / UK / Switzerland residents**: as stated above and in the
+Terms of Service Section 2, the Service is not offered to residents of
+these jurisdictions at this time.
 
-For Japan residents (個人情報保護法 / APPI): for inquiries please contact
-<CONTACT_EMAIL>. Our 個人情報取扱事業者 representative is
-<OPERATOR_LEGAL_NAME>, <OPERATOR_ADDRESS>.
+**For Japan residents (個人情報保護法 / APPI)**: the personal-information
+handling business operator (個人情報取扱事業者) is <OPERATOR_LEGAL_NAME>,
+<OPERATOR_ADDRESS>. You may request, with respect to your personal
+information that we hold (保有個人データ), (i) disclosure of the
+purpose-of-use, (ii) disclosure of the data itself, (iii) correction
+of inaccurate data, (iv) suspension of use or erasure where the
+data was acquired or used in violation of law, and (v) suspension
+of provision to third parties under APPI Articles 32–35. To make
+such a request, please email <CONTACT_EMAIL>. We will respond
+without delay (and in any case within 30 days) after verifying your
+identity. We may charge a reasonable fee for disclosure as permitted
+by APPI Rule.
+
+The complaint-handling contact for personal-information matters is
+<CONTACT_EMAIL>. The competent supervisory authority is the
+Personal Information Protection Commission (個人情報保護委員会,
+<https://www.ppc.go.jp/>).
 
 ## 8. Children's privacy
 
@@ -360,7 +456,8 @@ clear within 5–10 business days depending on your card issuer.
 
 ## 2. Not refund-eligible
 
-The following situations are **not** eligible for refund:
+Subject to Section 2A below, the following situations are **not**
+eligible for refund:
 
 - The CI / typecheck / build failures arise from changes you made to your
   repository after our migration job ran (including custom tests we did
@@ -374,10 +471,39 @@ The following situations are **not** eligible for refund:
 - You requested cancellation but the migration job had already completed
   successfully.
 
+## 2A. Carve-out for our intentional misconduct, gross negligence, or non-conformance
+
+Notwithstanding Section 2 and Section 3, the limitations in this Refund
+Policy do **not** apply to and do **not** waive any of the following:
+
+- Damage caused by **our intentional misconduct or gross negligence
+  (故意又は重大な過失)**;
+- A **non-conformance with the contract (契約不適合)** in the migration
+  output that exists at the time of delivery and that is attributable to
+  the Service. In such a case, you retain your rights under Civil Code
+  Articles 562 through 564 (代金減額請求権・履行追完請求権・解除権)
+  and equivalent statutory remedies, regardless of the outcome of our
+  automated verification step;
+- For Japan-resident consumer customers, any right under the Consumer
+  Contract Act (消費者契約法), including without limitation Articles
+  8, 8-2, 9, and 10. This Refund Policy is to be construed and applied
+  consistently with those provisions and shall not operate to
+  invalidate the consumer's statutory rights.
+
+If you believe Section 2A applies to your situation, contact
+<CONTACT_EMAIL> with the order details and a description of the
+non-conformance. We will respond within 2 business days and, where
+your claim is well-founded, issue a full or partial refund (or other
+remedy) consistent with applicable law.
+
 ## 3. Partial refunds
 
-We do not issue partial refunds. The unit of sale is the migration job; we
-either deliver a working draft PR or we refund the entire order price.
+As a general matter we do not issue partial refunds; the unit of sale is
+the migration job and we either deliver a working draft PR or refund the
+entire order price. **However, this Section 3 does not limit any right
+to partial-price reduction (代金減額請求権) under Civil Code Articles
+562–564 in cases of contract non-conformance, nor any other partial
+remedy required by applicable consumer-protection law.**
 
 ## 4. Cancellation before job completion
 
@@ -418,18 +544,21 @@ always posted at https://migrate-bot.dev/refunds.
 |---|---|
 | **販売事業者の名称** | <OPERATOR_LEGAL_NAME> |
 | **代表者の氏名** | <OPERATOR_LEGAL_NAME> |
-| **所在地** | <OPERATOR_ADDRESS><br>※請求があった場合に遅滞なく開示します |
-| **電話番号** | <CONTACT_PHONE><br>※請求があった場合に遅滞なく開示します |
+| **業務責任者** | <OPERATOR_LEGAL_NAME>(事業主本人) |
+| **所在地** | <OPERATOR_ADDRESS> |
+| **電話番号** | お客様からのご請求があった場合、<CONTACT_EMAIL> 宛のメール受領から **7 日以内** に書面又は電子メールにて遅滞なく開示します。通常時の非開示は、個人事業主のプライバシー保護を目的とした運用です |
 | **メールアドレス** | <CONTACT_EMAIL> |
 | **販売 URL** | https://migrate-bot.dev |
-| **販売価格** | 各プラン詳細は https://migrate-bot.dev/#pricing に表示。米ドル建て決済。日本円換算は決済時の Stripe レートを適用 |
-| **商品代金以外の必要料金** | 銀行送金・カード会社が課す為替手数料・利用料はお客様負担となる場合があります |
-| **支払方法** | クレジットカード(Visa / Mastercard / American Express / JCB / Discover、Stripe 経由) |
-| **支払時期** | 注文時に Stripe Checkout 経由で全額即時決済 |
-| **役務の提供時期** | 注文(決済成功)後、ほぼ自動で開始されます。完了までの目安時間は対象リポジトリの規模により 5〜30 分程度です。完了時に登録メールアドレス宛にお知らせします |
-| **返品・キャンセルの可否および条件** | 本サービスはカスタマイズされたデジタルサービスであり、原則として役務提供完了後の返品・キャンセルはお受けできません。<br>ただし**当社側の不具合によりサービスを完了できなかった場合**は決済日から 14 日以内のご連絡で全額返金します。詳細は[返金ポリシー](./refund-policy.md)を参照ください |
-| **動作環境** | お客様の Next.js リポジトリが Pages Router で記述されていること、 GitHub に存在すること、当社の GitHub App をインストール可能であることが前提です。詳細は[利用規約](./terms-of-service.md) §2、§4 を参照 |
-| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](./refund-policy.md)に従い全額返金します。提供物そのものに不適合があった場合は <CONTACT_EMAIL> までご連絡ください |
+| **販売価格** | 各プランの価格(米ドル建て)および日本円での参考換算額: <br>・Small: $99(参考: 約 ¥14,800、為替レートにより変動)<br>・Medium: $249(参考: 約 ¥37,400、為替レートにより変動)<br>・Large: $499(参考: 約 ¥74,800、為替レートにより変動)<br>・Enterprise: 個別見積り<br>決済はすべて米ドル建てで行われ、最終的な日本円請求額は決済日の為替レート(Stripe が適用するレート)に基づき各カード会社が確定し、ご請求時にカード明細上で表示されます。上記の参考換算額は本表記の最終更新日時点でのおおよその目安です |
+| **商品代金以外の必要料金** | 通信回線使用料、為替手数料、海外取引手数料等、お客様のクレジットカード会社又は決済機関が課す料金はお客様のご負担となります。当社からは追加の手数料は一切請求いたしません |
+| **支払方法** | クレジットカード(Visa / Mastercard / American Express / JCB / Discover、Stripe 経由)。当社はカード番号、有効期限、CVC を保持しません |
+| **支払時期** | 注文時に Stripe Checkout 経由で全額を即時決済 |
+| **申込みの有効期限** | 定めなし(常時お申込みを受け付けています) |
+| **役務の提供時期** | 注文(決済成功)後、自動的にジョブが開始されます。**所要時間の上限は決済日から 14 日以内**とし、対象リポジトリの規模・複雑度により概ね 5 分〜数時間程度で完了します。**14 日を超過しても役務提供が完了しない場合は、お客様からのご請求がなくとも当社の判断により[返金ポリシー](./refund-policy.md)に基づき全額返金します**。完了時又は返金時に登録メールアドレス宛に通知します |
+| **返品・キャンセルの可否および条件** | 本サービスはお客様のリポジトリ毎にカスタマイズされたデジタルサービスのため、原則として役務提供完了後の返品・キャンセルはお受けできません。<br>**ただし当社側に起因する不具合・障害によりサービスを完了できなかった場合**は、決済日から 14 日以内のご連絡で全額返金します。詳細は[返金ポリシー](./refund-policy.md)を参照ください |
+| **動作環境** | お客様の Next.js リポジトリが (a) GitHub.com 上に存在すること、(b) 当社 GitHub App をインストール可能なリポジトリであること、(c) Next.js Pages Router(\`pages/\` ディレクトリ構成)で記述されていること、を前提とします。Next.js のバージョンは概ね 13.x〜15.x の範囲を対象としますが、特殊な構成(custom server、複雑な monorepo、規制対象の依存関係を含むリポジトリ等)では当社が解析時に対応不可と判定する場合があります。詳細は[利用規約](./terms-of-service.md) §1、§2、§4 を参照 |
+| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](./refund-policy.md)に従い全額返金します。提供物そのもの(draft pull request の内容)に不適合があった場合は <CONTACT_EMAIL> までご連絡ください。当社は故意又は重大な過失による場合を除き、付随的・結果的損害(逸失利益、データ滅失等)について責任を負いません(詳細は[利用規約](./terms-of-service.md) §10) |
+| **苦情・お問合せ先** | <CONTACT_EMAIL>(原則 2 営業日以内に返信) |
 
 ## 補足
 

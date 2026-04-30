@@ -8,9 +8,16 @@
 > - `<OPERATOR_LEGAL_NAME>` — operator's legal name on file
 > - `<CONTACT_EMAIL>` — support contact email
 > - `<EFFECTIVE_DATE>` — date this version takes effect
-> - `<GOVERNING_LAW>` — likely Japan (operator is Japan-based) but USD pricing
->   to global customers complicates jurisdiction; lawyer to confirm
 > - `migrate-bot.dev` — production domain once registered
+>
+> Self-review notes (see `docs/legal-self-review-log.md`):
+> - Governing law fixed to Japan (operator-resident jurisdiction). Tokyo
+>   District Court non-exclusive. Consumer's domicile-court right under 民訴法
+>   3-4 preserved.
+> - Section 9/10/11 contain explicit "intentional misconduct or gross
+>   negligence" carve-outs to comply with 消費者契約法 8〜10 条.
+> - Section 2 excludes EEA/UK/CH residents to keep the Service outside the
+>   GDPR territorial scope.
 
 **Effective date: <EFFECTIVE_DATE>**
 
@@ -43,6 +50,11 @@ You represent that:
 - You are not a competitor of the Service intending to reverse-engineer it.
 - You will not use the Service from a country subject to a comprehensive U.S.
   trade embargo.
+- **You are not a resident of, and do not access the Service from, the
+  European Economic Area (EEA), the United Kingdom, or Switzerland.** The
+  Service is not currently offered to residents of those jurisdictions.
+  If you are unsure whether this restriction applies to you, please contact
+  us at <CONTACT_EMAIL> before paying.
 
 You are responsible for the security of your GitHub account and the
 correctness of your billing information.
@@ -135,38 +147,63 @@ but we will work in good faith to address service incidents.
 
 ## 9. Service availability and disclaimers
 
-THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY
-KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+The Service is provided on an "as is" and "as available" basis. Except to
+the extent prohibited by applicable consumer-protection law (including, for
+Japan-resident customers, the Consumer Contract Act, Articles 8 through
+10), we make no express or implied warranty of merchantability, fitness for
+a particular purpose, or non-infringement.
 
-We do not warrant that the migrated output will be free of bugs, will compile
-in every environment, or will be functionally identical to your original
-codebase. The output is provided as a *draft* pull request specifically so
-that you can review and adjust before merging.
+We do not warrant that the migrated output will be free of bugs, will
+compile in every environment, or will be functionally identical to your
+original codebase. The output is provided as a *draft* pull request
+specifically so that you can review and adjust before merging.
+
+**Nothing in this section excludes or limits our liability for damages
+caused by our intentional misconduct or gross negligence (故意又は重大な
+過失). The limitations in this Section 9 and Section 10 apply only to
+ordinary negligence (軽過失) and to the maximum extent permitted by
+applicable law.**
 
 ## 10. Limitation of liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL CUMULATIVE LIABILITY UNDER
-THESE TERMS SHALL NOT EXCEED THE AMOUNT YOU PAID US FOR THE INDIVIDUAL
-MIGRATION ORDER GIVING RISE TO THE CLAIM.
+Subject to Section 9 and to applicable consumer-protection law, our total
+cumulative liability under these Terms for any claim arising out of or
+relating to a particular migration order shall not exceed the amount you
+paid us for that order.
 
-WE WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, OR
-EXEMPLARY DAMAGES, INCLUDING WITHOUT LIMITATION LOST PROFITS, LOST DATA,
-LOST GOODWILL, OR BUSINESS INTERRUPTION, EVEN IF WE HAVE BEEN ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGES.
+To the maximum extent permitted by applicable law and except in the case
+of our intentional misconduct or gross negligence, we will not be liable
+for indirect, incidental, consequential, special, or exemplary damages,
+including without limitation lost profits, lost data, lost goodwill, or
+business interruption, even if we have been advised of the possibility of
+such damages.
 
-Some jurisdictions do not allow the exclusion or limitation of certain
-damages; these provisions shall apply to the maximum extent permitted by
-applicable law.
+**For Japan-resident consumer customers**: Pursuant to the Consumer
+Contract Act (消費者契約法) Articles 8 and 10, none of the limitations
+in this Section 10 shall apply where they would void the limitation
+under those Articles. In particular, this Section 10 does not exclude
+liability arising from our intentional misconduct or gross negligence,
+and does not impose any obligation that would unilaterally harm consumer
+interests in violation of Civil Code Article 1, Paragraph 2.
 
 ## 11. Indemnification
 
-You agree to indemnify and hold us harmless from claims, damages, and
-expenses (including reasonable attorneys' fees) arising from:
+To the extent permitted by applicable law, and only where you have acted
+intentionally or with negligence, you agree to indemnify and hold us
+harmless from third-party claims, damages, and reasonable expenses
+arising from:
 
-- Your breach of these Terms;
-- Your content or repository (including infringement of third-party rights);
-- Your violation of applicable law in connection with the Service.
+- Your material breach of these Terms;
+- Your repository content infringing on third-party rights or violating
+  applicable law (where you knew or should have known of the violation);
+- Your unauthorized or unlawful use of the Service.
+
+This Section 11 does not apply to claims caused in whole or in part by
+our intentional misconduct or gross negligence. For Japan-resident
+consumer customers, this Section 11 is to be construed and applied
+consistently with the Consumer Contract Act, Article 10, and shall not
+operate to unilaterally harm consumer interests beyond what general law
+would impose.
 
 ## 12. Termination
 
@@ -176,10 +213,21 @@ required by law. Sections 7, 9, 10, 11, and 13 survive termination.
 
 ## 13. Governing law and disputes
 
-These Terms are governed by the laws of <GOVERNING_LAW>, without regard to
-conflict-of-law principles. Any dispute will be resolved in the courts of
-<GOVERNING_LAW>, except that either party may seek equitable relief in any
-court of competent jurisdiction to protect its intellectual property.
+These Terms are governed by the laws of Japan, without regard to
+conflict-of-law principles. The Tokyo District Court (東京地方裁判所)
+shall have non-exclusive jurisdiction as the court of first instance for
+any dispute arising out of or in connection with these Terms or the
+Service.
+
+**For Japan-resident consumer customers**: Notwithstanding the above,
+nothing in this Section 13 limits a consumer's right under the Code of
+Civil Procedure (民事訴訟法) Article 3-4 to bring proceedings in the
+courts of the place of the consumer's domicile at the time of contract
+formation, or to invoke any other consumer-protection forum granted by
+Japanese law.
+
+Either party may seek equitable relief in any court of competent
+jurisdiction to protect its intellectual property.
 
 ## 14. Changes to these Terms
 
