@@ -89,7 +89,14 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - operator が Cloudflare Registrar で取得作業中
   - ✅ apps/web に `/checkout/success` `/checkout/cancel` 追加 (`b24de9b`)
   - ✅ operator: ドメイン取得完了 (P0-2、`migrate-bot.dev`、Cloudflare Registrar)
-  - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 神戸中央 問い合わせ済、応答待ち)
+  - ✅ legal pages に `<meta name="robots" content="noindex, nofollow">` 付与 (`a5ede14`、Karigo 私書箱の検索回避条件対応、+5 tests、累計 353)
+  - ✅ prod resources 作成 (`153f923`、2026-04-30):
+    - D1 `migrate-bot-prod` (database_id `d65c36a6-130e-4c95-99c2-ef02e3590447`、APAC region) + 0000_initial + 0001_orders 適用済 (8 業務テーブル + d1_migrations)
+    - Queue `migrate-bot-jobs-prod`
+    - Fly app `migrate-bot-runner-prod` (region nrt、初回 deploy 待ち)
+    - apps/api/wrangler.toml の `[env.prod.d1_databases]` / `[env.prod.queues.*]` をアンコメント、prod database_id 反映
+    - `wrangler deploy --env=prod --dry-run` で全 binding 解決確認済
+  - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 条件了承の返信送信済、契約は launch 1〜2 週間前)
   - ⏸ operator: 法務レビュー応答待ち (P0-3):
     - 南本町行政書士事務所(ココナラ): **辞退** — 4 文書フルレビューで ¥200K 提示 + 「弁護士の方が合うかも」
     - Atlas行政書士法人(ココナラ): **辞退** — 詳細不明
@@ -106,10 +113,12 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - ハートランド税理士法人(大阪、関西で対面可)
   - ⏸ operator: 法務レビューサービス問い合わせ (P0-3)
   - ⏸ operator: 税理士相談アポ取り (P0-4)
-  - ⏸ ドメイン取得 + custom domain 設定 (P1-1)
+  - ⏸ ドメイン取得 + custom domain 設定 (P1-1、ドメインは取得済、custom domain 紐付けはこれから)
   - ⏸ DNS + Resend ドメイン検証 (P1-2 / P2-2)
   - ⏸ 法務レビュー結果反映 + landing 公開 (P2-1 / P2-3)
-  - ⏸ 本番 GitHub App / Cloudflare D1 / Queue / Fly app 作成 (`docs/phase-4-deployment.md` §6-§8)
+  - ⏸ 本番 GitHub App `migrate-bot` 作成 (`docs/phase-4-deployment.md` §6、operator: GitHub web UI)
+  - ✅ 本番 Cloudflare D1 / Queue / Fly app 作成 (`docs/phase-4-deployment.md` §7.1 / §8.1、`153f923`)
+  - ⏸ prod secrets 設定 + 初回 deploy (`docs/phase-4-deployment.md` §7.3〜§7.5 / §8.2〜§8.5)
   - ⏸ Stripe Live activation 申請 (P3-1)
   - ⏸ デモ動画 + ローンチ告知文 (P4)
   - ⏸ Sentry プロジェクト作成 + DSN secret 登録 (operator)
