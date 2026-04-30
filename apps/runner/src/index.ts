@@ -39,6 +39,26 @@ interface RunnerEnv {
 }
 
 function readEnv(): RunnerEnv {
+  // Diagnostic: dump available env keys + lengths of expected ones.
+  // Names only (no values) since some are secrets. This helps trace
+  // whether values are flowing from Worker config.env / Fly app secrets.
+  const expected = [
+    'JOB_ID',
+    'TRACE_ID',
+    'INTERNAL_API_TOKEN',
+    'INTERNAL_API_URL',
+    'GITHUB_APP_ID',
+    'GITHUB_APP_PRIVATE_KEY',
+    'ANTHROPIC_API_KEY',
+  ] as const;
+  const summary: Record<string, { present: boolean; length: number }> = {};
+  for (const key of expected) {
+    const v = process.env[key];
+    summary[key] = { present: typeof v === 'string' && v.length > 0, length: v?.length ?? 0 };
+  }
+  const allEnvKeys = Object.keys(process.env).sort();
+  process.stderr.write(`runner env diagnostic: expected=${JSON.stringify(summary)} allEnvKeyCount=${allEnvKeys.length} sampleKeys=${JSON.stringify(allEnvKeys.slice(0, 20))}\n`);
+
   const jobId = process.env.JOB_ID;
   const token = process.env.INTERNAL_API_TOKEN;
   const url = process.env.INTERNAL_API_URL;
