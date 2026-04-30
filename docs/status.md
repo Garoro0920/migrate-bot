@@ -96,17 +96,17 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
     - Fly app `migrate-bot-runner-prod` (region nrt、初回 deploy 待ち)
     - apps/api/wrangler.toml の `[env.prod.d1_databases]` / `[env.prod.queues.*]` をアンコメント、prod database_id 反映
     - `wrangler deploy --env=prod --dry-run` で全 binding 解決確認済
+  - ✅ **法務レビュー方針: Case C (自己レビューで補完してローンチ) 採択** (`6f22c90` + `d4a82d7`、2026-04-30):
+    - 弁護士費用 (¥数十万円) を学生期間中は確保不能との operator 判断
+    - Claude Code が 7-pass の自己レビューを実施 (一次資料 6 件 WebFetch 引用 + 別 agent による独立レビュー):
+      - 特商法 11 条 9 項目 / 消費者契約法 8〜10 条 / APPI 27・28 条 / 景表法 / Anthropic DPA / Cross-doc / EEA 拒否
+    - `docs/templates/legal/*.md` 4 文書を改訂 (ToS / PP / Refund / 特商法)
+    - `docs/legal-self-review-log.md` 新規作成 — 引用一次資料、pass 別作業記録、残存リスク、運用指針、将来弁護士レビュー時の引継ぎ事項
+    - EEA/UK/CH 居住者拒否を 4 段防御で実装 (ToS §2 / Stripe Checkout custom_text / billing_address required / Landing 注記)
+    - 残課題: 売上発生後 (月商 ¥10 万到達等) に弁護士レビュー予算化、6 ヶ月後に PPC ガイド最新版で再点検
   - ⏸ operator: 私書箱代行サービス契約 (P0-1、Karigo 条件了承の返信送信済、契約は launch 1〜2 週間前)
-  - ⏸ operator: 法務レビュー応答待ち (P0-3):
-    - 南本町行政書士事務所(ココナラ): **辞退** — 4 文書フルレビューで ¥200K 提示 + 「弁護士の方が合うかも」
-    - Atlas行政書士法人(ココナラ): **辞退** — 詳細不明
-    - STORIA 法律事務所: **辞退** — 多忙のため新規依頼受け不可
-    - GVA 法律事務所: **辞退** — 「ご依頼項目が多岐にわたり、ご希望の納期での対応が難しい」
-    - 法律事務所 ZeLo: 応答待ち(GW 明け 5/7 以降見込み)
-    - → **5 社送信、4 社辞退、ZeLo のみ応答待ち**
-    - パターン: 4 文書 + GDPR/CCPA + 5/13 期限 が "重い" と判断される。**戦略再考必要**:
-      - 案 A: ZeLo 待ち、辞退なら追加候補(Monolith / AI-Con Pro / オンラインレビュー)に scope 縮小 + 期限延長で再送信
-      - 案 B: scope を 2 文書(ToS + PP)に分割し、refund / 特商法は self-review で運用。Stripe Live 申請には十分
+  - ⏹ operator: 法務レビュー応答待ち (P0-3) — **Case C 採択により 不要化**:
+    - 5 社送信、4 社辞退 (南本町 / Atlas / STORIA / GVA)、ZeLo のみ応答待ちだったが Case C で全 close 済
   - ⏸ operator: 税理士相談応答待ち (P0-4、freee 経由で 3 名 送信済)
     - スタートアップ税理士法人(東京)
     - BlueWorksTax(東京、IT 特化)
