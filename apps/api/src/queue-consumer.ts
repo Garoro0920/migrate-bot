@@ -29,6 +29,8 @@ export async function processJobMessage(
     flyAppName: env.FLY_APP_NAME,
     runnerImage: env.RUNNER_IMAGE,
     flyTokenLength: env.FLY_API_TOKEN?.length ?? 0,
+    internalApiTokenLength: env.INTERNAL_API_TOKEN?.length ?? 0,
+    internalApiTokenIsString: typeof env.INTERNAL_API_TOKEN === 'string',
     internalApiUrl: env.INTERNAL_API_URL,
   });
 
