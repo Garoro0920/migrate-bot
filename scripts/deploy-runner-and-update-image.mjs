@@ -84,27 +84,35 @@ if (skipFly) {
 } else {
   log.step(1, `flyctl deploy --app ${flyApp} --no-public-ips`);
   log.info('this typically takes 1-3 minutes...');
-  // flyctl deploy は出力が長く、子プロセスとして spawn してリアルタイム表示
-  // しつつ stdout を buffer に貯める
+  // 新しい flyctl は image: 行を stderr に書くため、stdout / stderr 両方を
+  // capture する。spawnSync は stdio: 'pipe' だと parent terminal にエコー
+  // しないので、子プロセスから読みつつ自前で前方転送する代わりに、
+  // 末尾でまとめて表示する (deploy 中はテキスト多いが許容)。
   const result = spawnSync('flyctl', ['deploy', '--app', flyApp, '--no-public-ips'], {
     cwd: repoRoot,
     encoding: 'utf-8',
-    stdio: ['inherit', 'pipe', 'inherit'],
+    stdio: ['inherit', 'pipe', 'pipe'],
   });
   if (result.status !== 0) {
+    process.stdout.write(result.stdout ?? '');
+    process.stderr.write(result.stderr ?? '');
     log.fail(`flyctl deploy exited with code ${result.status}`);
     process.exit(1);
   }
-  process.stdout.write(result.stdout);
-  // 出力から image: registry.fly.io/<app>:deployment-<TAG> を抽出
-  const m = result.stdout.match(/image:\s*registry\.fly\.io\/[^:]+:(deployment-[A-Z0-9]+)/);
+  process.stdout.write(result.stdout ?? '');
+  process.stderr.write(result.stderr ?? '');
+  // 出力から deployment-<TAG> を抽出 (stdout / stderr 両方を検索、image: 行
+  // ではなく単に "deployment-XXX" を任意の場所で探す。flyctl の version で
+  // 出力先・前後の文言が変わっても拾えるようにする)
+  const combined = (result.stdout ?? '') + '\n' + (result.stderr ?? '');
+  const m = combined.match(/deployment-[A-Z0-9]+/);
   if (!m) {
-    log.fail('could not find "image: registry.fly.io/...:deployment-XXX" in flyctl output');
+    log.fail('could not find "deployment-XXX" tag in flyctl output');
     log.info('  manually run: flyctl image show --app ' + flyApp);
     log.info('  then re-run with --skip-fly');
     process.exit(1);
   }
-  imageTag = m[1];
+  imageTag = m[0];
   log.ok(`captured image tag: ${imageTag}`);
 }
 
