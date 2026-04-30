@@ -55,10 +55,20 @@ export function createStripeClient(opts: StripeClientOptions): StripeClient {
 
   return {
     async createCheckoutSession(input) {
+      // GDPR 適用域 (EEA + UK + Switzerland) からの利用は ToS §2 で明示的に
+      // 拒否している。Stripe Checkout API には allowed_countries の概念が
+      // 通常 Checkout には無い (Connect 専用) ため、以下の 2 段防御で対応:
+      //   1. billing_address_collection: 'required' で住所を必須収集
+      //   2. custom_text で EEA/UK/CH 居住者は利用不可である旨を画面上に表示
+      // post-launch では webhook (checkout.session.completed) で
+      // session.customer_details.address.country を検証し、EEA/UK/CH なら
+      // 自動 refund する追加の防御層を入れる予定 (TODO: legal-self-review-log
+      // §"Stripe EEA gating" 参照)。
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         client_reference_id: input.orderId,
         customer_email: input.customerEmail,
+        billing_address_collection: 'required',
         line_items: [
           {
             price_data: {
@@ -76,6 +86,12 @@ export function createStripeClient(opts: StripeClientOptions): StripeClient {
           orderId: input.orderId,
           repoFullName: input.repoFullName,
           plan: input.plan,
+        },
+        custom_text: {
+          submit: {
+            message:
+              'This Service is not offered to residents of the European Economic Area, the United Kingdom, or Switzerland. By proceeding, you confirm that you are not a resident of those jurisdictions.',
+          },
         },
         success_url: input.successUrl,
         cancel_url: input.cancelUrl,

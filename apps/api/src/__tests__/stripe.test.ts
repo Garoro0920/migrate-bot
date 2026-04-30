@@ -79,6 +79,37 @@ describe('createStripeClient.createCheckoutSession', () => {
     expect(priceData?.unit_amount).toBe(24900);
   });
 
+  it('forces billing address collection and shows EEA/UK/CH non-availability text', async () => {
+    const createSession = vi.fn().mockResolvedValue({
+      id: 'cs_test_eu',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_eu',
+    });
+    const stripe = makeFakeStripe({ createSession });
+    const client = createStripeClient({
+      secretKey: 'sk_test',
+      webhookSecret: 'whsec_test',
+      stripe,
+    });
+    await client.createCheckoutSession({
+      orderId: 'order-2',
+      customerEmail: 'b@example.com',
+      plan: 'small',
+      amountUsdCents: 9900,
+      repoFullName: 'octocat/hello',
+      successUrl: 'https://app/success',
+      cancelUrl: 'https://app/cancel',
+    });
+    const arg = createSession.mock.calls[0]?.[0] as Stripe.Checkout.SessionCreateParams;
+    expect(arg.billing_address_collection).toBe('required');
+    const submit = arg.custom_text?.submit;
+    if (typeof submit !== 'object' || submit === null) {
+      throw new Error('expected custom_text.submit to be an object with message');
+    }
+    expect(submit.message).toMatch(/European Economic Area/);
+    expect(submit.message).toMatch(/United Kingdom/);
+    expect(submit.message).toMatch(/Switzerland/);
+  });
+
   it('throws when Stripe returns a session without a url', async () => {
     const stripe = makeFakeStripe({
       createSession: vi.fn().mockResolvedValue({ id: 'cs_no_url', url: null }),

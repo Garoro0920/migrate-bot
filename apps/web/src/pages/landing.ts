@@ -91,7 +91,7 @@ function renderHowItWorks(): string {
     <section id="how-it-works" class="px-6 py-20 max-w-6xl mx-auto">
       <h2 class="text-3xl md:text-4xl font-bold text-center">How it works</h2>
       <p class="mt-3 text-center text-slate-400 max-w-2xl mx-auto">
-        Three steps from install to draft PR. Most jobs finish in 5–15 minutes.
+        Three steps from install to draft PR. Typical Small repos complete within 5–15 minutes; larger or more complex repos may take longer.
       </p>
       <div class="mt-12 grid md:grid-cols-3 gap-6">
         <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
@@ -262,7 +262,7 @@ function renderPricing(opts: LandingOptions): string {
         )
         .join('');
       const badge = plan.featured
-        ? `<div class="absolute -top-3 left-6 text-xs font-semibold tracking-wide bg-indigo-500 text-white px-2 py-0.5 rounded">Most popular</div>`
+        ? `<div class="absolute -top-3 left-6 text-xs font-semibold tracking-wide bg-indigo-500 text-white px-2 py-0.5 rounded">Recommended</div>`
         : '';
       return `
         <div class="relative rounded-xl border ${cardClass} p-6 flex flex-col">
@@ -288,6 +288,9 @@ function renderPricing(opts: LandingOptions): string {
       <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">${cardsHtml}</div>
       <p class="mt-8 text-center text-sm text-slate-500">
         All prices in USD. <a href="/legal/refunds" class="underline hover:text-slate-300">Full refund</a> if our verify (typecheck + <code class="bg-slate-800 px-1 rounded">next build</code>) does not pass within 14 days for reasons attributable to the service.
+      </p>
+      <p class="mt-2 text-center text-xs text-slate-500">
+        At this time, the Service is <strong>not offered to residents of the European Economic Area, the United Kingdom, or Switzerland</strong>. See <a href="/legal/terms" class="underline hover:text-slate-400">Terms of Service §2</a>.
       </p>
     </section>
   `;
@@ -317,7 +320,7 @@ function renderFaq(opts: LandingOptions): string {
     },
     {
       q: 'How long does a migration take?',
-      a: `Typical Small jobs finish in 5–10 minutes. Medium runs about 10–20 minutes. Large can take 30–60 minutes. The job runs entirely on our infrastructure; you can close the page after payment and we will email you when the PR is ready.`,
+      a: `Most jobs we have observed in testing complete within these typical ranges: Small 5–15 minutes, Medium 10–30 minutes, Large 30–90 minutes. Larger or more complex repositories may take longer. The job runs entirely on our infrastructure; you can close the page after payment and we will email you when the PR is ready.`,
     },
     {
       q: 'Can I migrate just part of a repository?',
