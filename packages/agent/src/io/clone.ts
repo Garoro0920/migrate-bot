@@ -10,7 +10,11 @@ export interface CloneOptions {
   readonly url: string;
   readonly ref?: string;
   readonly depth?: number;
+  readonly timeoutMs?: number;
 }
+
+// R3: 大規模リポジトリ + 弱い回線でも 5 分で諦める。Fly Machine の SLA から逆算。
+const DEFAULT_CLONE_TIMEOUT_MS = 5 * 60 * 1000;
 
 export interface ClonedRepo {
   readonly localPath: string;
@@ -26,7 +30,10 @@ export async function cloneRepo(options: CloneOptions): Promise<ClonedRepo> {
   args.push(options.url, baseDir);
 
   try {
-    await execFileAsync('git', args);
+    await execFileAsync('git', args, {
+      timeout: options.timeoutMs ?? DEFAULT_CLONE_TIMEOUT_MS,
+      killSignal: 'SIGKILL',
+    });
   } catch (err) {
     await rm(baseDir, { recursive: true, force: true });
     throw err;

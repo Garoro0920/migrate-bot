@@ -261,9 +261,11 @@ describe('createRealPipeline.createPR', () => {
     expect(callArg.owner).toBe('octocat');
     expect(callArg.repo).toBe('hello');
 
-    // cleanup is fire-and-forget; allow microtask to flush
-    await new Promise((r) => setImmediate(r));
-    expect(cleanup).toHaveBeenCalled();
+    // R4: createPR 内では cleanup を呼ばない。runJob の finally で pipeline.cleanup
+    // 経由で発火するので、ここでは未発火を確認する。
+    expect(cleanup).not.toHaveBeenCalled();
+    await pipeline.cleanup();
+    expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
   it('commits when there is a diff', async () => {
@@ -296,5 +298,32 @@ describe('createRealPipeline.createPR', () => {
     const { deps } = buildDeps();
     const pipeline = createRealPipeline(deps);
     await expect(pipeline.createPR(makeJob())).rejects.toThrow(/workDir not ready/);
+  });
+});
+
+describe('createRealPipeline.cleanup (R4)', () => {
+  it('removes the cloned workdir on first call', async () => {
+    const { deps, cleanup } = buildDeps();
+    const pipeline = createRealPipeline(deps);
+    await pipeline.analyze('octocat/hello');
+    await pipeline.cleanup();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('is idempotent — repeated calls are no-ops', async () => {
+    const { deps, cleanup } = buildDeps();
+    const pipeline = createRealPipeline(deps);
+    await pipeline.analyze('octocat/hello');
+    await pipeline.cleanup();
+    await pipeline.cleanup();
+    await pipeline.cleanup();
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it('is a no-op when analyze never ran', async () => {
+    const { deps, cleanup } = buildDeps();
+    const pipeline = createRealPipeline(deps);
+    await pipeline.cleanup();
+    expect(cleanup).not.toHaveBeenCalled();
   });
 });

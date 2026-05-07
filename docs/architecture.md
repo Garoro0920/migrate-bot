@@ -285,12 +285,12 @@ migrate-bot/
 |---|---|---|
 | `queued` | キュー投入済、未着手 | `analyzing` / `cancelled` |
 | `analyzing` | リポジトリ解析中（移行可否判定） | `planning` / `aborted_blocker` |
-| `planning` | 移行計画生成中 | `migrating` |
-| `migrating` | コード変換実行中 | `verifying` |
-| `verifying` | CI 結果待ち | `pr_ready` / `failed_ci` |
+| `planning` | 移行計画生成中 | `migrating` / `aborted_blocker` |
+| `migrating` | コード変換実行中 | `verifying` / `aborted_blocker` |
+| `verifying` | CI 結果待ち | `pr_ready` / `failed_ci` / `aborted_blocker` |
 | `pr_ready` | draft → ready for review、完了 | （終端） |
 | `failed_ci` | CI green 達成失敗 | `refunding` |
-| `aborted_blocker` | 解析時に移行不可と判定 | `refunding` |
+| `aborted_blocker` | 移行不可と判定または runner 側で予期せぬ例外発生（`reason` で要因区別） | `refunding` |
 | `cost_exceeded` | コスト上限超過 | `refunding` |
 | `installation_revoked` | Installation が中途解除された | `refunding` |
 | `refunding` | 返金処理中 | `refunded` |

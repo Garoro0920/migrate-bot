@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-05-07
+> Last updated: 2026-05-07 (Batch C 完了)
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -19,6 +19,11 @@ prod environment 全機能通電完了済 (2026-04-30):
 - Stripe Test mode webhook + secret 全 9 件
 - E2E 完走 (PR #6 admin-trigger / PR #7 Stripe Test 経由、所要 1m35s / 3m16s、コスト $0.05)
 - 法務 4 文書 self-review (Case C) + EEA/UK/CH 5 段防御実装 (`4b351e5`)
+- 包括的レビュー Batch A→B→D→C 完了 (`c981295` + Batch C):
+  - Batch A: 法務文書 cross-doc 修正 (refund 14d/30d 区別、ToS §6、特商法 link)
+  - Batch B: stripe-webhook fail-closed + retry-safe (`PermanentWebhookError`)
+  - Batch D: refund failure 構造化ログ + Sentry capture
+  - Batch C: runner 安全強化 — R1 idempotency / R2 mid-pipeline crash → aborted_blocker / R3 subprocess timeouts / R4 tmp dir try/finally cleanup / R5 SIGTERM handler. tests 371 → 398.
 
 残作業は **operator 主体の外部依存タスクのみ**:
 - Karigo 神戸中央 私書箱契約 (本日 2026-05-07 申込み完了、本人確認済、初回請求 ¥16,700 + Toones ポイント購入待ち、住所通知が 2〜4 営業日後)

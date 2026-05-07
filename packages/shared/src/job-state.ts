@@ -35,12 +35,14 @@ export const JOB_STATES = [
 // 各状態から遷移可能な次状態。
 // 注: cost_exceeded / installation_revoked は実行中の状態 (analyzing/planning/
 // migrating/verifying) から発生しうる中断遷移。
+// aborted_blocker は analyze 時の判定だけでなく、plan/migrate/createPR 段階で
+// runner 側が予期せず例外を投げた場合にも使う (reason フィールドで原因を区別)。
 const TRANSITIONS: Readonly<Record<JobState, readonly JobState[]>> = {
   queued: ['analyzing', 'cancelled'],
   analyzing: ['planning', 'aborted_blocker', 'cost_exceeded', 'installation_revoked'],
-  planning: ['migrating', 'cost_exceeded', 'installation_revoked'],
-  migrating: ['verifying', 'cost_exceeded', 'installation_revoked'],
-  verifying: ['pr_ready', 'failed_ci', 'cost_exceeded', 'installation_revoked'],
+  planning: ['migrating', 'aborted_blocker', 'cost_exceeded', 'installation_revoked'],
+  migrating: ['verifying', 'aborted_blocker', 'cost_exceeded', 'installation_revoked'],
+  verifying: ['pr_ready', 'failed_ci', 'aborted_blocker', 'cost_exceeded', 'installation_revoked'],
   pr_ready: [],
   failed_ci: ['refunding'],
   aborted_blocker: ['refunding'],

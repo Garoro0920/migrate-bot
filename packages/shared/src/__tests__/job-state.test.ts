@@ -49,6 +49,13 @@ describe('canTransition', () => {
     expect(canTransition('verifying', 'pr_ready')).toBe(true);
     expect(canTransition('verifying', 'failed_ci')).toBe(true);
   });
+
+  it('allows aborted_blocker from any active pipeline state (runner-side crash)', () => {
+    expect(canTransition('analyzing', 'aborted_blocker')).toBe(true);
+    expect(canTransition('planning', 'aborted_blocker')).toBe(true);
+    expect(canTransition('migrating', 'aborted_blocker')).toBe(true);
+    expect(canTransition('verifying', 'aborted_blocker')).toBe(true);
+  });
 });
 
 describe('assertTransition', () => {

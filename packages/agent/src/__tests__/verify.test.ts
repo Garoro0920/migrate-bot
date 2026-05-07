@@ -79,4 +79,34 @@ describe('verify', () => {
     // Sanity: verify is callable without an explicit runner
     expect(typeof verify).toBe('function');
   });
+
+  it('passes timeoutMs through to the runner for each subprocess (R3)', async () => {
+    const seen: Array<{ key: string; timeoutMs: number | undefined }> = [];
+    const runner: CommandRunner = async (cmd, args, _cwd, opts) => {
+      seen.push({ key: `${cmd} ${args.join(' ')}`, timeoutMs: opts?.timeoutMs });
+      return { stdout: '', stderr: '' };
+    };
+    await verify(
+      repo,
+      { installTimeoutMs: 1000, typecheckTimeoutMs: 2000, buildTimeoutMs: 3000 },
+      runner,
+    );
+    const byKey = (k: string) => seen.find((s) => s.key === k)?.timeoutMs;
+    expect(byKey('pnpm install')).toBe(1000);
+    expect(byKey('pnpm exec tsc --noEmit')).toBe(2000);
+    expect(byKey('pnpm exec next build')).toBe(3000);
+  });
+
+  it('uses default timeouts when not specified', async () => {
+    const seen: Array<{ key: string; timeoutMs: number | undefined }> = [];
+    const runner: CommandRunner = async (cmd, args, _cwd, opts) => {
+      seen.push({ key: `${cmd} ${args.join(' ')}`, timeoutMs: opts?.timeoutMs });
+      return { stdout: '', stderr: '' };
+    };
+    await verify(repo, {}, runner);
+    // 既定値: install 5min, typecheck 5min, build 10min
+    expect(seen.find((s) => s.key === 'pnpm install')?.timeoutMs).toBe(5 * 60 * 1000);
+    expect(seen.find((s) => s.key === 'pnpm exec tsc --noEmit')?.timeoutMs).toBe(5 * 60 * 1000);
+    expect(seen.find((s) => s.key === 'pnpm exec next build')?.timeoutMs).toBe(10 * 60 * 1000);
+  });
 });

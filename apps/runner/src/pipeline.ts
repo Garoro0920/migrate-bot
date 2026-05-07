@@ -17,6 +17,13 @@ import type { PipelineRunner, PipelineUsage } from './runner';
 
 const execFileAsync = promisify(execFile);
 
+// R3: git サブプロセスのタイムアウト。
+// config / diff / add / commit / checkout は本来一瞬だが、ファイルシステム障害や
+// hang 検出の保険として 90 秒で強制終了。
+// push はネットワーク + サーバ side hook で長くなりうるので 5 分。
+const GIT_LOCAL_TIMEOUT_MS = 90 * 1000;
+const GIT_PUSH_TIMEOUT_MS = 5 * 60 * 1000;
+
 // 本番 PipelineRunner 実装。Phase 1 で作った @migrate-bot/agent を呼び、
 // git push + Octokit createDraftPR で draft PR まで仕上げる。
 //
@@ -109,28 +116,33 @@ export function createRealPipeline(deps: RealPipelineDeps): PipelineRunner {
       // git は PATH 上にあるので execFile から直接呼べる。
 
       // git config (per-repo only — global を汚さない)
-      await exec('git', ['config', 'user.email', authorEmail], { cwd });
-      await exec('git', ['config', 'user.name', authorName], { cwd });
+      const localOpts = { cwd, timeout: GIT_LOCAL_TIMEOUT_MS, killSignal: 'SIGKILL' as const };
+      await exec('git', ['config', 'user.email', authorEmail], localOpts);
+      await exec('git', ['config', 'user.name', authorName], localOpts);
 
       // 変更があるかチェック (diff があれば commit、無ければ skip)
       try {
-        await exec('git', ['diff', '--quiet'], { cwd });
+        await exec('git', ['diff', '--quiet'], localOpts);
         // diff なし
       } catch {
         // diff あり → add + commit
-        await exec('git', ['add', '-A'], { cwd });
+        await exec('git', ['add', '-A'], localOpts);
         await exec(
           'git',
           ['commit', '-m', '[migrate-bot] migrate Pages Router -> App Router'],
-          { cwd },
+          localOpts,
         );
       }
 
       // branch 作成 + push
-      await exec('git', ['checkout', '-b', branchName], { cwd });
+      await exec('git', ['checkout', '-b', branchName], localOpts);
       const token = await deps.factory.getInstallationToken(deps.installationId);
       const remoteUrl = `https://x-access-token:${token}@github.com/${job.repoFullName}.git`;
-      await exec('git', ['push', remoteUrl, branchName], { cwd });
+      await exec('git', ['push', remoteUrl, branchName], {
+        cwd,
+        timeout: GIT_PUSH_TIMEOUT_MS,
+        killSignal: 'SIGKILL',
+      });
 
       const pr = await createDraftPR({
         factory: deps.factory,
@@ -143,10 +155,22 @@ export function createRealPipeline(deps: RealPipelineDeps): PipelineRunner {
         body: buildPrBody(analysis, migrateOutcome),
       });
 
-      // tmp dir cleanup (fire-and-forget で例外は無視)
-      void cloned.cleanup().catch(() => {});
+      // R4: tmp dir の解放は runJob の finally から pipeline.cleanup() 経由で行う。
+      // ここで明示的に呼ぶと finally と二重実行になるが、cleanup 側が idempotent
+      // なので致命的ではない。あえて呼ばないことで「成功・例外いずれの経路でも
+      // cleanup は finally のみ」というルールを単純化する。
 
       return { prUrl: pr.html_url };
+    },
+
+    async cleanup() {
+      // R4: idempotent。複数回呼ばれても安全 (cloned.cleanup は rm -rf force)。
+      // analyze 前に呼ばれた場合は cloned が null なので no-op。
+      if (cloned) {
+        const target = cloned;
+        cloned = null;
+        await target.cleanup();
+      }
     },
   };
 }
