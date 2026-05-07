@@ -44,7 +44,7 @@ The flow:
    typecheck + `next build`
 5. Draft PR opens, email lands
 
-5–15 min total.
+Typical small repos: 5–15 min. Larger/complex repos may take longer.
 ```
 
 ---
@@ -54,14 +54,15 @@ The flow:
 ```
 Why not just use `@next/codemod`?
 
-The official codemod handles syntax. It doesn't:
+The official codemod handles syntax. Our agent additionally:
 
-- Convert getStaticProps to async server components
-- Move next/router → next/navigation correctly
-- Handle next/head → Metadata API
-- Update relative imports when files move directory levels
+- Converts getStaticProps to async server components
+- Moves next/router → next/navigation
+- Migrates next/head → Metadata API (best-effort; some patterns
+  remain a mix the customer reviews)
+- Updates relative imports when files move directory levels
 
-Our agent does each of these.
+Output is always a draft PR for you to validate.
 ```
 
 ---

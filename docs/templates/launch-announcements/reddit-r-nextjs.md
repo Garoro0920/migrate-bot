@@ -63,11 +63,14 @@ The high-level flow:
    --noEmit` and `next build`, and opens a draft PR if those pass
 4. You get an email with the PR link, review, run your CI, merge
 
-Two things I've explicitly designed in:
+Three things I've explicitly designed in:
 - **Refund**: If verify can't reach passing within 14 days for reasons
   on our side, full refund. Aim is to put the risk of "did the agent
   actually do this right" on us, not you.
 - **Draft PR, not auto-merge**: Your CI is the final arbiter, not us.
+- **EEA / UK / Switzerland exclusion at launch**: GDPR territorial
+  scope is a real obligation I can't credibly meet as a solo founder
+  on day 1. Excluding for now; will revisit later.
 
 What I want feedback on:
 

@@ -44,8 +44,11 @@ How it works:
 - Pay per repo ($99 / $249 / $499 by file count)
 - Our agent (powered by Claude) clones, plans, rewrites each file,
   runs typecheck + `next build`, and opens a draft PR
-- Most jobs finish in 5–15 minutes
+- Typical small repos finish in 5–15 minutes; larger or complex repos
+  may take longer
 - 14-day full refund if our verify can't pass
+- Service is currently not offered to EEA / UK / Switzerland residents
+  (GDPR territorial scope concern; we'll revisit post-launch)
 
 Tech: Cloudflare Workers + D1 + Queues, Fly.io Machines for the runner,
 Anthropic Claude API for the LLM work, Stripe for payment, Resend for
