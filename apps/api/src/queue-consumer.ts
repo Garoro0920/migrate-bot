@@ -34,6 +34,11 @@ export async function processJobMessage(
 
   const machine = await fly.createMachine({
     name: `job-${body.jobId.slice(0, 18)}`,
+    // 'nrt' (東京) で固定。prod app は flyctl apps create 時に region 未指定で
+    // Fly のデフォルト (sjc 米国西海岸) になる。日本顧客向けレイテンシと
+    // image pull 時間を考えて nrt を明示。fly.toml の primary_region 設定は
+    // app 名上書き時に効かないため Machines API 呼出側で指定する必要がある。
+    region: 'nrt',
     config: {
       image: env.RUNNER_IMAGE,
       env: {

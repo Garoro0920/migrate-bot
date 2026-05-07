@@ -66,16 +66,20 @@ max_concurrency = 3
 
 # ──────────────────────────────────────────────────────────────────────
 # 本番 environment (architecture.md §3.1: dev/prod 2 つ)。
-# Phase 4 ローンチ前に operator が以下を作成:
-#   1. wrangler d1 create migrate-bot-prod
-#      → database_id を控える
-#   2. wrangler queues create migrate-bot-jobs-prod
-#   3. GitHub App "migrate-bot-prod" を新規作成 (App ID 別)
-#   4. Fly.io app "migrate-bot-runner-prod" を新規作成
-#   5. 上記 secrets を `wrangler secret put <NAME> --env=prod` で全件登録
-#   6. 下の comment-out をすべて解除し、placeholder を実値に置換
-#   7. wrangler deploy --env=prod
-# 詳細手順は docs/phase-4-deployment.md。
+# 2026-04-30 に prod 全リソース作成 + Custom Domain 紐付け + 初回 deploy 完了。
+# 履歴は docs/phase-4-deployment.md と docs/status.md を参照。
+#
+# 既存リソース:
+#   - D1 migrate-bot-prod (database_id d65c36a6-130e-4c95-99c2-ef02e3590447)
+#   - Queue migrate-bot-jobs-prod
+#   - Fly app migrate-bot-runner-prod
+#   - GitHub App slug "migrate-bot" (App ID 別、operator が個別管理)
+#   - Custom Domain api.migrate-bot.dev → migrate-bot-api-prod (active)
+#
+# 新規 deploy フロー:
+#   - runner image 更新後: scripts/deploy-runner-and-update-image.mjs --env=prod
+#     (flyctl deploy → image tag 抽出 → wrangler.toml 更新 → wrangler deploy)
+#   - secret 値変更時: wrangler secret put <NAME> --env=prod
 # ──────────────────────────────────────────────────────────────────────
 [env.prod]
 name = "migrate-bot-api-prod"

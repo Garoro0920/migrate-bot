@@ -15,8 +15,17 @@
 # - GITHUB_APP_PRIVATE_KEY
 # - INTERNAL_API_TOKEN (apps/api /internal 認証共有秘密)
 #
-# Deploy: `flyctl deploy --app migrate-bot-runner-dev --no-public-ips` を
-# monorepo root から実行する。
+# Deploy:
+#   - dev: `flyctl deploy --app migrate-bot-runner-dev --no-public-ips`
+#   - prod: `node scripts/deploy-runner-and-update-image.mjs --env=prod`
+#     (内部で `flyctl deploy --app migrate-bot-runner-prod` を呼ぶ。
+#      app 名上書きにより本 fly.toml の app/region 値は無視される)
+#
+# ⚠ region 注意: prod app は flyctl apps create 時に region 未指定のため、
+# Machines API から作成される machine は Fly のデフォルト (sjc) で起動する。
+# 本 fly.toml の primary_region = 'nrt' は dev のみ反映される。
+# prod machines を nrt に固定するため、apps/api/src/queue-consumer.ts の
+# createMachine 呼出時に明示的に region: 'nrt' を渡している。
 #
 # See https://fly.io/docs/reference/configuration/
 

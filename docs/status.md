@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-04-28
+> Last updated: 2026-05-07
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -9,17 +9,25 @@
 
 ## 現在のフェーズ
 
-**Phase 3: 課金統合 (完了基準達成、Phase 4 着手前段階)**
+**Phase 4: ローンチ準備 (進行中、prod 稼働中・残作業は外部依存タスクのみ)**
 
-2026-04-28 ADR-0003 で「学生期間中に Phase 3/4 前倒し、市場検証 skip 継続」を決定。
-同日中に Phase 3 のコード + dev 環境動作確認まで完走:
+prod environment 全機能通電完了済 (2026-04-30):
+- apps/api / apps/web Worker deploy
+- Custom Domain (`migrate-bot.dev` apex + `api.migrate-bot.dev`)
+- Cloudflare D1 prod + Queue prod + Fly prod app
+- Resend ドメイン検証 + Cloudflare Email Routing (`support@`, `noreply@`)
+- Stripe Test mode webhook + secret 全 9 件
+- E2E 完走 (PR #6 admin-trigger / PR #7 Stripe Test 経由、所要 1m35s / 3m16s、コスト $0.05)
+- 法務 4 文書 self-review (Case C) + EEA/UK/CH 5 段防御実装 (`4b351e5`)
 
-- Stripe Test mode で実際にテストカード決済 ($99 = small plan)
-- webhook → order paid → job 作成 → Fly machine → agent → draft PR #4 作成
-- `pr_ready` 状態到達 (cost $0.0480、Phase 1 と同等)
-- Resend で `paymentReceived` + `prReady` の 2 通メール配信成功
+残作業は **operator 主体の外部依存タスクのみ**:
+- Karigo 神戸中央 私書箱契約 (本日 2026-05-07 申込み完了、本人確認済、初回請求 ¥16,700 + Toones ポイント購入待ち、住所通知が 2〜4 営業日後)
+- ZeLo 法律事務所 野村弁護士無料相談 (5/12 火 17:00-18:00、self-review チェック)
+- Karigo 住所受領後 → 法務 4 文書 placeholder 埋め → apps/web 再 deploy
+- Stripe Live activation 申請 → 承認後 sk_live_... 差替 → Live mode webhook 再作成
+- ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
 
-詳細 → `docs/roadmap.md` §1.4、ADR-0003
+詳細 → `docs/roadmap.md` §1.5、ADR-0003
 
 Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
 
@@ -204,8 +212,31 @@ ADR-0002 §1.1 kill criteria 累計使用 0.4% (約 $0.36)。
 
 ## 次に着手すべきこと
 
-**次回セッション開始時の最初のタスク**: Cloudflare 登録 (`docs/phase-2-deployment.md` §2)。
-operator は事前にクレカ + 永続メール + 2FA アプリ + 静かな環境を準備して再開する。
+**次回セッション開始時の最初のタスク**: 外部メール (Karigo 住所受領 / Stripe Live 承認 / ZeLo 5/12 会議) のいずれかが届いていれば該当する後続タスクを実行。届いていなければ、`docs/customer-support/` `docs/zelo-meeting-prep/` の最終確認、または Pre-launch Refinement Audit で発見された 🟠 medium / 🟢 minor の改修。
+
+### Karigo 住所受領後のフロー
+
+1. operator が住所 / 戸籍上のフルネーム / 携帯番号 / 公開予定日を共有
+2. Claude Code が `docs/templates/legal/*.md` 4 文書の placeholder を埋める
+3. `apps/web/scripts/embed-legal.mjs` 実行 → `legal-content.gen.ts` 再生成
+4. apps/web 再 deploy (`wrangler deploy --env=prod`)
+5. operator が <https://migrate-bot.dev/legal/specified-commercial-transactions> で確認
+6. Stripe Live activation 申請
+
+### ZeLo 5/12 会議後のフロー
+
+1. operator が会議メモ清書 (or 内容共有)
+2. Claude Code が `docs/legal-self-review-log.md` の Pass 8 として追記
+3. 必要なら法務 4 文書の修正 commit
+4. 修正後の再 deploy
+
+### Stripe Live 承認後のフロー
+
+1. STRIPE_SECRET_KEY を `sk_live_...` で再 put
+2. Stripe Dashboard で Live mode の prod webhook endpoint 新規作成 → STRIPE_WEBHOOK_SECRET 更新
+3. apps/api 再 deploy
+4. Live 自分カード決済で end-to-end 確認
+5. 確認後 ローンチ告知 (HN / Reddit / X) を operator 確認の上で投稿
 
 その後の選択肢:
 1. Cloudflare 完了後 → Fly.io 登録 (`docs/phase-2-deployment.md` §3)

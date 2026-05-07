@@ -1,8 +1,8 @@
 # CLAUDE.md — migrate-bot プロジェクト憲章
 
 > **Project**: Next.js Pages Router → App Router 自動移行 GitHub App
-> **Document version**: 0.5（分割構成）
-> **Last reviewed**: 2026-04-26
+> **Document version**: 0.6（Phase 4 進行中、prod 稼働中）
+> **Last reviewed**: 2026-05-07
 > **Owner (operator)**: 1 名
 
 このファイルは Claude Code に対する**恒久的な憲章**である。
@@ -39,7 +39,15 @@
 | `docs/development.md` | コーディングルール・テスト・eval・協業 |
 | `docs/security.md` | セキュリティポリシー・プライバシー・キー管理・規制 |
 | `docs/roadmap.md` | フェーズ・完了基準・ローンチチェックリスト |
-| `docs/templates/` | 再利用テンプレート（PR 説明欄など） |
+| `docs/phase-2-deployment.md` | Phase 2 (dev 環境契約・構築) 手順 — 完了済 |
+| `docs/phase-4-deployment.md` | Phase 4 (prod 環境構築・ローンチ) 手順 |
+| `docs/legal-self-review-log.md` | Case C 法務自己レビュー記録(`docs/templates/legal/` 修正の根拠と引用一次資料) |
+| `docs/customer-support/` | ローンチ後の顧客対応メールテンプレ 7 シナリオ |
+| `docs/zelo-meeting-prep/` | ZeLo 法律事務所 法務相談 (5/12 火 17:00) の質問リスト・事前共有メール draft |
+| `docs/runbooks/` | 運用ランブック (D1 migration backfill 等、本格運用時に追加予定) |
+| `docs/templates/legal/` | 利用規約・プライバシーポリシー・返金ポリシー・特商法表記の各 md (placeholder 含む) |
+| `docs/templates/launch-announcements/` | HN / Reddit / X ローンチ告知 draft |
+| `docs/templates/` (その他) | demo-video-script、PR description 等の再利用テンプレ |
 | `docs/decisions/` | Architecture Decision Records (ADR) |
 | `docs/prompts/` | Agent プロンプト原本（バージョン管理） |
 
