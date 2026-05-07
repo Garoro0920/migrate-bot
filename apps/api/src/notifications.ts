@@ -1,6 +1,7 @@
 import { type AnyDbClient, customers, getOrderByJobId, loadJob, loadOrder, orders } from '@migrate-bot/db';
 import { eq } from 'drizzle-orm';
 import {
+  eeaRejectionEmail,
   type EmailClient,
   paymentReceivedEmail,
   prReadyEmail,
@@ -52,6 +53,28 @@ export async function notifyPrReady(
     await email.send({ ...tpl, to });
   } catch (err) {
     console.error('notifyPrReady failed', { jobId, error: err });
+  }
+}
+
+export async function notifyEeaRejection(
+  db: AnyDbClient,
+  email: EmailClient,
+  orderId: string,
+  countryCode: string,
+): Promise<void> {
+  try {
+    const order = await loadOrder(db, orderId);
+    if (!order) return;
+    const to = await lookupCustomerEmail(db, order.customerId);
+    if (!to) return;
+    const tpl = eeaRejectionEmail({
+      repoFullName: order.repoFullName,
+      amountUsdCents: order.amountUsdCents,
+      countryCode,
+    });
+    await email.send({ ...tpl, to });
+  } catch (err) {
+    console.error('notifyEeaRejection failed', { orderId, error: err });
   }
 }
 

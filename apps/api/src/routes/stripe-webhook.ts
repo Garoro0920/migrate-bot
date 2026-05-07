@@ -13,8 +13,9 @@ import type { JobQueueMessage, QueueProducer } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type Stripe from 'stripe';
+import { isEeaUkCh } from '../eea-countries';
 import { createResendClient, type EmailClient } from '../email';
-import { notifyPaymentReceived } from '../notifications';
+import { notifyEeaRejection, notifyPaymentReceived } from '../notifications';
 import { type CloudflareQueue, wrapCloudflareQueue } from '../queue';
 import { createStripeClient, type StripeClient } from '../stripe';
 
@@ -167,6 +168,17 @@ async function handleCheckoutCompleted(
   });
   if (paidResult.alreadyHandled) return;
 
+  // GDPR / UK GDPR / Swiss FADP 対策の 5 段目防御:
+  // billing country が EEA / UK / Switzerland なら ToS §2 違反のため
+  // job 作成せず即時 refund + 拒否通知。
+  // Stripe Checkout は billing_address_collection: 'required' で
+  // customer_details.address.country を必ず提供する。
+  const billingCountry = session.customer_details?.address?.country ?? null;
+  if (isEeaUkCh(billingCountry)) {
+    await rejectEeaUkChOrder(c, db, order, paymentIntentId, billingCountry ?? 'unknown');
+    return;
+  }
+
   // 該当 installation を取得して GitHub integer ID を queue message に含める
   const instRows = await db
     .select()
@@ -200,6 +212,23 @@ async function handleCheckoutCompleted(
   // Notify customer that their migration job has started.
   if (email) {
     await notifyPaymentReceived(db, email, orderId);
+  }
+}
+
+async function rejectEeaUkChOrder(
+  c: { var: StripeWebhookContext['Variables']; env: StripeWebhookEnv },
+  db: AnyDbClient,
+  order: { readonly id: string; readonly amountUsdCents: number },
+  paymentIntentId: string,
+  countryCode: string,
+): Promise<void> {
+  const stripe = resolveStripe(c);
+  await stripe.createRefund(paymentIntentId, order.amountUsdCents);
+  await markOrderRefunded(db, order.id);
+
+  const email = resolveEmail(c);
+  if (email) {
+    await notifyEeaRejection(db, email, order.id, countryCode);
   }
 }
 

@@ -148,3 +148,45 @@ export function refundedEmail(data: RefundedData): SendEmailInput {
     html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
   };
 }
+
+export interface EeaRejectionData {
+  readonly repoFullName: string;
+  readonly amountUsdCents: number;
+  readonly countryCode: string;
+}
+
+export function eeaRejectionEmail(data: EeaRejectionData): SendEmailInput {
+  const dollars = (data.amountUsdCents / 100).toFixed(2);
+  const subject = `migrate-bot: full refund issued (service not available in your region)`;
+  const text = [
+    `Thanks for trying migrate-bot. Unfortunately, our Service is currently`,
+    `not offered to residents of the European Economic Area, the United`,
+    `Kingdom, or Switzerland (Terms of Service Section 2).`,
+    '',
+    `Your billing address (country: ${data.countryCode}) falls within that`,
+    `scope, so we've issued a full refund of $${dollars} back to your card`,
+    `via Stripe. It typically clears in 5-10 business days depending on`,
+    `the issuer.`,
+    '',
+    `The migration job for ${data.repoFullName} did not run; no repository`,
+    `data was processed by our agent.`,
+    '',
+    `The reason for this restriction is GDPR / UK GDPR / Swiss FADP`,
+    `compliance. As a small operator we cannot credibly meet the full`,
+    `data-controller obligations on day 1, so we exclude those`,
+    `jurisdictions for now. We may revisit this once we have proper`,
+    `DPA infrastructure.`,
+    '',
+    `If your billing address is in the EEA / UK / CH but your residency`,
+    `is not (e.g., a corporate card issued there but you live elsewhere),`,
+    `please reply with that context and we'll re-evaluate.`,
+    '',
+    `— migrate-bot`,
+  ].join('\n');
+  return {
+    to: '',
+    subject,
+    text,
+    html: `<p>${text.replace(/\n/g, '<br>')}</p>`,
+  };
+}

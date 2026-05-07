@@ -278,6 +278,122 @@ describe('POST /webhooks/stripe', () => {
     expect(order?.refundedAt).not.toBeNull();
   });
 
+  it('rejects EEA billing address: refunds via Stripe, marks order refunded, does not create job', async () => {
+    const seed = await seedPaidOrder(db);
+    const createRefund = vi
+      .fn()
+      .mockResolvedValue({ refundId: 're_eea_test', amountUsdCents: 9900 });
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_eea',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_eea',
+              customer_details: { address: { country: 'DE' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+
+    const order = await loadOrder(db, seed.orderId);
+    expect(order?.state).toBe('refunded');
+    expect(order?.jobId).toBeNull();
+
+    expect(createRefund).toHaveBeenCalledTimes(1);
+    expect(createRefund).toHaveBeenCalledWith('pi_eea', 9900);
+
+    const queued = queue.drain();
+    expect(queued).toHaveLength(0);
+  });
+
+  it('rejects UK billing address (post-Brexit, still under UK GDPR)', async () => {
+    const seed = await seedPaidOrder(db);
+    const createRefund = vi
+      .fn()
+      .mockResolvedValue({ refundId: 're_uk_test', amountUsdCents: 9900 });
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_uk',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_uk',
+              customer_details: { address: { country: 'GB' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+    const order = await loadOrder(db, seed.orderId);
+    expect(order?.state).toBe('refunded');
+    expect(createRefund).toHaveBeenCalledWith('pi_uk', 9900);
+  });
+
+  it('does NOT reject Japan / US / non-EEA billing addresses', async () => {
+    const seed = await seedPaidOrder(db);
+    const createRefund = vi.fn().mockRejectedValue(new Error('should not refund'));
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_jp',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_jp',
+              customer_details: { address: { country: 'JP' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+    expect(createRefund).not.toHaveBeenCalled();
+
+    const order = await loadOrder(db, seed.orderId);
+    expect(order?.state).toBe('paid');
+    expect(order?.jobId).not.toBeNull();
+    expect(queue.drain()).toHaveLength(1);
+  });
+
   it('ignores unknown event types with 200 ack', async () => {
     const stripe = makeStripeStub(async () => ({
       id: 'evt_unknown',
