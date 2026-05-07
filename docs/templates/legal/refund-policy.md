@@ -16,22 +16,33 @@ explains when you are entitled to a refund and how to request one.
 ## 1. Refund-eligible scenarios
 
 You are eligible for a **full refund** of the order price if **any** of the
-following applies and you contact us within 14 days of payment:
+following applies. You may notify us at any time within **30 days of
+payment**; for failures attributable to the Service, we will also process
+the refund proactively (without you having to ask) where we can detect
+the failure on our side.
 
 - Our automated verification (TypeScript typecheck and `next build`) cannot
-  reach a passing state for reasons attributable to the Service.
+  reach a passing state within 14 days of payment for reasons attributable
+  to the Service.
 - The migration job fails to complete due to a Service-side defect (for
   example, a runtime error inside our agent that we cannot reproduce as a
   pre-existing condition in your repository).
 - Our agent identifies a blocker in your repository that we did not detect
   upfront (for example, a custom server, monorepo layout that our analyzer
   missed, or a regulated dependency we cannot process). In this case the
-  refund is automatic; the migration job is aborted and the refund is
-  initiated within minutes.
+  migration job is aborted and the refund is processed promptly upon our
+  detection of the blocker.
 
 In refund-eligible cases, the refund covers the full order price. Refunds
 are issued back to the original payment method via Stripe and typically
 clear within 5–10 business days depending on your card issuer.
+
+> **Note on 14 days vs 30 days**: 14 days is our internal commitment for
+> when the Service must complete the migration (役務提供時期). If we
+> haven't delivered a passing draft PR by then, the order qualifies for a
+> refund. 30 days is the window during which **you** can notify us of
+> issues you've observed (e.g., quality problems noticed after merge);
+> see Section 5 for the request procedure.
 
 ## 2. Not refund-eligible
 

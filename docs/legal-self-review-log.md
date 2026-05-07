@@ -99,9 +99,12 @@ PPC ガイドラインで必須の 3 項目(規則 17 条 2 項):
 
 ### Pass 5 — Cross-doc 整合
 **確認項目**:
-- 14 日返金期間: ToS §6 / Refund §1 / 特商法 / PP §9 すべて一致 ✅
+- 14 日返金期間 (役務提供期限): ToS §6 / Refund §1 / 特商法「役務の提供時期」「返品キャンセル」すべて 14 日で一致 ✅
+- 30 日通知 window (お客様連絡期間): Refund §1 で明示、ToS §6 で参照 ✅ (post-audit clarification commit `XXXX` で導入。それまでは 14 日通知期間と混同表現あり)
 - 価格 $99 / $249 / $499: landing / business.md / Stripe / 特商法すべて一致 ✅
 - 動作環境 Pages Router: 特商法 / ToS §1, §4 / landing 一致 ✅
+- Subprocessor 6 社の所在国: PP §3 表 / EEA 拒否説明 (PP §5、ToS §2、Stripe Checkout custom_text、Landing pricing 注記) で「米国」記述一致 ✅
+- 法務文書間の link: relative `./xxx.md` → absolute `/legal/xxx` に統一済 (audit finding 反映)
 
 ### Pass 6 — 独立エージェントレビュー
 別 agent (general-purpose) に改訂後 4 文書をレンダリングしレビュー依頼。**5 件の追加指摘**を受領、すべて反映:

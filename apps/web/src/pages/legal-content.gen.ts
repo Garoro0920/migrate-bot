@@ -89,11 +89,14 @@ already-purchased migrations.
 
 ## 6. Refunds
 
-Refunds are governed by our [Refund Policy](./refund-policy.md), which is
-incorporated into these Terms by reference. In summary: if our automated
-verification (typecheck and \`next build\`) cannot reach a passing state within
-14 days of payment for reasons attributable to the Service, you are entitled
-to a full refund of the order price.
+Refunds are governed by our [Refund Policy](/legal/refunds), which is
+incorporated into these Terms by reference. In summary, you are entitled to
+a full refund of the order price for any failure attributable to the
+Service — including unrecoverable verification failure within the 14-day
+service-delivery window, agent-side defects, and blockers we did not
+detect upfront. The full list of refund-eligible scenarios, exclusions,
+and the 30-day notification window during which you may raise issues are
+described in the Refund Policy.
 
 ## 7. Intellectual Property
 
@@ -437,22 +440,33 @@ explains when you are entitled to a refund and how to request one.
 ## 1. Refund-eligible scenarios
 
 You are eligible for a **full refund** of the order price if **any** of the
-following applies and you contact us within 14 days of payment:
+following applies. You may notify us at any time within **30 days of
+payment**; for failures attributable to the Service, we will also process
+the refund proactively (without you having to ask) where we can detect
+the failure on our side.
 
 - Our automated verification (TypeScript typecheck and \`next build\`) cannot
-  reach a passing state for reasons attributable to the Service.
+  reach a passing state within 14 days of payment for reasons attributable
+  to the Service.
 - The migration job fails to complete due to a Service-side defect (for
   example, a runtime error inside our agent that we cannot reproduce as a
   pre-existing condition in your repository).
 - Our agent identifies a blocker in your repository that we did not detect
   upfront (for example, a custom server, monorepo layout that our analyzer
   missed, or a regulated dependency we cannot process). In this case the
-  refund is automatic; the migration job is aborted and the refund is
-  initiated within minutes.
+  migration job is aborted and the refund is processed promptly upon our
+  detection of the blocker.
 
 In refund-eligible cases, the refund covers the full order price. Refunds
 are issued back to the original payment method via Stripe and typically
 clear within 5–10 business days depending on your card issuer.
+
+> **Note on 14 days vs 30 days**: 14 days is our internal commitment for
+> when the Service must complete the migration (役務提供時期). If we
+> haven't delivered a passing draft PR by then, the order qualifies for a
+> refund. 30 days is the window during which **you** can notify us of
+> issues you've observed (e.g., quality problems noticed after merge);
+> see Section 5 for the request procedure.
 
 ## 2. Not refund-eligible
 
@@ -554,10 +568,10 @@ always posted at https://migrate-bot.dev/refunds.
 | **支払方法** | クレジットカード(Visa / Mastercard / American Express / JCB / Discover、Stripe 経由)。当社はカード番号、有効期限、CVC を保持しません |
 | **支払時期** | 注文時に Stripe Checkout 経由で全額を即時決済 |
 | **申込みの有効期限** | 定めなし(常時お申込みを受け付けています) |
-| **役務の提供時期** | 注文(決済成功)後、自動的にジョブが開始されます。**所要時間の上限は決済日から 14 日以内**とし、対象リポジトリの規模・複雑度により概ね 5 分〜数時間程度で完了します。**14 日を超過しても役務提供が完了しない場合は、お客様からのご請求がなくとも当社の判断により[返金ポリシー](./refund-policy.md)に基づき全額返金します**。完了時又は返金時に登録メールアドレス宛に通知します |
-| **返品・キャンセルの可否および条件** | 本サービスはお客様のリポジトリ毎にカスタマイズされたデジタルサービスのため、原則として役務提供完了後の返品・キャンセルはお受けできません。<br>**ただし当社側に起因する不具合・障害によりサービスを完了できなかった場合**は、決済日から 14 日以内のご連絡で全額返金します。詳細は[返金ポリシー](./refund-policy.md)を参照ください |
-| **動作環境** | お客様の Next.js リポジトリが (a) GitHub.com 上に存在すること、(b) 当社 GitHub App をインストール可能なリポジトリであること、(c) Next.js Pages Router(\`pages/\` ディレクトリ構成)で記述されていること、を前提とします。Next.js のバージョンは概ね 13.x〜15.x の範囲を対象としますが、特殊な構成(custom server、複雑な monorepo、規制対象の依存関係を含むリポジトリ等)では当社が解析時に対応不可と判定する場合があります。詳細は[利用規約](./terms-of-service.md) §1、§2、§4 を参照 |
-| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](./refund-policy.md)に従い全額返金します。提供物そのもの(draft pull request の内容)に不適合があった場合は <CONTACT_EMAIL> までご連絡ください。当社は故意又は重大な過失による場合を除き、付随的・結果的損害(逸失利益、データ滅失等)について責任を負いません(詳細は[利用規約](./terms-of-service.md) §10) |
+| **役務の提供時期** | 注文(決済成功)後、自動的にジョブが開始されます。**所要時間の上限は決済日から 14 日以内**とし、対象リポジトリの規模・複雑度により概ね 5 分〜数時間程度で完了します。**14 日を超過しても役務提供が完了しない場合は、お客様からのご請求がなくとも当社の判断により[返金ポリシー](/legal/refunds)に基づき全額返金します**。完了時又は返金時に登録メールアドレス宛に通知します |
+| **返品・キャンセルの可否および条件** | 本サービスはお客様のリポジトリ毎にカスタマイズされたデジタルサービスのため、原則として役務提供完了後の返品・キャンセルはお受けできません。<br>**ただし当社側に起因する不具合・障害によりサービスを完了できなかった場合**は、決済日から 14 日以内のご連絡で全額返金します。詳細は[返金ポリシー](/legal/refunds)を参照ください |
+| **動作環境** | お客様の Next.js リポジトリが (a) GitHub.com 上に存在すること、(b) 当社 GitHub App をインストール可能なリポジトリであること、(c) Next.js Pages Router(\`pages/\` ディレクトリ構成)で記述されていること、を前提とします。Next.js のバージョンは概ね 13.x〜15.x の範囲を対象としますが、特殊な構成(custom server、複雑な monorepo、規制対象の依存関係を含むリポジトリ等)では当社が解析時に対応不可と判定する場合があります。詳細は[利用規約](/legal/terms) §1、§2、§4 を参照 |
+| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](/legal/refunds)に従い全額返金します。提供物そのもの(draft pull request の内容)に不適合があった場合は <CONTACT_EMAIL> までご連絡ください。当社は故意又は重大な過失による場合を除き、付随的・結果的損害(逸失利益、データ滅失等)について責任を負いません(詳細は[利用規約](/legal/terms) §10) |
 | **苦情・お問合せ先** | <CONTACT_EMAIL>(原則 2 営業日以内に返信) |
 
 ## 補足
@@ -568,7 +582,7 @@ always posted at https://migrate-bot.dev/refunds.
   優先します。
 - 本サービスは弊社のソフトウェアと第三者の AI サービス
   (Anthropic Claude API)を組み合わせて提供されます。詳細は[プライバシー
-  ポリシー](./privacy-policy.md) §3 を参照ください。
+  ポリシー](/legal/privacy) §3 を参照ください。
 `,
 } as const;
 

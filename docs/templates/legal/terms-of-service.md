@@ -104,11 +104,14 @@ already-purchased migrations.
 
 ## 6. Refunds
 
-Refunds are governed by our [Refund Policy](./refund-policy.md), which is
-incorporated into these Terms by reference. In summary: if our automated
-verification (typecheck and `next build`) cannot reach a passing state within
-14 days of payment for reasons attributable to the Service, you are entitled
-to a full refund of the order price.
+Refunds are governed by our [Refund Policy](/legal/refunds), which is
+incorporated into these Terms by reference. In summary, you are entitled to
+a full refund of the order price for any failure attributable to the
+Service — including unrecoverable verification failure within the 14-day
+service-delivery window, agent-side defects, and blockers we did not
+detect upfront. The full list of refund-eligible scenarios, exclusions,
+and the 30-day notification window during which you may raise issues are
+described in the Refund Policy.
 
 ## 7. Intellectual Property
 

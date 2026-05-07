@@ -124,7 +124,10 @@ export function createInternalRouter(): Hono<InternalContext> {
       });
 
       // 課金済 job が refunding に入った直後に Stripe 返金を試みる。
-      // 失敗した場合は job を refunding のまま残し、ログのみ。手動 retry できる。
+      // 失敗した場合は job を refunding のまま残す → operator が手動 retry。
+      // ⚠ refund 失敗は **operator が即時 alert で気付く必要あり** な事象なので
+      // structured error log + Sentry captureException 両方で残す。
+      // ※返却 status は 200 のまま (runner 側の transition 自体は成功している)。
       if (body.toState === 'refunding') {
         const stripe = resolveStripe(c);
         if (stripe) {
@@ -136,8 +139,30 @@ export function createInternalRouter(): Hono<InternalContext> {
               await notifyRefunded(db, email, jobId, body.reason);
             }
           } catch (err) {
-            console.error('refund failed', { jobId, error: err });
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            const errorStack = err instanceof Error ? err.stack : undefined;
+            console.error('REFUND_FAILURE: stripe refund failed during job transition', {
+              jobId,
+              transitionReason: body.reason,
+              error: errorMessage,
+              errorStack,
+              alert: 'OPERATOR_ACTION_REQUIRED — manually verify Stripe charge state and reconcile DB',
+            });
+            // Sentry の withSentry wrapper が globalThis.Sentry を expose する場合は
+            // ここで captureException する。運用上 SENTRY_DSN 未設定なら no-op。
+            // 直接 import すると bundle が膨らむため optional access pattern にする。
+            const sentryGlobal = (globalThis as { Sentry?: { captureException?: (err: unknown, ctx?: unknown) => void } }).Sentry;
+            sentryGlobal?.captureException?.(err, {
+              tags: { jobId, kind: 'refund_failure' },
+              extra: { transitionReason: body.reason },
+            });
           }
+        } else {
+          console.error('REFUND_FAILURE: stripe binding unavailable, cannot process refund', {
+            jobId,
+            transitionReason: body.reason,
+            alert: 'OPERATOR_ACTION_REQUIRED — STRIPE_SECRET_KEY secret missing or wrangler binding broken',
+          });
         }
       }
 

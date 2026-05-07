@@ -130,13 +130,39 @@ export function createStripeWebhookRouter(): Hono<StripeWebhookContext> {
       return c.json({ ok: true, eventType: event.type });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      // 5xx を返すと Stripe が retry する。DB transient な失敗時に retry したいので
-      // 500 を返す (idempotency は DB 層で確保)。
+      // permanent failures (event payload が壊れている、DB row が無い等)
+      // を 500 で返すと Stripe が 3 日間 retry し続け Sentry alert spam に
+      // なるため、200 + 警告 log で固定する。
+      // transient failures (DB 一時不能、Stripe API 不能) は 500 を返して
+      // retry させたいため別経路。
+      if (err instanceof PermanentWebhookError) {
+        console.warn('stripe webhook permanent failure, ack with 200', {
+          eventType: event.type,
+          eventId: event.id,
+          reason: msg,
+        });
+        return c.json({ ok: false, reason: msg, permanent: true });
+      }
+      console.error('stripe webhook transient failure, return 500 for retry', {
+        eventType: event.type,
+        eventId: event.id,
+        error: msg,
+      });
       return c.json({ error: msg }, 500);
     }
   });
 
   return app;
+}
+
+// permanent failures (Stripe retry してもまず再現しない、対応不能なエラー)
+// と transient failures (Stripe retry すれば回復する見込み) を区別するための
+// マーカ例外。throw 側は理由を message に詳述する。
+class PermanentWebhookError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PermanentWebhookError';
+  }
 }
 
 async function handleCheckoutCompleted(
@@ -147,37 +173,62 @@ async function handleCheckoutCompleted(
   const email = resolveEmail(c);
   const orderId = session.client_reference_id;
   if (!orderId) {
-    throw new Error(`checkout.session.completed without client_reference_id: ${session.id}`);
+    throw new PermanentWebhookError(
+      `checkout.session.completed without client_reference_id: ${session.id}`,
+    );
   }
-  const paymentIntentId = typeof session.payment_intent === 'string'
-    ? session.payment_intent
-    : (session.payment_intent?.id ?? null);
+  const paymentIntentId =
+    typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
   if (!paymentIntentId) {
-    throw new Error(`checkout.session.completed without payment_intent: ${session.id}`);
+    throw new PermanentWebhookError(
+      `checkout.session.completed without payment_intent: ${session.id}`,
+    );
   }
 
-  const order = await loadOrder(db, orderId);
-  if (!order) {
-    throw new Error(`order not found for client_reference_id: ${orderId}`);
+  const initialOrder = await loadOrder(db, orderId);
+  if (!initialOrder) {
+    throw new PermanentWebhookError(
+      `order not found for client_reference_id: ${orderId}`,
+    );
   }
 
-  // markOrderPaid は idempotent。既に paid なら job 再作成はしない。
+  // markOrderPaid は idempotent。既に paid でも payment_intent_id を保存する。
   const paidResult = await markOrderPaid(db, {
     orderId,
     stripePaymentIntentId: paymentIntentId,
   });
-  if (paidResult.alreadyHandled) return;
+  // 既に paid な場合は最新 state を再 load (refundedAt 等が必要)
+  const order = paidResult.alreadyHandled
+    ? ((await loadOrder(db, orderId)) ?? initialOrder)
+    : initialOrder;
 
   // GDPR / UK GDPR / Swiss FADP 対策の 5 段目防御:
-  // billing country が EEA / UK / Switzerland なら ToS §2 違反のため
-  // job 作成せず即時 refund + 拒否通知。
+  // billing country が EEA / UK / Switzerland か、または欠落 (fail-closed)
+  // なら ToS §2 違反のため job 作成せず即時 refund + 拒否通知。
   // Stripe Checkout は billing_address_collection: 'required' で
-  // customer_details.address.country を必ず提供する。
+  // customer_details.address.country を必ず提供するはずだが、saved customer
+  // / async payment 等で null になる edge case が報告されている。
   const billingCountry = session.customer_details?.address?.country ?? null;
-  if (isEeaUkCh(billingCountry)) {
-    await rejectEeaUkChOrder(c, db, order, paymentIntentId, billingCountry ?? 'unknown');
+  const shouldReject = isEeaUkCh(billingCountry) || billingCountry === null;
+  if (shouldReject) {
+    if (order.refundedAt !== null) {
+      // 既に refunded 済 (Stripe webhook retry) → 何もしない
+      return;
+    }
+    await rejectEeaUkChOrder(
+      c,
+      db,
+      order,
+      paymentIntentId,
+      billingCountry ?? 'missing_billing_country',
+    );
     return;
   }
+
+  // 非 EEA path: 既に処理済ならここで早期 return (idempotent)
+  if (paidResult.alreadyHandled) return;
 
   // 該当 installation を取得して GitHub integer ID を queue message に含める
   const instRows = await db
@@ -187,7 +238,7 @@ async function handleCheckoutCompleted(
     .limit(1);
   const inst = instRows[0];
   if (!inst) {
-    throw new Error(`installation not found: ${order.installationId}`);
+    throw new PermanentWebhookError(`installation not found: ${order.installationId}`);
   }
 
   const { jobId, traceId } = await createJob(db, {
@@ -223,7 +274,28 @@ async function rejectEeaUkChOrder(
   countryCode: string,
 ): Promise<void> {
   const stripe = resolveStripe(c);
-  await stripe.createRefund(paymentIntentId, order.amountUsdCents);
+  // Stripe createRefund は idempotent ではないが、二度目の呼出は
+  // "already refunded" のような error を返すので、そのケースを捕捉して
+  // markOrderRefunded に進める (DB の refundedAt 設定が前回失敗していた等)
+  try {
+    await stripe.createRefund(paymentIntentId, order.amountUsdCents);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+    if (
+      msg.includes('already refunded') ||
+      msg.includes('charge_already_refunded') ||
+      msg.includes('refund already issued')
+    ) {
+      console.warn('Stripe refund already issued for EEA reject, proceeding to mark refunded', {
+        orderId: order.id,
+        paymentIntentId,
+      });
+    } else {
+      // transient or unknown error → throw → Stripe retry, retry でも refundedAt
+      // 未設定なので再 enter で同じ流れに到達する
+      throw err;
+    }
+  }
   await markOrderRefunded(db, order.id);
 
   const email = resolveEmail(c);

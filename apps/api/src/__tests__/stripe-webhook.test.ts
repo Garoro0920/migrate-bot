@@ -150,6 +150,7 @@ describe('POST /webhooks/stripe', () => {
           id: 'cs_seed',
           client_reference_id: seed.orderId,
           payment_intent: 'pi_xyz',
+          customer_details: { address: { country: 'JP' } },
         },
       },
     }) as unknown as Stripe.Event);
@@ -185,6 +186,7 @@ describe('POST /webhooks/stripe', () => {
           id: 'cs_seed',
           client_reference_id: seed.orderId,
           payment_intent: 'pi_xyz',
+          customer_details: { address: { country: 'JP' } },
         },
       },
     } as unknown as Stripe.Event;
@@ -207,6 +209,151 @@ describe('POST /webhooks/stripe', () => {
 
     const queued = queue.drain();
     expect(queued).toHaveLength(1);
+  });
+
+  it('fail-closed: rejects checkout when customer_details.address.country is missing (defensive)', async () => {
+    const seed = await seedPaidOrder(db);
+    const createRefund = vi
+      .fn()
+      .mockResolvedValue({ refundId: 're_failclosed', amountUsdCents: 9900 });
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_failclosed',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_failclosed',
+              // customer_details missing entirely (saved customer / async payment edge case)
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+    expect(createRefund).toHaveBeenCalledWith('pi_failclosed', 9900);
+    const order = await loadOrder(db, seed.orderId);
+    expect(order?.state).toBe('refunded');
+    expect(queue.drain()).toHaveLength(0);
+  });
+
+  it('EEA retry-safe: second webhook after refund succeeds is no-op (refundedAt set)', async () => {
+    const seed = await seedPaidOrder(db);
+    let refundCallCount = 0;
+    const createRefund = vi.fn(async () => {
+      refundCallCount++;
+      return { refundId: 're_retry_test', amountUsdCents: 9900 };
+    });
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_eea_retry',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_retry',
+              customer_details: { address: { country: 'DE' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+
+    // First webhook: refund + mark refunded
+    const r1 = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(r1.status).toBe(200);
+    expect(refundCallCount).toBe(1);
+
+    // Second webhook (retry): should NOT call createRefund again
+    const r2 = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(r2.status).toBe(200);
+    expect(refundCallCount).toBe(1); // unchanged
+  });
+
+  it('EEA Stripe "already refunded" error is treated as success (idempotent recovery)', async () => {
+    const seed = await seedPaidOrder(db);
+    const createRefund = vi
+      .fn()
+      .mockRejectedValue(new Error('charge_already_refunded: charge has been refunded'));
+    const stripe = {
+      createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
+      verifyWebhookSignature: vi.fn(async () =>
+        ({
+          id: 'evt_already_refunded',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_alreadyrefunded',
+              customer_details: { address: { country: 'FR' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+      ),
+      createRefund,
+    } as unknown as StripeClient;
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+    const order = await loadOrder(db, seed.orderId);
+    expect(order?.state).toBe('refunded');
+  });
+
+  it('returns 200 (not 500) when order not found — permanent failure ack to stop Stripe retries', async () => {
+    const stripe = makeStripeStub(async () => ({
+      id: 'evt_orphan',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: 'cs_orphan',
+          client_reference_id: 'unknown-order-id',
+          payment_intent: 'pi_orphan',
+          customer_details: { address: { country: 'JP' } },
+        },
+      },
+    }) as unknown as Stripe.Event);
+    const queue = new InMemoryQueue<JobQueueMessage>();
+    const app = buildApp(db, stripe, queue);
+    const res = await app.request(
+      '/webhooks/stripe',
+      { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
+      ENV,
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; permanent?: boolean };
+    expect(body.ok).toBe(false);
+    expect(body.permanent).toBe(true);
   });
 
   it('handles checkout.session.expired by marking order expired', async () => {
