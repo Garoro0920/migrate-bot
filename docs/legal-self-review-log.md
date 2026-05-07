@@ -122,7 +122,7 @@ GDPR 適用域(EEA + UK + Switzerland)からのアクセスを技術的に抑止
 3. **billing_address_collection: 'required' で住所を必須収集** (将来の auto-refund 層の準備)
 4. **Landing pricing section に non-availability 注記** (購入前の自己排除促進層)
 
-**TODO (post-launch)**: webhook (`checkout.session.completed`) で `session.customer_details.address.country` を検証、EEA/UK/CH 国コード(EEA 30 + UK + CH = 計 32 ヶ国)が来たら自動 refund + reject 通知メール。Beta 中は Stripe 画面の警告文言で抑止する best-effort で運用。
+**実装済 (commit `4b351e5`)**: webhook (`checkout.session.completed`) で `session.customer_details.address.country` を検証、EEA/UK/CH 国コード(EEA 30 + UK + CH = 計 32 ヶ国)が来たら自動 refund + reject 通知メール (`eeaRejectionEmail`)。これで 5 段防御が完成。手動 fallback として `docs/customer-support/eea-uk-ch-rejection.md` も維持(万一 webhook が動作しなかった場合用)。
 
 ## 4. 残存リスクと運用指針
 
