@@ -21,6 +21,10 @@ import type { StripeClient } from './stripe';
 //
 // 例外発生時 (Stripe API 失敗等) は throw して caller が handle する。job は
 // refunding のまま残るので後で manual retry できる。
+//
+// A13: Stripe API call が hang した場合に Workers の request 全体が無限に
+// 待ち状態になるのを防ぐため、Stripe createRefund に timeout を被せる。
+// 既定 30s。テスト時は ProcessRefundOptions で上書き可能。
 
 export interface ProcessRefundResult {
   readonly skipped: boolean;
@@ -28,11 +32,39 @@ export interface ProcessRefundResult {
   readonly stripeRefundId?: string;
 }
 
+export interface ProcessRefundOptions {
+  readonly stripeTimeoutMs?: number;
+}
+
+const DEFAULT_STRIPE_TIMEOUT_MS = 30_000;
+
+export class StripeRefundTimeoutError extends Error {
+  readonly timeoutMs: number;
+  constructor(timeoutMs: number) {
+    super(`Stripe createRefund timed out after ${timeoutMs}ms`);
+    this.name = 'StripeRefundTimeoutError';
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new StripeRefundTimeoutError(timeoutMs)), timeoutMs);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function processRefund(
   db: AnyDbClient,
   stripe: StripeClient,
   jobId: string,
   reason: string,
+  options: ProcessRefundOptions = {},
 ): Promise<ProcessRefundResult> {
   const order = await getOrderByJobId(db, jobId);
 
@@ -66,8 +98,12 @@ export async function processRefund(
     return { skipped: true, refunded: false };
   }
 
-  // ここから Stripe を叩く
-  const refund = await stripe.createRefund(order.stripePaymentIntentId, order.amountUsdCents);
+  // ここから Stripe を叩く (timeout 付き)
+  const stripeTimeoutMs = options.stripeTimeoutMs ?? DEFAULT_STRIPE_TIMEOUT_MS;
+  const refund = await withTimeout(
+    stripe.createRefund(order.stripePaymentIntentId, order.amountUsdCents),
+    stripeTimeoutMs,
+  );
 
   // refunds 表に記録 (drizzle 経由で raw insert)
   await db.run(sql`

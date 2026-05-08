@@ -7,18 +7,17 @@ const ENV = {
 };
 
 function makeFetchOk(body: unknown): typeof fetch {
-  return vi.fn(async () =>
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    }),
+  return vi.fn(
+    async () =>
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      }),
   ) as unknown as typeof fetch;
 }
 
 function makeFetchError(status: number, body: string): typeof fetch {
-  return vi.fn(async () =>
-    new Response(body, { status }),
-  ) as unknown as typeof fetch;
+  return vi.fn(async () => new Response(body, { status })) as unknown as typeof fetch;
 }
 
 describe('cli admin-trigger', () => {
@@ -52,7 +51,7 @@ describe('cli admin-trigger', () => {
     stderr.mockRestore();
   });
 
-  it("returns 1 when repo is not in owner/repo form", async () => {
+  it('returns 1 when repo is not in owner/repo form', async () => {
     const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
     const code = await runAdminTrigger(['42', 'no-slash'], { env: ENV });
     expect(code).toBe(1);
@@ -157,5 +156,82 @@ describe('cli admin-trigger', () => {
     });
     expect(code).toBe(2);
     stderr.mockRestore();
+  });
+
+  // B12: --dry-run はリクエストを送信しない
+  describe('--dry-run', () => {
+    it('does not call fetch and returns 0', async () => {
+      const fetchSpy = vi.fn() as unknown as typeof fetch;
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      const code = await runAdminTrigger(['--dry-run', '42', 'octocat/hello'], {
+        fetch: fetchSpy,
+        env: ENV,
+      });
+      expect(code).toBe(0);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      stdout.mockRestore();
+    });
+
+    it('still validates installationId and repo before reporting', async () => {
+      const fetchSpy = vi.fn() as unknown as typeof fetch;
+      const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+      const code = await runAdminTrigger(['--dry-run', 'not-a-number', 'octocat/hello'], {
+        fetch: fetchSpy,
+        env: ENV,
+      });
+      // 不正な installationId は dry-run でも reject
+      expect(code).toBe(1);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      stderr.mockRestore();
+    });
+
+    it('emits JSON when combined with --json', async () => {
+      const fetchSpy = vi.fn() as unknown as typeof fetch;
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      const code = await runAdminTrigger(
+        ['--dry-run', '--json', '--plan', 'medium', '42', 'octocat/hello'],
+        { fetch: fetchSpy, env: ENV },
+      );
+      expect(code).toBe(0);
+      const written = stdout.mock.calls
+        .map((c) => {
+          const first = c[0];
+          if (typeof first === 'string') return first;
+          if (first instanceof Uint8Array) return Buffer.from(first).toString('utf-8');
+          return '';
+        })
+        .join('');
+      const parsed = JSON.parse(written) as {
+        dryRun: boolean;
+        request: { body: { plan: string; githubInstallationId: number } };
+      };
+      expect(parsed.dryRun).toBe(true);
+      expect(parsed.request.body.plan).toBe('medium');
+      expect(parsed.request.body.githubInstallationId).toBe(42);
+      stdout.mockRestore();
+    });
+
+    it('redacts the bearer token in dry-run output', async () => {
+      const fetchSpy = vi.fn() as unknown as typeof fetch;
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      await runAdminTrigger(['--dry-run', '--json', '42', 'octocat/hello'], {
+        fetch: fetchSpy,
+        env: ENV,
+      });
+      const written = stdout.mock.calls
+        .map((c) => {
+          const first = c[0];
+          if (typeof first === 'string') return first;
+          if (first instanceof Uint8Array) return Buffer.from(first).toString('utf-8');
+          return '';
+        })
+        .join('');
+      // 完全な token が dry-run 出力に出ないこと
+      expect(written).not.toContain(ENV.MIGRATE_BOT_API_TOKEN);
+      // 先頭 6 文字 + truncated 表記は出ること
+      expect(written).toContain('secret');
+      expect(written).toContain('truncated');
+      stdout.mockRestore();
+    });
   });
 });

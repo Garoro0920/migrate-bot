@@ -46,12 +46,24 @@ function readEnv(): RunnerEnv {
 // - process.exit を呼ぶ前に Sentry.flush で例外送信を待つ。
 // - 二重起動 (SIGTERM が複数回飛ぶ) を防ぐため shuttingDown フラグでガード。
 // - api / jobId は handler installation 時にクロージャでキャプチャする。
+//
+// 補足: SIGKILL (kernel OOM-killer 等) は捕捉不可能。OOM の前兆検知は別途
+// installMemoryWatchdog で実装している (B5)。
 export function installShutdownHandler(api: InternalApiClient, jobId: string): () => void {
   let shuttingDown = false;
   const handler = async (signal: NodeJS.Signals): Promise<void> => {
     if (shuttingDown) return;
     shuttingDown = true;
     process.stderr.write(`runner: received ${signal}, attempting graceful shutdown\n`);
+    // operator 観測性: 当該 job が「外部要因で kill された」事実を Sentry に
+    // breadcrumb として残す。連続発生すれば Fly Machine の deploy / OOM パターンを
+    // 検出できる。SENTRY_DSN 未設定なら Sentry.captureMessage は no-op。
+    if (process.env.SENTRY_DSN) {
+      Sentry.captureMessage(`runner received ${signal}; transitioning to refunding`, {
+        level: 'warning',
+        tags: { signal, jobId, kind: 'fly_machine_terminated' },
+      });
+    }
     try {
       // 既に terminal な状態なら不正遷移エラーになるので best-effort で握りつぶす。
       await api.transitionJob({
@@ -85,6 +97,54 @@ export function installShutdownHandler(api: InternalApiClient, jobId: string): (
   };
 }
 
+// B5: OOM 前兆検知。Fly Machine の memory_mb (現状 2048MB) に対して
+// process.memoryUsage().rss が一定割合を超えたら一度だけ warning を発火。
+// SIGKILL は捕捉不可能なので、kill される前に operator が気付ける手段として残す。
+//
+// 設定はテスト性のため引数で上書き可能。デフォルトは Fly fly.toml の
+// guest.memory_mb=2048 に合わせる。
+export interface MemoryWatchdogOptions {
+  readonly limitMb?: number;
+  readonly thresholdRatio?: number;
+  readonly intervalMs?: number;
+  readonly memoryUsage?: () => NodeJS.MemoryUsage;
+  readonly now?: () => number;
+}
+
+export function installMemoryWatchdog(opts: MemoryWatchdogOptions = {}): () => void {
+  const limitMb = opts.limitMb ?? 2048;
+  const thresholdRatio = opts.thresholdRatio ?? 0.85;
+  const intervalMs = opts.intervalMs ?? 30_000;
+  const memoryUsage = opts.memoryUsage ?? process.memoryUsage.bind(process);
+  const limitBytes = limitMb * 1024 * 1024;
+  const thresholdBytes = limitBytes * thresholdRatio;
+  let warned = false;
+
+  const check = (): void => {
+    const usage = memoryUsage();
+    if (warned) return;
+    if (usage.rss < thresholdBytes) return;
+    warned = true;
+    const rssMb = Math.round(usage.rss / (1024 * 1024));
+    const heapMb = Math.round(usage.heapUsed / (1024 * 1024));
+    const message = `runner memory high: rss=${rssMb}MB heapUsed=${heapMb}MB threshold=${Math.round(thresholdBytes / (1024 * 1024))}MB limit=${limitMb}MB`;
+    process.stderr.write(`${message}\n`);
+    if (process.env.SENTRY_DSN) {
+      Sentry.captureMessage(message, {
+        level: 'warning',
+        tags: { kind: 'memory_high', jobId: process.env.JOB_ID ?? 'unknown' },
+        extra: { rss: usage.rss, heapUsed: usage.heapUsed, limitBytes, thresholdBytes },
+      });
+    }
+  };
+
+  const timer = setInterval(check, intervalMs);
+  // Fly Machine が auto_destroy なので process が exit したら timer も死ぬが、
+  // unref で明示的に「main 処理が終わったら timer のために process を生かさない」
+  if (typeof timer.unref === 'function') timer.unref();
+  return () => clearInterval(timer);
+}
+
 export async function runApp(): Promise<number> {
   const env = readEnv();
   const api = createInternalApiClient({
@@ -96,6 +156,7 @@ export async function runApp(): Promise<number> {
   // shutdown 経路で api が必要なので、これより前に SIGTERM を受けても何もできないが
   // それは仕方ない (Fly が起動中の Machine を即座に kill する状況は稀)。
   const detachShutdown = installShutdownHandler(api, env.JOB_ID);
+  const detachMemoryWatchdog = installMemoryWatchdog();
 
   // installationId を取るために 1 度 job を pre-load する。runJob 内でも loadJob が
   // 走るので 1 往復多いが、それ以外の wiring は単純化される。
@@ -125,5 +186,6 @@ export async function runApp(): Promise<number> {
   } finally {
     // 通常終了時は shutdown handler を外して、Sentry close 等が二重に走るのを防ぐ
     detachShutdown();
+    detachMemoryWatchdog();
   }
 }

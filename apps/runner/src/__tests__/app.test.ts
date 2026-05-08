@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { installShutdownHandler } from '../app';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { installMemoryWatchdog, installShutdownHandler } from '../app';
 import type { InternalApiClient, RemoteJob } from '../internal-api';
 
 // R5: SIGTERM handler の挙動を unit テストする。
@@ -135,5 +135,73 @@ describe('installShutdownHandler (R5)', () => {
 
     expect(exitSpy).toHaveBeenCalledWith(143);
     detach();
+  });
+});
+
+describe('installMemoryWatchdog (B5)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  function makeUsage(rssMb: number): NodeJS.MemoryUsage {
+    return {
+      rss: rssMb * 1024 * 1024,
+      heapTotal: 0,
+      heapUsed: Math.floor(rssMb * 0.8) * 1024 * 1024,
+      external: 0,
+      arrayBuffers: 0,
+    };
+  }
+
+  it('does not warn when rss is below threshold', () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    // 2048MB limit × 0.85 = 1740MB threshold; 500MB is well below
+    const detach = installMemoryWatchdog({
+      limitMb: 2048,
+      thresholdRatio: 0.85,
+      intervalMs: 1000,
+      memoryUsage: () => makeUsage(500),
+    });
+    vi.advanceTimersByTime(5000);
+    expect(stderr).not.toHaveBeenCalled();
+    detach();
+  });
+
+  it('warns once when rss crosses the threshold', () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const detach = installMemoryWatchdog({
+      limitMb: 2048,
+      thresholdRatio: 0.85,
+      intervalMs: 1000,
+      memoryUsage: () => makeUsage(1800), // > 1740 threshold
+    });
+    vi.advanceTimersByTime(5000);
+    // 5 ticks worth of intervals but only one warning
+    expect(stderr).toHaveBeenCalledTimes(1);
+    const written = stderr.mock.calls[0]?.[0];
+    expect(typeof written).toBe('string');
+    expect(written as string).toMatch(/runner memory high/);
+    expect(written as string).toMatch(/rss=1800MB/);
+    detach();
+  });
+
+  it('detach stops further checks', () => {
+    const memoryUsage = vi.fn(() => makeUsage(100));
+    const detach = installMemoryWatchdog({
+      limitMb: 2048,
+      thresholdRatio: 0.85,
+      intervalMs: 1000,
+      memoryUsage,
+    });
+    vi.advanceTimersByTime(2500);
+    const callsBefore = memoryUsage.mock.calls.length;
+    detach();
+    vi.advanceTimersByTime(5000);
+    expect(memoryUsage.mock.calls.length).toBe(callsBefore);
   });
 });

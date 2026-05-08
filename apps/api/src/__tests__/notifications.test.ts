@@ -14,12 +14,8 @@ import {
 } from '@migrate-bot/db';
 import Database from 'better-sqlite3';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { EmailClient } from '../email';
-import {
-  notifyPaymentReceived,
-  notifyPrReady,
-  notifyRefunded,
-} from '../notifications';
+import { type EmailClient, ResendError } from '../email';
+import { notifyPaymentReceived, notifyPrReady, notifyRefunded } from '../notifications';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const INITIAL_SQL = readFileSync(
@@ -107,6 +103,49 @@ describe('notifyPaymentReceived', () => {
       send: vi.fn().mockRejectedValue(new Error('SMTP down')),
     };
     await expect(notifyPaymentReceived(db, email, orderId)).resolves.toBeUndefined();
+  });
+
+  // A12: Resend 4xx (permanent) と 5xx (transient) を log で区別する
+  it('logs EMAIL_PERMANENT_FAILURE on Resend 4xx (e.g. invalid email)', async () => {
+    const { orderId } = await seedFullScenario(db, { paid: true });
+    const email: EmailClient = {
+      send: vi.fn().mockRejectedValue(new ResendError(422, '{"error":"invalid_to"}')),
+    };
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await notifyPaymentReceived(db, email, orderId);
+    expect(errSpy).toHaveBeenCalledWith(
+      'notifyPaymentReceived failed',
+      expect.objectContaining({ alert: 'EMAIL_PERMANENT_FAILURE', status: 422 }),
+    );
+    errSpy.mockRestore();
+  });
+
+  it('logs EMAIL_TRANSIENT_FAILURE on Resend 5xx (e.g. provider outage)', async () => {
+    const { orderId } = await seedFullScenario(db, { paid: true });
+    const email: EmailClient = {
+      send: vi.fn().mockRejectedValue(new ResendError(503, 'Service Unavailable')),
+    };
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await notifyPaymentReceived(db, email, orderId);
+    expect(errSpy).toHaveBeenCalledWith(
+      'notifyPaymentReceived failed',
+      expect.objectContaining({ alert: 'EMAIL_TRANSIENT_FAILURE', status: 503 }),
+    );
+    errSpy.mockRestore();
+  });
+
+  it('logs EMAIL_UNKNOWN_FAILURE on non-Resend errors (e.g. network)', async () => {
+    const { orderId } = await seedFullScenario(db, { paid: true });
+    const email: EmailClient = {
+      send: vi.fn().mockRejectedValue(new Error('ECONNRESET')),
+    };
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await notifyPaymentReceived(db, email, orderId);
+    expect(errSpy).toHaveBeenCalledWith(
+      'notifyPaymentReceived failed',
+      expect.objectContaining({ alert: 'EMAIL_UNKNOWN_FAILURE' }),
+    );
+    errSpy.mockRestore();
   });
 
   it('is a no-op for unknown orderId', async () => {

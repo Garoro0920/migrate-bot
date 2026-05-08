@@ -12,6 +12,7 @@ interface ParsedAdminArgs {
   readonly repo: string | undefined;
   readonly plan: 'small' | 'medium' | 'large' | 'enterprise';
   readonly json: boolean;
+  readonly dryRun: boolean;
 }
 
 const PLANS = ['small', 'medium', 'large', 'enterprise'] as const;
@@ -21,6 +22,7 @@ function parseArgs(args: readonly string[]): ParsedAdminArgs {
   let repo: string | undefined;
   let plan: ParsedAdminArgs['plan'] = 'small';
   let json = false;
+  let dryRun = false;
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -32,12 +34,14 @@ function parseArgs(args: readonly string[]): ParsedAdminArgs {
       i += 1;
     } else if (a === '--json') {
       json = true;
+    } else if (a === '--dry-run') {
+      dryRun = true;
     } else if (!a?.startsWith('--')) {
       if (installationId === undefined) installationId = a;
       else if (repo === undefined) repo = a;
     }
   }
-  return { installationId, repo, plan, json };
+  return { installationId, repo, plan, json, dryRun };
 }
 
 interface TriggerResponse {
@@ -62,11 +66,12 @@ export async function runAdminTrigger(
   const parsed = parseArgs(args);
   if (!parsed.installationId || !parsed.repo) {
     process.stderr.write(
-      'Usage: admin-trigger [--plan small|medium|large|enterprise] [--json] <installationId> <owner/repo>\n',
+      'Usage: admin-trigger [--plan small|medium|large|enterprise] [--json] [--dry-run] <installationId> <owner/repo>\n',
     );
     process.stderr.write(
-      '  Required env: MIGRATE_BOT_API_URL, MIGRATE_BOT_API_TOKEN\n',
+      '  --dry-run: 入力値の表示と検証のみ。/admin/trigger を呼ばず job 作成しない。\n',
     );
+    process.stderr.write('  Required env: MIGRATE_BOT_API_URL, MIGRATE_BOT_API_TOKEN\n');
     return 1;
   }
 
@@ -92,6 +97,45 @@ export async function runAdminTrigger(
     return 1;
   }
   const accountLogin = parsed.repo.slice(0, slashIdx);
+
+  // --dry-run: ここまでの parse + validate に成功したら「もし送信したら何が起きるか」
+  // を出力して終了。誤った installationId / repo / plan を本番投入する事故を防ぐ。
+  if (parsed.dryRun) {
+    const planSummary = {
+      method: 'POST',
+      url: `${apiUrl}/admin/trigger`,
+      headers: {
+        authorization: `Bearer ${apiToken.slice(0, 6)}…(truncated)`,
+        'content-type': 'application/json',
+      },
+      body: {
+        githubInstallationId: installationId,
+        accountLogin,
+        repoFullName: parsed.repo,
+        plan: parsed.plan,
+      },
+    };
+    if (parsed.json) {
+      process.stdout.write(`${JSON.stringify({ dryRun: true, request: planSummary }, null, 2)}\n`);
+    } else {
+      process.stdout.write(
+        [
+          '[migrate-bot] admin-trigger --dry-run (no request sent)',
+          `  POST ${planSummary.url}`,
+          `  installationId: ${installationId}`,
+          `  accountLogin:   ${accountLogin}`,
+          `  repo:           ${parsed.repo}`,
+          `  plan:           ${parsed.plan}`,
+          '  body (JSON):',
+          `    ${JSON.stringify(planSummary.body)}`,
+          '',
+          '  To actually trigger, re-run without --dry-run.',
+          '',
+        ].join('\n'),
+      );
+    }
+    return 0;
+  }
 
   let response: Response;
   try {

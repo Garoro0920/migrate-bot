@@ -5,16 +5,47 @@ import {
   eeaRejectionEmail,
   paymentReceivedEmail,
   prReadyEmail,
+  ResendError,
   refundedEmail,
 } from './email';
 
 // 通知ヘルパー。各 trigger は (db, email, id) を受け取り、customer を引き、
 // テンプレを組み立てて送る。送信失敗は throw せず log のみ — メール送信失敗で
 // state machine が止まらないように。
+//
+// ただし「永続的失敗 (4xx: 不正アドレス・auth NG・RLS 違反)」と「一時的失敗
+// (5xx: Resend 障害)」は性質が違うので、log で区別する。
+//   - 4xx 'EMAIL_PERMANENT_FAILURE' → operator が顧客アドレス再確認すべき
+//   - 5xx 'EMAIL_TRANSIENT_FAILURE' → Resend 復旧待ち、頻発したら incident
+// それ以外 (network 例外等) は 'EMAIL_UNKNOWN_FAILURE'。
 
 async function lookupCustomerEmail(db: AnyDbClient, customerId: string): Promise<string | null> {
   const rows = await db.select().from(customers).where(eq(customers.id, customerId)).limit(1);
   return rows[0]?.email ?? null;
+}
+
+function classifyEmailFailure(err: unknown): {
+  alert: 'EMAIL_PERMANENT_FAILURE' | 'EMAIL_TRANSIENT_FAILURE' | 'EMAIL_UNKNOWN_FAILURE';
+  status?: number;
+} {
+  if (err instanceof ResendError) {
+    if (err.status >= 400 && err.status < 500) {
+      return { alert: 'EMAIL_PERMANENT_FAILURE', status: err.status };
+    }
+    if (err.status >= 500) {
+      return { alert: 'EMAIL_TRANSIENT_FAILURE', status: err.status };
+    }
+  }
+  return { alert: 'EMAIL_UNKNOWN_FAILURE' };
+}
+
+function logEmailFailure(scope: string, context: Record<string, unknown>, err: unknown): void {
+  const classification = classifyEmailFailure(err);
+  console.error(`${scope} failed`, {
+    ...context,
+    ...classification,
+    error: err instanceof Error ? err.message : String(err),
+  });
 }
 
 export async function notifyPaymentReceived(
@@ -30,7 +61,7 @@ export async function notifyPaymentReceived(
     const tpl = paymentReceivedEmail({ repoFullName: order.repoFullName, plan: order.plan });
     await email.send({ ...tpl, to });
   } catch (err) {
-    console.error('notifyPaymentReceived failed', { orderId, error: err });
+    logEmailFailure('notifyPaymentReceived', { orderId }, err);
   }
 }
 
@@ -49,7 +80,7 @@ export async function notifyPrReady(
     const tpl = prReadyEmail({ repoFullName: job.repoFullName, prUrl: job.prUrl });
     await email.send({ ...tpl, to });
   } catch (err) {
-    console.error('notifyPrReady failed', { jobId, error: err });
+    logEmailFailure('notifyPrReady', { jobId }, err);
   }
 }
 
@@ -71,7 +102,7 @@ export async function notifyEeaRejection(
     });
     await email.send({ ...tpl, to });
   } catch (err) {
-    console.error('notifyEeaRejection failed', { orderId, error: err });
+    logEmailFailure('notifyEeaRejection', { orderId }, err);
   }
 }
 
@@ -93,6 +124,6 @@ export async function notifyRefunded(
     });
     await email.send({ ...tpl, to });
   } catch (err) {
-    console.error('notifyRefunded failed', { jobId, error: err });
+    logEmailFailure('notifyRefunded', { jobId }, err);
   }
 }

@@ -29,7 +29,10 @@ const ORDERS_SQL = readFileSync(
 );
 
 function makeStripeStub(
-  createRefundImpl: (paymentIntentId: string, amountUsdCents: number) => Promise<{
+  createRefundImpl: (
+    paymentIntentId: string,
+    amountUsdCents: number,
+  ) => Promise<{
     refundId: string;
     amountUsdCents: number;
   }>,
@@ -197,6 +200,24 @@ describe('processRefund', () => {
     await expect(processRefund(db, stripe, jobId, 'fail')).rejects.toThrow(/Stripe boom/);
 
     // job should remain in refunding
+    const job = await loadJob(db, jobId);
+    expect(job?.state).toBe('refunding');
+  });
+
+  // A13: Stripe API hang から Workers の request 全体が無限待機にならないよう、
+  // createRefund に timeout が被さる。timeout したら job は refunding のまま。
+  it('throws StripeRefundTimeoutError when Stripe createRefund hangs longer than the timeout', async () => {
+    const { jobId } = await seedJobAndOrder(db, { paid: true });
+    await transitionToRefunding(db, jobId);
+
+    // never resolves
+    const stripe = makeStripeStub(() => new Promise(() => {}));
+
+    await expect(processRefund(db, stripe, jobId, 'fail', { stripeTimeoutMs: 50 })).rejects.toThrow(
+      /timed out after 50ms/,
+    );
+
+    // job must remain in refunding so operator can manually retry
     const job = await loadJob(db, jobId);
     expect(job?.state).toBe('refunding');
   });
