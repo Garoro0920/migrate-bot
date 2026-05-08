@@ -1,6 +1,6 @@
 # 5/12 (火) 17:00-18:00 ZeLo 野村弁護士 無料相談 質問リスト
 
-> 形式: Web 会議 (Zoom or Google Meet)
+> 形式: Google Meet (`https://meet.google.com/ptq-tjxw-tuo`、2026-05-07 確定)
 > 所要: 60 分
 > 担当: 野村弁護士 (パートナー) + 安養寺秘書 (調整、当日同席する可能性あり)
 > 費用: ¥0 (free consultation)
