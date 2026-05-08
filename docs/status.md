@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-05-07 (Batch C 完了)
+> Last updated: 2026-05-08 (Karigo Toones 入金 + ZeLo 事前共有メール送信)
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -26,8 +26,8 @@ prod environment 全機能通電完了済 (2026-04-30):
   - Batch C: runner 安全強化 — R1 idempotency / R2 mid-pipeline crash → aborted_blocker / R3 subprocess timeouts / R4 tmp dir try/finally cleanup / R5 SIGTERM handler. tests 371 → 398.
 
 残作業は **operator 主体の外部依存タスクのみ**:
-- Karigo 神戸中央 私書箱契約 (本日 2026-05-07 申込み完了、本人確認済、初回請求 ¥16,700 + Toones ポイント購入待ち、住所通知が 2〜4 営業日後)
-- ZeLo 法律事務所 野村弁護士無料相談 (5/12 火 17:00-18:00、self-review チェック)
+- Karigo 神戸中央 私書箱契約 (5/7 申込み・本人確認、5/8 審査完了、Toones ¥16,700 単発購入 + オートチャージ設定 + Karigo support へ通知メール送信完了。**住所通知待ち = 早くて 5/11 月曜以降**)
+- ZeLo 法律事務所 野村弁護士無料相談 (5/12 火 17:00-18:00、事前共有メール 5/8 19:00 送信完了 `b96b025`)
 - Karigo 住所受領後 → 法務 4 文書 placeholder 埋め → apps/web 再 deploy
 - Stripe Live activation 申請 → 承認後 sk_live_... 差替 → Live mode webhook 再作成
 - ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
