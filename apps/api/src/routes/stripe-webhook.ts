@@ -189,9 +189,7 @@ async function handleCheckoutCompleted(
 
   const initialOrder = await loadOrder(db, orderId);
   if (!initialOrder) {
-    throw new PermanentWebhookError(
-      `order not found for client_reference_id: ${orderId}`,
-    );
+    throw new PermanentWebhookError(`order not found for client_reference_id: ${orderId}`);
   }
 
   // markOrderPaid は idempotent。既に paid でも payment_intent_id を保存する。
@@ -216,6 +214,15 @@ async function handleCheckoutCompleted(
     if (order.refundedAt !== null) {
       // 既に refunded 済 (Stripe webhook retry) → 何もしない
       return;
+    }
+    // operator 観測性: なぜ拒否したかを log で明示。null 経路は Stripe の edge
+    // case で時折踏むため、頻発したら fail-closed 設定を見直す材料になる。
+    if (billingCountry === null) {
+      console.warn('EEA_GATE_FAIL_CLOSED: rejecting order with null billing country', {
+        orderId: order.id,
+        stripeSessionId: session.id,
+        reason: 'null_billing_country_fail_closed',
+      });
     }
     await rejectEeaUkChOrder(
       c,
@@ -315,21 +322,15 @@ async function handleCheckoutExpired(
   await markOrderExpired(db, orderId);
 }
 
-async function handleChargeRefunded(
-  db: AnyDbClient,
-  charge: Stripe.Charge,
-): Promise<void> {
-  const paymentIntentId = typeof charge.payment_intent === 'string'
-    ? charge.payment_intent
-    : (charge.payment_intent?.id ?? null);
+async function handleChargeRefunded(db: AnyDbClient, charge: Stripe.Charge): Promise<void> {
+  const paymentIntentId =
+    typeof charge.payment_intent === 'string'
+      ? charge.payment_intent
+      : (charge.payment_intent?.id ?? null);
   if (!paymentIntentId) return;
 
   const orderRow = (
-    await db
-      .select()
-      .from(orders)
-      .where(eq(orders.stripePaymentIntentId, paymentIntentId))
-      .limit(1)
+    await db.select().from(orders).where(eq(orders.stripePaymentIntentId, paymentIntentId)).limit(1)
   )[0];
   if (!orderRow) return;
   await markOrderRefunded(db, orderRow.id);

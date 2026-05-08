@@ -1,8 +1,8 @@
-import { type AnyDbClient, customers, getOrderByJobId, loadJob, loadOrder, orders } from '@migrate-bot/db';
+import { type AnyDbClient, customers, getOrderByJobId, loadJob, loadOrder } from '@migrate-bot/db';
 import { eq } from 'drizzle-orm';
 import {
-  eeaRejectionEmail,
   type EmailClient,
+  eeaRejectionEmail,
   paymentReceivedEmail,
   prReadyEmail,
   refundedEmail,
@@ -12,10 +12,7 @@ import {
 // テンプレを組み立てて送る。送信失敗は throw せず log のみ — メール送信失敗で
 // state machine が止まらないように。
 
-async function lookupCustomerEmail(
-  db: AnyDbClient,
-  customerId: string,
-): Promise<string | null> {
+async function lookupCustomerEmail(db: AnyDbClient, customerId: string): Promise<string | null> {
   const rows = await db.select().from(customers).where(eq(customers.id, customerId)).limit(1);
   return rows[0]?.email ?? null;
 }
@@ -99,6 +96,3 @@ export async function notifyRefunded(
     console.error('notifyRefunded failed', { jobId, error: err });
   }
 }
-
-// orders は import 時に副作用なし (re-export 用に確保) — drizzle table 参照を保持
-export { orders };

@@ -2,11 +2,11 @@ import {
   type AnyDbClient,
   createD1Client,
   createOrder,
+  installations,
   upsertCustomerByEmail,
 } from '@migrate-bot/db';
 import { newOrderId } from '@migrate-bot/shared';
 import { eq } from 'drizzle-orm';
-import { installations } from '@migrate-bot/db';
 import { Hono } from 'hono';
 import { createStripeClient, PLAN_AMOUNT_USD_CENTS, type StripeClient } from '../stripe';
 
@@ -47,15 +47,26 @@ interface CreateSessionBody {
   readonly customerEmail: string;
 }
 
+// 簡易だが「`@` 単独」より遥かに堅い email 形式チェック。RFC 5322 完全準拠は
+// 大袈裟なので、local + @ + domain + . + tld を最小要件とし、whitespace と
+// 連続 `..` を除外する。最終的な検証は Stripe / Resend 側でも行われる。
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LENGTH = 254; // RFC 5321 上限
+const MAX_REPO_FULL_NAME_LENGTH = 255; // GitHub owner/name は概ね 100 字以内
+
 function isCreateSessionBody(v: unknown): v is CreateSessionBody {
   if (typeof v !== 'object' || v === null) return false;
   const o = v as Record<string, unknown>;
   return (
     typeof o.githubInstallationId === 'number' &&
+    Number.isFinite(o.githubInstallationId) &&
     typeof o.repoFullName === 'string' &&
+    o.repoFullName.length > 0 &&
+    o.repoFullName.length <= MAX_REPO_FULL_NAME_LENGTH &&
     (o.plan === 'small' || o.plan === 'medium' || o.plan === 'large') &&
     typeof o.customerEmail === 'string' &&
-    o.customerEmail.includes('@')
+    o.customerEmail.length <= MAX_EMAIL_LENGTH &&
+    EMAIL_PATTERN.test(o.customerEmail)
   );
 }
 
@@ -65,10 +76,7 @@ function resolveDb(c: { var: CheckoutContext['Variables']; env: CheckoutEnv }): 
   return null;
 }
 
-function resolveStripe(c: {
-  var: CheckoutContext['Variables'];
-  env: CheckoutEnv;
-}): StripeClient {
+function resolveStripe(c: { var: CheckoutContext['Variables']; env: CheckoutEnv }): StripeClient {
   if (c.var.stripe) return c.var.stripe;
   return createStripeClient({
     secretKey: c.env.STRIPE_SECRET_KEY,

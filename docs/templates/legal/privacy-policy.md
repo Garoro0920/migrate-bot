@@ -213,7 +213,7 @@ deletion.
 We may update this policy from time to time. Material changes will be
 announced by email to active customers at least 14 days before they take
 effect. The current version is always posted at
-https://migrate-bot.dev/privacy.
+https://migrate-bot.dev/legal/privacy.
 
 ## 10. Contact
 

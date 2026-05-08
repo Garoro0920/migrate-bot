@@ -220,7 +220,7 @@ jurisdiction to protect its intellectual property.
 ## 14. Changes to these Terms
 
 We may update these Terms from time to time. The current version is always
-posted at https://migrate-bot.dev/terms. Material changes will be announced by
+posted at https://migrate-bot.dev/legal/terms. Material changes will be announced by
 email to active customers at least 14 days before they take effect.
 
 ## 15. Contact
@@ -423,7 +423,7 @@ deletion.
 We may update this policy from time to time. Material changes will be
 announced by email to active customers at least 14 days before they take
 effect. The current version is always posted at
-https://migrate-bot.dev/privacy.
+https://migrate-bot.dev/legal/privacy.
 
 ## 10. Contact
 
@@ -543,12 +543,14 @@ clarifying questions before issuing a refund where the cause is unclear.
 If you disagree with our refund decision, please reply to our determination
 email and we will review the case again with a different reviewer. If we
 still cannot reach an agreement, you retain your statutory rights under
-applicable consumer-protection laws.
+applicable consumer-protection laws. This Refund Policy is incorporated by
+reference into our [Terms of Service](/legal/terms) §6 and is to be read
+together with that document.
 
 ## 7. Changes
 
 We may update this Refund Policy from time to time. The current version is
-always posted at https://migrate-bot.dev/refunds.
+always posted at https://migrate-bot.dev/legal/refunds.
 `,
   'specified-commercial-transactions': `# 特定商取引法に基づく表記
 

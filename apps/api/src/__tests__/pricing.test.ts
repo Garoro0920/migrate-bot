@@ -1,10 +1,6 @@
 import { Hono } from 'hono';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createPricingRouter,
-  planForFileCount,
-  type PricingContext,
-} from '../routes/pricing';
+import { createPricingRouter, type PricingContext, planForFileCount } from '../routes/pricing';
 
 const ENV = {} as PricingContext['Bindings'];
 
@@ -82,6 +78,14 @@ describe('GET /pricing/estimate', () => {
   it('returns 400 for missing repo param', async () => {
     const app = buildApp(makeRepoTreeFetch({ treePaths: [] }));
     const res = await app.request('/pricing/estimate', {}, ENV);
+    expect(res.status).toBe(400);
+  });
+
+  it('returns 400 for repo param exceeding 255 chars', async () => {
+    const app = buildApp(makeRepoTreeFetch({ treePaths: [] }));
+    const longOwner = 'a'.repeat(130);
+    const longRepo = 'b'.repeat(130);
+    const res = await app.request(`/pricing/estimate?repo=${longOwner}/${longRepo}`, {}, ENV);
     expect(res.status).toBe(400);
   });
 
@@ -187,11 +191,7 @@ describe('GET /pricing/estimate', () => {
       await next();
     });
     app.route('/pricing', createPricingRouter());
-    await app.request(
-      '/pricing/estimate?repo=octo/hello',
-      {},
-      { GITHUB_PAT: 'ghp_test_token' },
-    );
+    await app.request('/pricing/estimate?repo=octo/hello', {}, { GITHUB_PAT: 'ghp_test_token' });
     const callsWithAuth = fetchSpy.mock.calls.filter((call) => {
       const init = call[1] as RequestInit | undefined;
       const headers = init?.headers as Record<string, string> | undefined;

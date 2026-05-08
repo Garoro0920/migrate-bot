@@ -96,11 +96,11 @@ export function createPricingRouter(): Hono<PricingContext> {
 
   app.get('/estimate', async (c) => {
     const repo = c.req.query('repo');
-    if (!repo || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo)) {
-      return c.json(
-        { error: 'invalid repo: use owner/repo format (e.g. octocat/hello)' },
-        400,
-      );
+    // 上限 255 文字: GitHub の owner/name は概ね 100 字以内、255 で十分余裕。
+    // 上限を入れることで悪意あるクライアントが巨大な URL クエリを送って
+    // 後段の API call で問題を起こすのを防ぐ。
+    if (!repo || repo.length > 255 || !/^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/.test(repo)) {
+      return c.json({ error: 'invalid repo: use owner/repo format (e.g. octocat/hello)' }, 400);
     }
 
     const fetchFn = c.var.fetch ?? fetch;
@@ -120,10 +120,7 @@ export function createPricingRouter(): Hono<PricingContext> {
         return c.json({ error: 'repo not found (or private)' }, 404);
       }
       if (repoRes.status === 403) {
-        return c.json(
-          { error: 'GitHub API rate limit hit; try again in a few minutes' },
-          429,
-        );
+        return c.json({ error: 'GitHub API rate limit hit; try again in a few minutes' }, 429);
       }
       if (!repoRes.ok) {
         return c.json({ error: `GitHub API repo lookup failed: ${repoRes.status}` }, 502);
@@ -137,8 +134,7 @@ export function createPricingRouter(): Hono<PricingContext> {
     if (repoInfo.private) {
       return c.json(
         {
-          error:
-            'repo is private; install the GitHub App to get an authenticated quote',
+          error: 'repo is private; install the GitHub App to get an authenticated quote',
         },
         403,
       );
@@ -154,10 +150,7 @@ export function createPricingRouter(): Hono<PricingContext> {
         { headers },
       );
       if (!treeRes.ok) {
-        return c.json(
-          { error: `GitHub Tree API failed: ${treeRes.status}` },
-          502,
-        );
+        return c.json({ error: `GitHub Tree API failed: ${treeRes.status}` }, 502);
       }
       tree = (await treeRes.json()) as GitHubTreeResponse;
     } catch (err) {
@@ -168,9 +161,7 @@ export function createPricingRouter(): Hono<PricingContext> {
     // 3. count Next.js source files under pages/ + components/
     const fileCount = tree.tree.filter(
       (item) =>
-        item.type === 'blob' &&
-        RELEVANT_DIR.test(item.path) &&
-        NEXT_FILE_EXT.test(item.path),
+        item.type === 'blob' && RELEVANT_DIR.test(item.path) && NEXT_FILE_EXT.test(item.path),
     ).length;
 
     const plan = planForFileCount(fileCount);

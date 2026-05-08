@@ -1,12 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  createSqliteClient,
-  orders,
-  type SqliteClient,
-  upsertInstallation,
-} from '@migrate-bot/db';
+import { createSqliteClient, orders, type SqliteClient, upsertInstallation } from '@migrate-bot/db';
 import Database from 'better-sqlite3';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
@@ -98,6 +93,74 @@ describe('POST /checkout/create-session', () => {
       ENV,
     );
     expect(res.status).toBe(400);
+  });
+
+  it.each([
+    ['plain word with @', 'foo@'],
+    ['leading @', '@bar.com'],
+    ['no dot in domain', 'foo@bar'],
+    ['internal whitespace', 'foo bar@example.com'],
+    ['empty', ''],
+  ])('rejects malformed customerEmail (%s)', async (_label, email) => {
+    const stripe = makeStripeStub();
+    const app = buildApp(db, stripe);
+    const res = await app.request(
+      '/checkout/create-session',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          githubInstallationId: 1,
+          repoFullName: 'octocat/hello',
+          plan: 'small',
+          customerEmail: email,
+        }),
+      },
+      ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects repoFullName exceeding 255 characters', async () => {
+    const stripe = makeStripeStub();
+    const app = buildApp(db, stripe);
+    const longOwner = 'a'.repeat(130);
+    const longRepo = 'b'.repeat(130);
+    const res = await app.request(
+      '/checkout/create-session',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          githubInstallationId: 1,
+          repoFullName: `${longOwner}/${longRepo}`,
+          plan: 'small',
+          customerEmail: 'foo@example.com',
+        }),
+      },
+      ENV,
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects non-finite githubInstallationId (NaN, Infinity)', async () => {
+    const stripe = makeStripeStub();
+    const app = buildApp(db, stripe);
+    for (const bad of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+      const res = await app.request(
+        '/checkout/create-session',
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          // JSON does not encode NaN / Infinity → manual body
+          body: `{"githubInstallationId":${String(bad)},"repoFullName":"o/r","plan":"small","customerEmail":"foo@example.com"}`,
+        },
+        ENV,
+      );
+      // JSON.parse on the server may already reject these; accept any 4xx
+      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(res.status).toBeLessThan(500);
+    }
   });
 
   it('returns 404 when the installation is unknown', async () => {

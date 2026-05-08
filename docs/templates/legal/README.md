@@ -26,11 +26,11 @@ Phase 4 ローンチに必要な法務文書 4 点のドラフト。
    - `<EFFECTIVE_DATE>`: 公開日
    - `<GOVERNING_LAW>`: 準拠法(弁護士確認)
    - `migrate-bot.dev`: 公開ドメイン
-3. **landing page から各 URL へのリンク**:
-   - `https://migrate-bot.dev/terms` → terms-of-service
-   - `https://migrate-bot.dev/privacy` → privacy-policy
-   - `https://migrate-bot.dev/refunds` → refund-policy
-   - `https://migrate-bot.dev/legal` (まとめページ) → 特商法表記含む
+3. **landing page から各 URL へのリンク**(canonical は `/legal/<slug>`、`apps/web/src/app.ts` で route 確定):
+   - `https://migrate-bot.dev/legal/terms` → terms-of-service
+   - `https://migrate-bot.dev/legal/privacy` → privacy-policy
+   - `https://migrate-bot.dev/legal/refunds` → refund-policy
+   - `https://migrate-bot.dev/legal/specified-commercial-transactions` → 特商法表記
 4. **Stripe Live activation 申請時に上記 URL を Stripe Dashboard に入力**
 
 ## 重要な前提・想定

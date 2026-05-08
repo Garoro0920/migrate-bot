@@ -71,6 +71,13 @@ export class OctokitAppFactory implements InstallationOctokitFactory {
       installationId,
     })) as { token: string; expiresAt: string };
     const expiresAt = Date.parse(auth.expiresAt);
+    // Date.parse は不正な文字列で NaN を返す。NaN を cache に保存すると
+    // 比較 (cached.expiresAt > now + 60_000) が常に false になり cache 無効化、
+    // 1 job 内で installation token を毎回取り直す → rate limit に近づく。
+    // 取得直後に検出して投げる方が安全。
+    if (Number.isNaN(expiresAt)) {
+      throw new Error(`installation token has invalid expiresAt: ${auth.expiresAt}`);
+    }
     this.tokenCache.set(installationId, { token: auth.token, expiresAt });
     return auth.token;
   }

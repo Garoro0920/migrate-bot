@@ -235,7 +235,7 @@ jurisdiction to protect its intellectual property.
 ## 14. Changes to these Terms
 
 We may update these Terms from time to time. The current version is always
-posted at https://migrate-bot.dev/terms. Material changes will be announced by
+posted at https://migrate-bot.dev/legal/terms. Material changes will be announced by
 email to active customers at least 14 days before they take effect.
 
 ## 15. Contact

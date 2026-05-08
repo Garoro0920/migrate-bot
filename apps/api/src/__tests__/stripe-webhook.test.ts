@@ -9,19 +9,12 @@ import {
   upsertCustomerByEmail,
   upsertInstallation,
 } from '@migrate-bot/db';
-import {
-  InMemoryQueue,
-  type JobQueueMessage,
-  type QueueProducer,
-} from '@migrate-bot/shared';
+import { InMemoryQueue, type JobQueueMessage, type QueueProducer } from '@migrate-bot/shared';
 import Database from 'better-sqlite3';
 import { Hono } from 'hono';
 import type Stripe from 'stripe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  createStripeWebhookRouter,
-  type StripeWebhookContext,
-} from '../routes/stripe-webhook';
+import { createStripeWebhookRouter, type StripeWebhookContext } from '../routes/stripe-webhook';
 import type { StripeClient } from '../stripe';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -39,11 +32,7 @@ const ENV = {
   STRIPE_WEBHOOK_SECRET: 'whsec_test',
 };
 
-function buildApp(
-  db: SqliteClient,
-  stripe: StripeClient,
-  queue: QueueProducer<JobQueueMessage>,
-) {
+function buildApp(db: SqliteClient, stripe: StripeClient, queue: QueueProducer<JobQueueMessage>) {
   const app = new Hono<StripeWebhookContext>();
   app.use('*', async (c, next) => {
     c.set('db', db);
@@ -109,16 +98,15 @@ describe('POST /webhooks/stripe', () => {
   });
 
   it('returns 400 when stripe-signature header is missing', async () => {
-    const stripe = makeStripeStub(async () => ({
-      type: 'checkout.session.completed',
-    }) as Stripe.Event);
+    const stripe = makeStripeStub(
+      async () =>
+        ({
+          type: 'checkout.session.completed',
+        }) as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
-    const res = await app.request(
-      '/webhooks/stripe',
-      { method: 'POST', body: '{}' },
-      ENV,
-    );
+    const res = await app.request('/webhooks/stripe', { method: 'POST', body: '{}' }, ENV);
     expect(res.status).toBe(400);
   });
 
@@ -142,18 +130,21 @@ describe('POST /webhooks/stripe', () => {
 
   it('handles checkout.session.completed by paying order, creating job, queuing message', async () => {
     const seed = await seedPaidOrder(db);
-    const stripe = makeStripeStub(async () => ({
-      id: 'evt_1',
-      type: 'checkout.session.completed',
-      data: {
-        object: {
-          id: 'cs_seed',
-          client_reference_id: seed.orderId,
-          payment_intent: 'pi_xyz',
-          customer_details: { address: { country: 'JP' } },
-        },
-      },
-    }) as unknown as Stripe.Event);
+    const stripe = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_1',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_xyz',
+              customer_details: { address: { country: 'JP' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
     const res = await app.request(
@@ -218,24 +209,28 @@ describe('POST /webhooks/stripe', () => {
       .mockResolvedValue({ refundId: 're_failclosed', amountUsdCents: 9900 });
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_failclosed',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_failclosed',
-              // customer_details missing entirely (saved customer / async payment edge case)
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_failclosed',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_failclosed',
+                // customer_details missing entirely (saved customer / async payment edge case)
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
+    // operator 観測性: null country の fail-closed 経路は構造化 warning log で
+    // 区別できるはず。頻発したら fail-closed を緩める判断材料にする。
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const res = await app.request(
       '/webhooks/stripe',
       { method: 'POST', headers: { 'stripe-signature': 'sig' }, body: '{}' },
@@ -246,6 +241,11 @@ describe('POST /webhooks/stripe', () => {
     const order = await loadOrder(db, seed.orderId);
     expect(order?.state).toBe('refunded');
     expect(queue.drain()).toHaveLength(0);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('EEA_GATE_FAIL_CLOSED'),
+      expect.objectContaining({ reason: 'null_billing_country_fail_closed' }),
+    );
+    warnSpy.mockRestore();
   });
 
   it('EEA retry-safe: second webhook after refund succeeds is no-op (refundedAt set)', async () => {
@@ -257,19 +257,20 @@ describe('POST /webhooks/stripe', () => {
     });
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_eea_retry',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_retry',
-              customer_details: { address: { country: 'DE' } },
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_eea_retry',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_retry',
+                customer_details: { address: { country: 'DE' } },
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
@@ -302,19 +303,20 @@ describe('POST /webhooks/stripe', () => {
       .mockRejectedValue(new Error('charge_already_refunded: charge has been refunded'));
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_already_refunded',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_alreadyrefunded',
-              customer_details: { address: { country: 'FR' } },
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_already_refunded',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_alreadyrefunded',
+                customer_details: { address: { country: 'FR' } },
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
@@ -331,18 +333,21 @@ describe('POST /webhooks/stripe', () => {
   });
 
   it('returns 200 (not 500) when order not found — permanent failure ack to stop Stripe retries', async () => {
-    const stripe = makeStripeStub(async () => ({
-      id: 'evt_orphan',
-      type: 'checkout.session.completed',
-      data: {
-        object: {
-          id: 'cs_orphan',
-          client_reference_id: 'unknown-order-id',
-          payment_intent: 'pi_orphan',
-          customer_details: { address: { country: 'JP' } },
-        },
-      },
-    }) as unknown as Stripe.Event);
+    const stripe = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_orphan',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_orphan',
+              client_reference_id: 'unknown-order-id',
+              payment_intent: 'pi_orphan',
+              customer_details: { address: { country: 'JP' } },
+            },
+          },
+        }) as unknown as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
     const res = await app.request(
@@ -358,16 +363,19 @@ describe('POST /webhooks/stripe', () => {
 
   it('handles checkout.session.expired by marking order expired', async () => {
     const seed = await seedPaidOrder(db);
-    const stripe = makeStripeStub(async () => ({
-      id: 'evt_2',
-      type: 'checkout.session.expired',
-      data: {
-        object: {
-          id: 'cs_seed',
-          client_reference_id: seed.orderId,
-        },
-      },
-    }) as unknown as Stripe.Event);
+    const stripe = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_2',
+          type: 'checkout.session.expired',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+            },
+          },
+        }) as unknown as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
     const res = await app.request(
@@ -383,17 +391,20 @@ describe('POST /webhooks/stripe', () => {
   it('handles charge.refunded by marking order refunded (lookup via payment_intent)', async () => {
     const seed = await seedPaidOrder(db);
     // first mark paid so payment_intent_id is set
-    const completedEvent = makeStripeStub(async () => ({
-      id: 'evt_pay',
-      type: 'checkout.session.completed',
-      data: {
-        object: {
-          id: 'cs_seed',
-          client_reference_id: seed.orderId,
-          payment_intent: 'pi_for_refund',
-        },
-      },
-    }) as unknown as Stripe.Event);
+    const completedEvent = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_pay',
+          type: 'checkout.session.completed',
+          data: {
+            object: {
+              id: 'cs_seed',
+              client_reference_id: seed.orderId,
+              payment_intent: 'pi_for_refund',
+            },
+          },
+        }) as unknown as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app1 = buildApp(db, completedEvent, queue);
     await app1.request(
@@ -403,16 +414,19 @@ describe('POST /webhooks/stripe', () => {
     );
 
     // now refund event
-    const refundedEvent = makeStripeStub(async () => ({
-      id: 'evt_refund',
-      type: 'charge.refunded',
-      data: {
-        object: {
-          id: 'ch_1',
-          payment_intent: 'pi_for_refund',
-        },
-      },
-    }) as unknown as Stripe.Event);
+    const refundedEvent = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_refund',
+          type: 'charge.refunded',
+          data: {
+            object: {
+              id: 'ch_1',
+              payment_intent: 'pi_for_refund',
+            },
+          },
+        }) as unknown as Stripe.Event,
+    );
     const app2 = buildApp(db, refundedEvent, queue);
     const res = await app2.request(
       '/webhooks/stripe',
@@ -432,19 +446,20 @@ describe('POST /webhooks/stripe', () => {
       .mockResolvedValue({ refundId: 're_eea_test', amountUsdCents: 9900 });
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_eea',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_eea',
-              customer_details: { address: { country: 'DE' } },
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_eea',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_eea',
+                customer_details: { address: { country: 'DE' } },
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
@@ -475,19 +490,20 @@ describe('POST /webhooks/stripe', () => {
       .mockResolvedValue({ refundId: 're_uk_test', amountUsdCents: 9900 });
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_uk',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_uk',
-              customer_details: { address: { country: 'GB' } },
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_uk',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_uk',
+                customer_details: { address: { country: 'GB' } },
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
@@ -509,19 +525,20 @@ describe('POST /webhooks/stripe', () => {
     const createRefund = vi.fn().mockRejectedValue(new Error('should not refund'));
     const stripe = {
       createCheckoutSession: vi.fn().mockRejectedValue(new Error('not used')),
-      verifyWebhookSignature: vi.fn(async () =>
-        ({
-          id: 'evt_jp',
-          type: 'checkout.session.completed',
-          data: {
-            object: {
-              id: 'cs_seed',
-              client_reference_id: seed.orderId,
-              payment_intent: 'pi_jp',
-              customer_details: { address: { country: 'JP' } },
+      verifyWebhookSignature: vi.fn(
+        async () =>
+          ({
+            id: 'evt_jp',
+            type: 'checkout.session.completed',
+            data: {
+              object: {
+                id: 'cs_seed',
+                client_reference_id: seed.orderId,
+                payment_intent: 'pi_jp',
+                customer_details: { address: { country: 'JP' } },
+              },
             },
-          },
-        }) as unknown as Stripe.Event,
+          }) as unknown as Stripe.Event,
       ),
       createRefund,
     } as unknown as StripeClient;
@@ -542,11 +559,14 @@ describe('POST /webhooks/stripe', () => {
   });
 
   it('ignores unknown event types with 200 ack', async () => {
-    const stripe = makeStripeStub(async () => ({
-      id: 'evt_unknown',
-      type: 'invoice.payment_succeeded', // not handled
-      data: { object: {} },
-    }) as unknown as Stripe.Event);
+    const stripe = makeStripeStub(
+      async () =>
+        ({
+          id: 'evt_unknown',
+          type: 'invoice.payment_succeeded', // not handled
+          data: { object: {} },
+        }) as unknown as Stripe.Event,
+    );
     const queue = new InMemoryQueue<JobQueueMessage>();
     const app = buildApp(db, stripe, queue);
     const res = await app.request(

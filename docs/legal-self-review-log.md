@@ -23,6 +23,10 @@
 
 ## 2. 参照した一次資料
 
+> **アクセス確認日: 2026-04-30**。下記 URL は当日 WebFetch で取得可能であることを
+> 確認済み。一次資料は時間の経過と共に rotation・改訂される可能性があるため、
+> 弁護士による参照時には最新版での再確認を推奨する。
+
 | 資料 | URL | 確認内容 |
 |---|---|---|
 | 消費者庁「特定商取引法・通信販売における表示」 | <https://www.no-trouble.caa.go.jp/what/mailorder/> | 11 条 必須表示 9 項目 + 「請求あれば開示」運用条件 |
@@ -100,7 +104,7 @@ PPC ガイドラインで必須の 3 項目(規則 17 条 2 項):
 ### Pass 5 — Cross-doc 整合
 **確認項目**:
 - 14 日返金期間 (役務提供期限): ToS §6 / Refund §1 / 特商法「役務の提供時期」「返品キャンセル」すべて 14 日で一致 ✅
-- 30 日通知 window (お客様連絡期間): Refund §1 で明示、ToS §6 で参照 ✅ (post-audit clarification commit `XXXX` で導入。それまでは 14 日通知期間と混同表現あり)
+- 30 日通知 window (お客様連絡期間): Refund §1 で明示、ToS §6 で参照 ✅ (post-audit clarification commit `c981295` で導入。それまでは 14 日通知期間と混同表現あり)
 - 価格 $99 / $249 / $499: landing / business.md / Stripe / 特商法すべて一致 ✅
 - 動作環境 Pages Router: 特商法 / ToS §1, §4 / landing 一致 ✅
 - Subprocessor 6 社の所在国: PP §3 表 / EEA 拒否説明 (PP §5、ToS §2、Stripe Checkout custom_text、Landing pricing 注記) で「米国」記述一致 ✅
@@ -116,16 +120,19 @@ PPC ガイドラインで必須の 3 項目(規則 17 条 2 項):
 5. **「請求あれば開示」運用の 7 日基準 + 自社直販の脆弱性** → 「7 日以内に開示」を明記、住所は Karigo 直接公開(NOINDEX 適用) + 電話のみ請求対応
 
 ### Pass 7 — Stripe Checkout EU 拒否実装
-**対象**: `apps/api/src/stripe.ts` + `apps/web/src/pages/landing.ts`
+**対象**: `apps/api/src/stripe.ts` + `apps/web/src/pages/landing.ts` + `apps/api/src/routes/stripe-webhook.ts`
 
-GDPR 適用域(EEA + UK + Switzerland)からのアクセスを技術的に抑止する 3 段防御:
+GDPR 適用域(EEA + UK + Switzerland)からのアクセスを抑止する **5 層 (5-layer) defense in depth** を実装:
 
-1. **ToS §2 で利用条件として明示禁止** (法的層)
-2. **Stripe Checkout custom_text.submit.message で画面上に EU 居住者非提供を明記** (Stripe 画面層)
-3. **billing_address_collection: 'required' で住所を必須収集** (将来の auto-refund 層の準備)
-4. **Landing pricing section に non-availability 注記** (購入前の自己排除促進層)
+1. **法的層 — ToS §2 で利用条件として明示禁止**
+2. **Stripe 画面層 — Checkout custom_text.submit.message で EU 居住者非提供を明記**
+3. **データ収集層 — billing_address_collection: 'required' で住所を必須収集**
+4. **Landing 自己排除層 — pricing section に non-availability 注記**
+5. **Webhook 自動拒否層 — `checkout.session.completed` で `session.customer_details.address.country` を検証、EEA/UK/CH 国コード(EEA 30 + UK + CH = 計 32 ヶ国)が来たら自動 refund + reject 通知メール (`eeaRejectionEmail`)** (commit `4b351e5`、retry-safe 化は `c981295`)
 
-**実装済 (commit `4b351e5`)**: webhook (`checkout.session.completed`) で `session.customer_details.address.country` を検証、EEA/UK/CH 国コード(EEA 30 + UK + CH = 計 32 ヶ国)が来たら自動 refund + reject 通知メール (`eeaRejectionEmail`)。これで 5 段防御が完成。手動 fallback として `docs/customer-support/eea-uk-ch-rejection.md` も維持(万一 webhook が動作しなかった場合用)。
+加えて手動 fallback として `docs/customer-support/eea-uk-ch-rejection.md` も維持(万一 webhook が動作しなかった場合用)。
+
+> **段数のカウント方針**: 法的・UI・データ・自己排除・Webhook の 5 層を独立 layer として数える。手動 fallback runbook は冗長コントロールであり層数には含めない。
 
 ## 4. 残存リスクと運用指針
 
