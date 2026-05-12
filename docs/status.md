@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-05-08 (Karigo Toones 入金 + ZeLo 事前共有メール送信)
+> Last updated: 2026-05-12 (ZeLo 会議完了 + Karigo 住所反映 prod deploy)
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -25,12 +25,13 @@ prod environment 全機能通電完了済 (2026-04-30):
   - Batch D: refund failure 構造化ログ + Sentry capture
   - Batch C: runner 安全強化 — R1 idempotency / R2 mid-pipeline crash → aborted_blocker / R3 subprocess timeouts / R4 tmp dir try/finally cleanup / R5 SIGTERM handler. tests 371 → 398.
 
-残作業は **operator 主体の外部依存タスクのみ**:
-- Karigo 神戸中央 私書箱契約 (5/7 申込み・本人確認、5/8 審査完了、Toones ¥16,700 単発購入 + オートチャージ設定 + Karigo support へ通知メール送信完了。**住所通知待ち = 早くて 5/11 月曜以降**)
-- ZeLo 法律事務所 野村弁護士無料相談 (5/12 火 17:00-18:00、事前共有メール 5/8 19:00 送信完了 `b96b025`)
-- Karigo 住所受領後 → 法務 4 文書 placeholder 埋め → apps/web 再 deploy
-- Stripe Live activation 申請 → 承認後 sk_live_... 差替 → Live mode webhook 再作成
-- ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
+残作業:
+- ✅ Karigo 神戸 私書箱契約 (5/12 貸与住所受領: 〒651-0094 兵庫県神戸市中央区琴ノ緒町五丁目二番二号 三信ビル401)
+- ✅ ZeLo 野村弁護士 60 分相談 (5/12 17:00-18:00 完了、Gemini 文字起こしを後日メール受領予定、御礼メール送信済)
+- ✅ 法務 4 文書 placeholder 埋め + apps/web prod deploy (`377ad6f`)
+- ⏳ ZeLo Gemini 文字起こし受領 → legal-self-review-log.md 反映 → 法務文書再修正 → 再 deploy (5/13-15 頃)
+- ⏳ Stripe Live activation 申請 → 承認後 sk_live_... 差替 → Live mode webhook 再作成
+- ⏳ ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
 
 詳細 → `docs/roadmap.md` §1.5、ADR-0003
 
