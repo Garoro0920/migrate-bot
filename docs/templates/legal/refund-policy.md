@@ -4,11 +4,11 @@
 > Operator must have this policy reviewed alongside the Terms of Service.
 >
 > Placeholders to fill before publishing:
-> - `<CONTACT_EMAIL>`
-> - `<EFFECTIVE_DATE>`
+> - `support@migrate-bot.dev`
+> - `2026-05-12`
 > - `migrate-bot.dev`
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
 We are committed to delivering working migration output. This Refund Policy
 explains when you are entitled to a refund and how to request one.
@@ -81,7 +81,7 @@ Policy do **not** apply to and do **not** waive any of the following:
   invalidate the consumer's statutory rights.
 
 If you believe Section 2A applies to your situation, contact
-<CONTACT_EMAIL> with the order details and a description of the
+support@migrate-bot.dev with the order details and a description of the
 non-conformance. We will respond within 2 business days and, where
 your claim is well-founded, issue a full or partial refund (or other
 remedy) consistent with applicable law.
@@ -100,11 +100,11 @@ remedy required by applicable consumer-protection law.**
 If you contact us before the migration job has produced a draft PR (typical
 window: 0–10 minutes after payment), we may be able to cancel and refund
 the order, but cancellation is not guaranteed once the job has started.
-Email <CONTACT_EMAIL> immediately if you wish to cancel.
+Email support@migrate-bot.dev immediately if you wish to cancel.
 
 ## 5. How to request a refund
 
-Email <CONTACT_EMAIL> with:
+Email support@migrate-bot.dev with:
 
 1. The email address used at checkout
 2. The repository full name (e.g., `octocat/hello`)

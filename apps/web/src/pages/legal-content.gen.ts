@@ -4,10 +4,10 @@
 export const LEGAL_CONTENT = {
   'terms': `# Terms of Service
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
 These Terms of Service ("Terms") govern your use of the migrate-bot service
-("Service") provided by <OPERATOR_LEGAL_NAME> ("we", "us", "our"). By
+("Service") provided by Sawai Kouki ("we", "us", "our"). By
 installing the migrate-bot GitHub App, paying for a migration, or otherwise
 using the Service, you ("Customer", "you") agree to these Terms.
 
@@ -39,7 +39,7 @@ You represent that:
   European Economic Area (EEA), the United Kingdom, or Switzerland.** The
   Service is not currently offered to residents of those jurisdictions.
   If you are unsure whether this restriction applies to you, please contact
-  us at <CONTACT_EMAIL> before paying.
+  us at support@migrate-bot.dev before paying.
 
 You are responsible for the security of your GitHub account and the
 correctness of your billing information.
@@ -225,13 +225,13 @@ email to active customers at least 14 days before they take effect.
 
 ## 15. Contact
 
-Questions about these Terms can be sent to <CONTACT_EMAIL>.
+Questions about these Terms can be sent to support@migrate-bot.dev.
 `,
   'privacy': `# Privacy Policy
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
-This Privacy Policy describes how <OPERATOR_LEGAL_NAME> ("we", "us")
+This Privacy Policy describes how Sawai Kouki ("we", "us")
 collects, uses, and protects information when you use migrate-bot
 ("Service").
 
@@ -351,12 +351,12 @@ Economic Area, the United Kingdom, or Switzerland** (see Terms of Service
 Section 2). Accordingly, we do not undertake processing operations that
 would bring this Service within the territorial scope of the GDPR or the
 UK / Swiss equivalents. If you believe you have used the Service from one
-of those jurisdictions in error, please contact <CONTACT_EMAIL> and we
+of those jurisdictions in error, please contact support@migrate-bot.dev and we
 will delete your data and refund any payment.
 
 If you are a resident of a jurisdiction whose law restricts cross-border
 transfer of personal data and you require data residency in a specific
-region, please contact <CONTACT_EMAIL> before paying. We may not be able
+region, please contact support@migrate-bot.dev before paying. We may not be able
 to support every residency requirement.
 
 ## 6. Security
@@ -381,7 +381,7 @@ Depending on your jurisdiction, you may have the right to:
 - **Object / restrict** — object to certain processing activities
 - **Withdraw consent** — where processing is based on consent
 
-To exercise any of these rights, contact <CONTACT_EMAIL>. We will respond
+To exercise any of these rights, contact support@migrate-bot.dev. We will respond
 within 30 days (or sooner where required by applicable law).
 
 **For California residents (CCPA / CPRA)**: we do not sell or share your
@@ -394,20 +394,20 @@ Terms of Service Section 2, the Service is not offered to residents of
 these jurisdictions at this time.
 
 **For Japan residents (個人情報保護法 / APPI)**: the personal-information
-handling business operator (個人情報取扱事業者) is <OPERATOR_LEGAL_NAME>,
-<OPERATOR_ADDRESS>. You may request, with respect to your personal
+handling business operator (個人情報取扱事業者) is Sawai Kouki,
+Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan. You may request, with respect to your personal
 information that we hold (保有個人データ), (i) disclosure of the
 purpose-of-use, (ii) disclosure of the data itself, (iii) correction
 of inaccurate data, (iv) suspension of use or erasure where the
 data was acquired or used in violation of law, and (v) suspension
 of provision to third parties under APPI Articles 32–35. To make
-such a request, please email <CONTACT_EMAIL>. We will respond
+such a request, please email support@migrate-bot.dev. We will respond
 without delay (and in any case within 30 days) after verifying your
 identity. We may charge a reasonable fee for disclosure as permitted
 by APPI Rule.
 
 The complaint-handling contact for personal-information matters is
-<CONTACT_EMAIL>. The competent supervisory authority is the
+support@migrate-bot.dev. The competent supervisory authority is the
 Personal Information Protection Commission (個人情報保護委員会,
 <https://www.ppc.go.jp/>).
 
@@ -427,12 +427,12 @@ https://migrate-bot.dev/legal/privacy.
 
 ## 10. Contact
 
-Privacy inquiries: <CONTACT_EMAIL>
-Mail: <OPERATOR_LEGAL_NAME>, <OPERATOR_ADDRESS>
+Privacy inquiries: support@migrate-bot.dev
+Mail: Sawai Kouki, Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan
 `,
   'refunds': `# Refund Policy
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
 We are committed to delivering working migration output. This Refund Policy
 explains when you are entitled to a refund and how to request one.
@@ -505,7 +505,7 @@ Policy do **not** apply to and do **not** waive any of the following:
   invalidate the consumer's statutory rights.
 
 If you believe Section 2A applies to your situation, contact
-<CONTACT_EMAIL> with the order details and a description of the
+support@migrate-bot.dev with the order details and a description of the
 non-conformance. We will respond within 2 business days and, where
 your claim is well-founded, issue a full or partial refund (or other
 remedy) consistent with applicable law.
@@ -524,11 +524,11 @@ remedy required by applicable consumer-protection law.**
 If you contact us before the migration job has produced a draft PR (typical
 window: 0–10 minutes after payment), we may be able to cancel and refund
 the order, but cancellation is not guaranteed once the job has started.
-Email <CONTACT_EMAIL> immediately if you wish to cancel.
+Email support@migrate-bot.dev immediately if you wish to cancel.
 
 ## 5. How to request a refund
 
-Email <CONTACT_EMAIL> with:
+Email support@migrate-bot.dev with:
 
 1. The email address used at checkout
 2. The repository full name (e.g., \`octocat/hello\`)
@@ -554,16 +554,16 @@ always posted at https://migrate-bot.dev/legal/refunds.
 `,
   'specified-commercial-transactions': `# 特定商取引法に基づく表記
 
-**最終更新: <EFFECTIVE_DATE>**
+**最終更新: 2026-05-12**
 
 | 項目 | 内容 |
 |---|---|
-| **販売事業者の名称** | <OPERATOR_LEGAL_NAME> |
-| **代表者の氏名** | <OPERATOR_LEGAL_NAME> |
-| **業務責任者** | <OPERATOR_LEGAL_NAME>(事業主本人) |
-| **所在地** | <OPERATOR_ADDRESS> |
-| **電話番号** | お客様からのご請求があった場合、<CONTACT_EMAIL> 宛のメール受領から **7 日以内** に書面又は電子メールにて遅滞なく開示します。通常時の非開示は、個人事業主のプライバシー保護を目的とした運用です |
-| **メールアドレス** | <CONTACT_EMAIL> |
+| **販売事業者の名称** | 澤井功樹 |
+| **代表者の氏名** | 澤井功樹 |
+| **業務責任者** | 澤井功樹(事業主本人) |
+| **所在地** | 〒651-0094 兵庫県神戸市中央区琴ノ緒町五丁目二番二号 三信ビル401 |
+| **電話番号** | お客様からのご請求があった場合、support@migrate-bot.dev 宛のメール受領から **7 日以内** に書面又は電子メールにて遅滞なく開示します。通常時の非開示は、個人事業主のプライバシー保護を目的とした運用です |
+| **メールアドレス** | support@migrate-bot.dev |
 | **販売 URL** | https://migrate-bot.dev |
 | **販売価格** | 各プランの価格(米ドル建て)および日本円での参考換算額: <br>・Small: $99(参考: 約 ¥14,800、為替レートにより変動)<br>・Medium: $249(参考: 約 ¥37,400、為替レートにより変動)<br>・Large: $499(参考: 約 ¥74,800、為替レートにより変動)<br>・Enterprise: 個別見積り<br>決済はすべて米ドル建てで行われ、最終的な日本円請求額は決済日の為替レート(Stripe が適用するレート)に基づき各カード会社が確定し、ご請求時にカード明細上で表示されます。上記の参考換算額は本表記の最終更新日時点でのおおよその目安です |
 | **商品代金以外の必要料金** | 通信回線使用料、為替手数料、海外取引手数料等、お客様のクレジットカード会社又は決済機関が課す料金はお客様のご負担となります。当社からは追加の手数料は一切請求いたしません |
@@ -573,8 +573,8 @@ always posted at https://migrate-bot.dev/legal/refunds.
 | **役務の提供時期** | 注文(決済成功)後、自動的にジョブが開始されます。**所要時間の上限は決済日から 14 日以内**とし、対象リポジトリの規模・複雑度により概ね 5 分〜数時間程度で完了します。**14 日を超過しても役務提供が完了しない場合は、お客様からのご請求がなくとも当社の判断により[返金ポリシー](/legal/refunds)に基づき全額返金します**。完了時又は返金時に登録メールアドレス宛に通知します |
 | **返品・キャンセルの可否および条件** | 本サービスはお客様のリポジトリ毎にカスタマイズされたデジタルサービスのため、原則として役務提供完了後の返品・キャンセルはお受けできません。<br>**ただし当社側に起因する不具合・障害によりサービスを完了できなかった場合**は、決済日から 14 日以内のご連絡で全額返金します。詳細は[返金ポリシー](/legal/refunds)を参照ください |
 | **動作環境** | お客様の Next.js リポジトリが (a) GitHub.com 上に存在すること、(b) 当社 GitHub App をインストール可能なリポジトリであること、(c) Next.js Pages Router(\`pages/\` ディレクトリ構成)で記述されていること、を前提とします。Next.js のバージョンは概ね 13.x〜15.x の範囲を対象としますが、特殊な構成(custom server、複雑な monorepo、規制対象の依存関係を含むリポジトリ等)では当社が解析時に対応不可と判定する場合があります。詳細は[利用規約](/legal/terms) §1、§2、§4 を参照 |
-| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](/legal/refunds)に従い全額返金します。提供物そのもの(draft pull request の内容)に不適合があった場合は <CONTACT_EMAIL> までご連絡ください。当社は故意又は重大な過失による場合を除き、付随的・結果的損害(逸失利益、データ滅失等)について責任を負いません(詳細は[利用規約](/legal/terms) §10) |
-| **苦情・お問合せ先** | <CONTACT_EMAIL>(原則 2 営業日以内に返信) |
+| **不良品・契約不適合への対応** | 当社の不具合によりサービスを完了できなかった場合は[返金ポリシー](/legal/refunds)に従い全額返金します。提供物そのもの(draft pull request の内容)に不適合があった場合は support@migrate-bot.dev までご連絡ください。当社は故意又は重大な過失による場合を除き、付随的・結果的損害(逸失利益、データ滅失等)について責任を負いません(詳細は[利用規約](/legal/terms) §10) |
+| **苦情・お問合せ先** | support@migrate-bot.dev(原則 2 営業日以内に返信) |
 
 ## 補足
 

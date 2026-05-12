@@ -5,9 +5,9 @@
 > service like LegalZoom / SmartAsset) before publishing.
 >
 > Placeholders to fill before publishing:
-> - `<OPERATOR_LEGAL_NAME>` — operator's legal name on file
-> - `<CONTACT_EMAIL>` — support contact email
-> - `<EFFECTIVE_DATE>` — date this version takes effect
+> - `Sawai Kouki` — operator's legal name on file
+> - `support@migrate-bot.dev` — support contact email
+> - `2026-05-12` — date this version takes effect
 > - `migrate-bot.dev` — production domain once registered
 >
 > Self-review notes (see `docs/legal-self-review-log.md`):
@@ -19,10 +19,10 @@
 > - Section 2 excludes EEA/UK/CH residents to keep the Service outside the
 >   GDPR territorial scope.
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
 These Terms of Service ("Terms") govern your use of the migrate-bot service
-("Service") provided by <OPERATOR_LEGAL_NAME> ("we", "us", "our"). By
+("Service") provided by Sawai Kouki ("we", "us", "our"). By
 installing the migrate-bot GitHub App, paying for a migration, or otherwise
 using the Service, you ("Customer", "you") agree to these Terms.
 
@@ -54,7 +54,7 @@ You represent that:
   European Economic Area (EEA), the United Kingdom, or Switzerland.** The
   Service is not currently offered to residents of those jurisdictions.
   If you are unsure whether this restriction applies to you, please contact
-  us at <CONTACT_EMAIL> before paying.
+  us at support@migrate-bot.dev before paying.
 
 You are responsible for the security of your GitHub account and the
 correctness of your billing information.
@@ -240,4 +240,4 @@ email to active customers at least 14 days before they take effect.
 
 ## 15. Contact
 
-Questions about these Terms can be sent to <CONTACT_EMAIL>.
+Questions about these Terms can be sent to support@migrate-bot.dev.

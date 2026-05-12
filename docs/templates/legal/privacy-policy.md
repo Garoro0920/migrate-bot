@@ -5,11 +5,11 @@
 > the review record and rationale).**
 >
 > Placeholders to fill before publishing:
-> - `<OPERATOR_LEGAL_NAME>`
-> - `<CONTACT_EMAIL>` — privacy contact email
-> - `<EFFECTIVE_DATE>`
+> - `Sawai Kouki`
+> - `support@migrate-bot.dev` — privacy contact email
+> - `2026-05-12`
 > - `migrate-bot.dev`
-> - `<OPERATOR_ADDRESS>` — required for APPI / 特商法 (mailbox service is fine)
+> - `Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan` — required for APPI / 特商法 (mailbox service is fine)
 >
 > Self-review notes:
 > - Section 3 Subprocessors table now includes country, protection-regime
@@ -19,9 +19,9 @@
 > - Section 7 enumerates APPI Articles 32–35 disclosure / correction /
 >   suspension rights and identifies the PPC as supervisory authority.
 
-**Effective date: <EFFECTIVE_DATE>**
+**Effective date: 2026-05-12**
 
-This Privacy Policy describes how <OPERATOR_LEGAL_NAME> ("we", "us")
+This Privacy Policy describes how Sawai Kouki ("we", "us")
 collects, uses, and protects information when you use migrate-bot
 ("Service").
 
@@ -141,12 +141,12 @@ Economic Area, the United Kingdom, or Switzerland** (see Terms of Service
 Section 2). Accordingly, we do not undertake processing operations that
 would bring this Service within the territorial scope of the GDPR or the
 UK / Swiss equivalents. If you believe you have used the Service from one
-of those jurisdictions in error, please contact <CONTACT_EMAIL> and we
+of those jurisdictions in error, please contact support@migrate-bot.dev and we
 will delete your data and refund any payment.
 
 If you are a resident of a jurisdiction whose law restricts cross-border
 transfer of personal data and you require data residency in a specific
-region, please contact <CONTACT_EMAIL> before paying. We may not be able
+region, please contact support@migrate-bot.dev before paying. We may not be able
 to support every residency requirement.
 
 ## 6. Security
@@ -171,7 +171,7 @@ Depending on your jurisdiction, you may have the right to:
 - **Object / restrict** — object to certain processing activities
 - **Withdraw consent** — where processing is based on consent
 
-To exercise any of these rights, contact <CONTACT_EMAIL>. We will respond
+To exercise any of these rights, contact support@migrate-bot.dev. We will respond
 within 30 days (or sooner where required by applicable law).
 
 **For California residents (CCPA / CPRA)**: we do not sell or share your
@@ -184,20 +184,20 @@ Terms of Service Section 2, the Service is not offered to residents of
 these jurisdictions at this time.
 
 **For Japan residents (個人情報保護法 / APPI)**: the personal-information
-handling business operator (個人情報取扱事業者) is <OPERATOR_LEGAL_NAME>,
-<OPERATOR_ADDRESS>. You may request, with respect to your personal
+handling business operator (個人情報取扱事業者) is Sawai Kouki,
+Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan. You may request, with respect to your personal
 information that we hold (保有個人データ), (i) disclosure of the
 purpose-of-use, (ii) disclosure of the data itself, (iii) correction
 of inaccurate data, (iv) suspension of use or erasure where the
 data was acquired or used in violation of law, and (v) suspension
 of provision to third parties under APPI Articles 32–35. To make
-such a request, please email <CONTACT_EMAIL>. We will respond
+such a request, please email support@migrate-bot.dev. We will respond
 without delay (and in any case within 30 days) after verifying your
 identity. We may charge a reasonable fee for disclosure as permitted
 by APPI Rule.
 
 The complaint-handling contact for personal-information matters is
-<CONTACT_EMAIL>. The competent supervisory authority is the
+support@migrate-bot.dev. The competent supervisory authority is the
 Personal Information Protection Commission (個人情報保護委員会,
 <https://www.ppc.go.jp/>).
 
@@ -217,5 +217,5 @@ https://migrate-bot.dev/legal/privacy.
 
 ## 10. Contact
 
-Privacy inquiries: <CONTACT_EMAIL>
-Mail: <OPERATOR_LEGAL_NAME>, <OPERATOR_ADDRESS>
+Privacy inquiries: support@migrate-bot.dev
+Mail: Sawai Kouki, Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan
