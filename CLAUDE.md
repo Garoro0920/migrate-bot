@@ -44,7 +44,7 @@
 | `docs/legal-self-review-log.md` | Case C 法務自己レビュー記録(`docs/templates/legal/` 修正の根拠と引用一次資料) |
 | `docs/customer-support/` | ローンチ後の顧客対応メールテンプレ 7 シナリオ |
 | `docs/zelo-meeting-prep/` | ZeLo 法律事務所 法務相談 (5/12 火 17:00) の質問リスト・事前共有メール draft |
-| `docs/runbooks/` | 運用ランブック (D1 migration backfill 等、本格運用時に追加予定) |
+| `docs/runbooks/` | 運用ランブック (Stripe Live activation、D1 migration backfill 等) |
 | `docs/templates/legal/` | 利用規約・プライバシーポリシー・返金ポリシー・特商法表記の各 md (placeholder 含む) |
 | `docs/templates/launch-announcements/` | HN / Reddit / X ローンチ告知 draft |
 | `docs/templates/` (その他) | demo-video-script、PR description 等の再利用テンプレ |
