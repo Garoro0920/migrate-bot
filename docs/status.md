@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-05-12 (ZeLo 会議完了 + Karigo 住所反映 prod deploy)
+> Last updated: 2026-05-13 (Pass 8 反映完了、Stripe Live activation 申請着手可能状態)
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -27,10 +27,11 @@ prod environment 全機能通電完了済 (2026-04-30):
 
 残作業:
 - ✅ Karigo 神戸 私書箱契約 (5/12 貸与住所受領: 〒651-0094 兵庫県神戸市中央区琴ノ緒町五丁目二番二号 三信ビル401)
-- ✅ ZeLo 野村弁護士 60 分相談 (5/12 17:00-18:00 完了、Gemini 文字起こしを後日メール受領予定、御礼メール送信済)
+- ✅ ZeLo 野村弁護士 60 分相談 (5/12 17:00-18:00 完了、御礼メール送信済)
 - ✅ 法務 4 文書 placeholder 埋め + apps/web prod deploy (`377ad6f`)
-- ⏳ ZeLo Gemini 文字起こし受領 → legal-self-review-log.md 反映 → 法務文書再修正 → 再 deploy (5/13-15 頃)
-- ⏳ Stripe Live activation 申請 → 承認後 sk_live_... 差替 → Live mode webhook 再作成
+- ✅ ZeLo Gemini 文字起こし受領 (5/13) → legal-self-review-log.md に Pass 8 として反映 (`fff5328`)、御礼返信メール送信済
+- ✅ 野村先生の評価: 主要 6 論点 (Q1-Q6) すべて「現状で OK」または「やれるだけのことはやっている」、**法務 4 文書の実質修正は不要**
+- ⏳ Stripe Live activation 申請 (runbook `docs/runbooks/stripe-live-activation.md` 参照) → 承認後 sk_live_... 差替 → Live mode webhook 再作成
 - ⏳ ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
 
 詳細 → `docs/roadmap.md` §1.5、ADR-0003
@@ -218,23 +219,28 @@ ADR-0002 §1.1 kill criteria 累計使用 0.4% (約 $0.36)。
 
 ## 次に着手すべきこと
 
-**次回セッション開始時の最初のタスク**: 外部メール (Karigo 住所受領 / Stripe Live 承認 / ZeLo 5/12 会議) のいずれかが届いていれば該当する後続タスクを実行。届いていなければ、`docs/customer-support/` `docs/zelo-meeting-prep/` の最終確認、または Pre-launch Refinement Audit で発見された 🟠 medium / 🟢 minor の改修。
+**次回セッション開始時の最初のタスク**: Stripe Live activation 申請の進捗確認、または以下の残作業のうち operator が選択した項目。
 
-### Karigo 住所受領後のフロー
+### ✅ 完了済 (5/12-5/13)
 
-1. operator が住所 / 戸籍上のフルネーム / 携帯番号 / 公開予定日を共有
-2. Claude Code が `docs/templates/legal/*.md` 4 文書の placeholder を埋める
-3. `apps/web/scripts/embed-legal.mjs` 実行 → `legal-content.gen.ts` 再生成
-4. apps/web 再 deploy (`wrangler deploy --env=prod`)
-5. operator が <https://migrate-bot.dev/legal/specified-commercial-transactions> で確認
-6. Stripe Live activation 申請
+- Karigo 神戸 私書箱契約 + 住所受領 (5/12)
+- 法務 4 文書 placeholder 埋め + apps/web prod deploy (5/12 `377ad6f`)
+- ZeLo 野村弁護士 60 分相談 (5/12) + Pass 8 反映 (5/13 `fff5328`)
+- 御礼メール 2 通送信済 (5/12 会議直後、5/13 文字起こし受領後)
 
-### ZeLo 5/12 会議後のフロー
+### 🔴 Stripe Live activation 申請 (operator 主体、最優先)
 
-1. operator が会議メモ清書 (or 内容共有)
-2. Claude Code が `docs/legal-self-review-log.md` の Pass 8 として追記
-3. 必要なら法務 4 文書の修正 commit
-4. 修正後の再 deploy
+詳細手順 → `docs/runbooks/stripe-live-activation.md`
+
+主な準備:
+1. operator が runbook §1 checklist で書類収集 (本人確認書類、マイナンバー、銀行口座、Karigo 利用契約書 PDF)
+2. Stripe Dashboard で申請 (所要 30-60 分)
+3. 審査 1-3 営業日待機 (追加質問があれば 24h 以内返信)
+4. 承認後の本番反映 (runbook §4):
+   - `STRIPE_SECRET_KEY` を `sk_live_...` で再 put
+   - Stripe Dashboard で Live mode prod webhook 新規作成 → `STRIPE_WEBHOOK_SECRET` 更新
+   - apps/api 再 deploy
+   - Live 自分カード決済で end-to-end 確認
 
 ### Stripe Live 承認後のフロー
 
