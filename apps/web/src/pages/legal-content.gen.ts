@@ -7,7 +7,7 @@ export const LEGAL_CONTENT = {
 **Effective date: 2026-05-12**
 
 These Terms of Service ("Terms") govern your use of the migrate-bot service
-("Service") provided by Sawai Kouki ("we", "us", "our"). By
+("Service") provided by Sawai Isaki ("we", "us", "our"). By
 installing the migrate-bot GitHub App, paying for a migration, or otherwise
 using the Service, you ("Customer", "you") agree to these Terms.
 
@@ -231,7 +231,7 @@ Questions about these Terms can be sent to support@migrate-bot.dev.
 
 **Effective date: 2026-05-12**
 
-This Privacy Policy describes how Sawai Kouki ("we", "us")
+This Privacy Policy describes how Sawai Isaki ("we", "us")
 collects, uses, and protects information when you use migrate-bot
 ("Service").
 
@@ -394,7 +394,7 @@ Terms of Service Section 2, the Service is not offered to residents of
 these jurisdictions at this time.
 
 **For Japan residents (個人情報保護法 / APPI)**: the personal-information
-handling business operator (個人情報取扱事業者) is Sawai Kouki,
+handling business operator (個人情報取扱事業者) is Sawai Isaki,
 Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan. You may request, with respect to your personal
 information that we hold (保有個人データ), (i) disclosure of the
 purpose-of-use, (ii) disclosure of the data itself, (iii) correction
@@ -428,7 +428,7 @@ https://migrate-bot.dev/legal/privacy.
 ## 10. Contact
 
 Privacy inquiries: support@migrate-bot.dev
-Mail: Sawai Kouki, Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan
+Mail: Sawai Isaki, Sanshin Building 401, 5-2-2 Kotonoo-cho, Chuo-ku, Kobe-shi, Hyogo 651-0094, Japan
 `,
   'refunds': `# Refund Policy
 

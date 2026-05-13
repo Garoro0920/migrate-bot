@@ -5,7 +5,7 @@
 > service like LegalZoom / SmartAsset) before publishing.
 >
 > Placeholders to fill before publishing:
-> - `Sawai Kouki` — operator's legal name on file
+> - `Sawai Isaki` — operator's legal name on file
 > - `support@migrate-bot.dev` — support contact email
 > - `2026-05-12` — date this version takes effect
 > - `migrate-bot.dev` — production domain once registered
@@ -22,7 +22,7 @@
 **Effective date: 2026-05-12**
 
 These Terms of Service ("Terms") govern your use of the migrate-bot service
-("Service") provided by Sawai Kouki ("we", "us", "our"). By
+("Service") provided by Sawai Isaki ("we", "us", "our"). By
 installing the migrate-bot GitHub App, paying for a migration, or otherwise
 using the Service, you ("Customer", "you") agree to these Terms.
 
