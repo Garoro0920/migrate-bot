@@ -196,6 +196,26 @@ describe('createRealPipeline.plan + migrate', () => {
     await expect(pipeline.migrate()).rejects.toThrow(/1 failed task/);
   });
 
+  // 2026-05-13 prod 実カード E2E (Garoro0920/migrate-bot-prod-test) で発覚した
+  // launch blocker の regression test。MigrateResult.skippedTaskIds (= 計画段階で
+  // 意図された衝突スキップ、例: _document.tsx は _app.tsx と同じ app/layout.tsx
+  // を target にする) が non-empty でも、failedTaskIds が empty なら pipeline は
+  // fail しないことを保証する。修正前は migrate.ts が skip を failedTaskIds に
+  // 積んでいたため、_document.tsx を持つ全リポジトリで pipeline が中断していた。
+  it('migrate does NOT throw when skippedTaskIds is non-empty but failedTaskIds is empty', async () => {
+    const { deps } = buildDeps({
+      migrateResult: buildMigrate({
+        skippedTaskIds: ['task-002-pages-document-tsx'],
+        failedTaskIds: [],
+      }),
+    });
+    const pipeline = createRealPipeline(deps);
+    await pipeline.analyze('octocat/hello');
+    await pipeline.plan();
+    const result = await pipeline.migrate();
+    expect(result.usage).toBeDefined();
+  });
+
   it('migrate returns aggregated usage on success', async () => {
     const { deps } = buildDeps();
     const pipeline = createRealPipeline(deps);
