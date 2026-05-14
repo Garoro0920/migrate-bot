@@ -152,7 +152,7 @@ export function createRealPipeline(deps: RealPipelineDeps): PipelineRunner {
         head: branchName,
         base: baseBranch,
         title: '[migrate-bot] Pages Router → App Router migration',
-        body: buildPrBody(analysis, migrateOutcome),
+        body: buildPrBody(analysis, migrateOutcome, migrationPlan),
       });
 
       // R4: tmp dir の解放は runJob の finally から pipeline.cleanup() 経由で行う。
@@ -195,7 +195,11 @@ function splitRepoFullName(rfn: string): { owner: string; repo: string } {
   return { owner: rfn.slice(0, idx), repo: rfn.slice(idx + 1) };
 }
 
-function buildPrBody(analysis: AnalyzeResult | null, migrateOutcome: MigrateResult | null): string {
+function buildPrBody(
+  analysis: AnalyzeResult | null,
+  migrateOutcome: MigrateResult | null,
+  migrationPlan: MigrationPlan | null,
+): string {
   const lines: string[] = [];
   lines.push('Auto-generated migration by migrate-bot.');
   lines.push('');
@@ -209,7 +213,45 @@ function buildPrBody(analysis: AnalyzeResult | null, migrateOutcome: MigrateResu
     const dels = migrateOutcome.changes.filter((c) => c.kind === 'delete').length;
     lines.push(`- changes: ${adds} added, ${dels} deleted`);
     lines.push(`- failed tasks: ${migrateOutcome.failedTaskIds.length}`);
+    lines.push(`- skipped tasks: ${migrateOutcome.skippedTaskIds.length}`);
   }
+
+  // skippedTaskIds は「計画段階で別タスクと同じ targetPath を共有していたため
+  // 意図的にスキップした task」(主に _document.tsx)。source は pages/ に残るので
+  // customer が手動でマージできるよう、PR body で具体的に案内する。
+  if (migrateOutcome && migrationPlan && migrateOutcome.skippedTaskIds.length > 0) {
+    lines.push('');
+    lines.push('### Manual merge needed');
+    lines.push('');
+    lines.push(
+      'The following file(s) were intentionally not migrated because their target path',
+    );
+    lines.push(
+      'was already produced from another source. The source file(s) remain in `pages/`',
+    );
+    lines.push('for you to manually merge:');
+    lines.push('');
+    for (const skippedId of migrateOutcome.skippedTaskIds) {
+      const task = migrationPlan.tasks.find((t) => t.id === skippedId);
+      if (task) {
+        lines.push(
+          `- \`${task.sourcePath}\` → merge into \`${task.targetPath}\` (already produced from another source)`,
+        );
+      }
+    }
+    lines.push('');
+    lines.push(
+      'Most commonly: `pages/_document.tsx` is preserved when `pages/_app.tsx` was the',
+    );
+    lines.push(
+      'primary source for `app/layout.tsx`. Carry over `<Html>` attributes (e.g. `lang`)',
+    );
+    lines.push(
+      'and any custom `<body>` className/style into the generated layout, then delete',
+    );
+    lines.push('`pages/_document.tsx`.');
+  }
+
   lines.push('');
   lines.push('Please review and run CI before merging.');
   return lines.join('\n');
