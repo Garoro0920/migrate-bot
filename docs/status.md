@@ -1,6 +1,6 @@
 # status.md — 現在のフェーズ・進行中タスク
 
-> Last updated: 2026-05-13 (Pass 8 反映完了、Stripe Live activation 申請着手可能状態)
+> Last updated: 2026-05-14 (Phase 4 完了 — prod 実カード E2E 再テスト成功、ローンチ告知に進める状態)
 
 各セッション開始時に Claude Code が読み、終了時に必要なら更新する。
 履歴を残したい場合はコミットメッセージで充分（このファイルは最新状態のみ保持）。
@@ -9,15 +9,15 @@
 
 ## 現在のフェーズ
 
-**Phase 4: ローンチ準備 (進行中、prod 稼働中・残作業は外部依存タスクのみ)**
+**Phase 4: ローンチ準備 — 完了。残作業はローンチ告知投稿のみ**
 
-prod environment 全機能通電完了済 (2026-04-30):
-- apps/api / apps/web Worker deploy
+prod environment 全機能通電完了済 (2026-04-30) + 実カード $99 E2E 検証完了 (2026-05-14):
+- apps/api / apps/web Worker deploy + `/post-install` ルート追加 (`a389c54`)
 - Custom Domain (`migrate-bot.dev` apex + `api.migrate-bot.dev`)
 - Cloudflare D1 prod + Queue prod + Fly prod app
 - Resend ドメイン検証 + Cloudflare Email Routing (`support@`, `noreply@`)
-- Stripe Test mode webhook + secret 全 9 件
-- E2E 完走 (PR #6 admin-trigger / PR #7 Stripe Test 経由、所要 1m35s / 3m16s、コスト $0.05)
+- Stripe Live mode webhook + secret 完全反映 (2026-05-14、`STRIPE_SECRET_KEY` = sk_live_、webhook URL = `/webhooks/stripe`)
+- 実カード $99 E2E 完走 (2026-05-14、PR #1 in `Garoro0920/migrate-bot-prod-test`、決済 → PR 作成まで約 2 分 18 秒、failed tasks 0)
 - 法務 4 文書 self-review (Case C) + EEA/UK/CH 5 段防御実装 (`4b351e5`)
 - 包括的レビュー Batch A→B→D→C 完了 (`c981295` + Batch C):
   - Batch A: 法務文書 cross-doc 修正 (refund 14d/30d 区別、ToS §6、特商法 link)
@@ -25,14 +25,20 @@ prod environment 全機能通電完了済 (2026-04-30):
   - Batch D: refund failure 構造化ログ + Sentry capture
   - Batch C: runner 安全強化 — R1 idempotency / R2 mid-pipeline crash → aborted_blocker / R3 subprocess timeouts / R4 tmp dir try/finally cleanup / R5 SIGTERM handler. tests 371 → 398.
 
+ローンチ前最終解消した launch blocker (2026-05-14):
+- `fix(agent)` (`1e28460`): MigrateResult に `skippedTaskIds` 追加、`_document.tsx` 衝突スキップを failure から分離。pipeline.ts が `failedTaskIds.length > 0` で fatal していたため、_document.tsx を持つ全リポジトリで migration が中断する状態だった
+- `chore(prod)` (`a07ba3b`): RUNNER_IMAGE を `deployment-01KRJJWZ0XE5TGR40JQDT5K7DC` に bump (R1-R5 + Batch E/F + skippedTaskIds 修正 全部入り)
+- `feat(web)` (`a389c54`): apps/web に `/post-install` ルート追加 (GitHub App Setup URL からの redirect 先、checkout 入口)
+
 残作業:
 - ✅ Karigo 神戸 私書箱契約 (5/12 貸与住所受領: 〒651-0094 兵庫県神戸市中央区琴ノ緒町五丁目二番二号 三信ビル401)
 - ✅ ZeLo 野村弁護士 60 分相談 (5/12 17:00-18:00 完了、御礼メール送信済)
 - ✅ 法務 4 文書 placeholder 埋め + apps/web prod deploy (`377ad6f`)
 - ✅ ZeLo Gemini 文字起こし受領 (5/13) → legal-self-review-log.md に Pass 8 として反映 (`fff5328`)、御礼返信メール送信済
 - ✅ 野村先生の評価: 主要 6 論点 (Q1-Q6) すべて「現状で OK」または「やれるだけのことはやっている」、**法務 4 文書の実質修正は不要**
-- ⏳ Stripe Live activation 申請 (runbook `docs/runbooks/stripe-live-activation.md` 参照) → 承認後 sk_live_... 差替 → Live mode webhook 再作成
-- ⏳ ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`)
+- ✅ Stripe Live activation 申請 + 承認 (2026-05-13、個人事業主 / MCC 5734)
+- ✅ Stripe Live mode prod デプロイ + 実カード $99 E2E 完走 (2026-05-14、PR #1)
+- ⏳ ローンチ告知 (HN / Reddit / X、`docs/templates/launch-announcements/`) ← **最後の残作業**
 
 詳細 → `docs/roadmap.md` §1.5、ADR-0003
 
@@ -149,6 +155,18 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
 
 ## 直近の重要判断
 
+- **2026-05-14: Phase 4 ローンチ準備 完了**:
+  - 5/13 prod 実カード $99 E2E (`Garoro0920/migrate-bot-prod-test`) で launch blocker 発覚: agent が task-002-pages-document-tsx (`_document.tsx` 変換) で「失敗」、prod runner image は 2026-04-30 時点 (R1-R5 未デプロイ) で auto-refund も発火せず手動 refund 実施
+  - 根本原因: migrate.ts の writtenTargets 衝突スキップ (intentional 設計: `_document.tsx` は `_app.tsx` と同じ `app/layout.tsx` を target にする) を `failedTaskIds` に積んでいたため、pipeline.ts が fatal 扱いしていた
+  - 修正 3 件:
+    - `1e28460` fix(agent): MigrateResult に skippedTaskIds 追加、衝突スキップを failure から分離
+    - `a07ba3b` chore(prod): RUNNER_IMAGE bump (`deployment-01KRJJWZ0XE5TGR40JQDT5K7DC`、R1-R5 + Batch E/F + skippedTaskIds 修正 全部入り)
+    - `a389c54` feat(web): apps/web に `/post-install` ルート追加 (GitHub App Setup URL からの redirect 先、Phase 4 デプロイで抜けていた checkout 入口)
+  - 5/14 再テスト成功: 同じ repo で $99 再購入 → 決済から PR 作成まで約 2 分 18 秒で完走、failed tasks 0、draft PR #1 作成。app/layout.tsx に `<html lang="en"><body>` 含む、blog/[slug] の getStaticPaths → generateStaticParams 変換、api/hello.ts → route.ts 変換すべて品質合格
+  - 次は ローンチ告知 (HN / Reddit / X) のみ
+- 2026-05-13: Stripe Live mode 完全承認 (個人事業主 / MCC 5734)、勢いで prod デプロイ + 実カードテストまで実行 → 直後に上記 launch blocker 発覚
+- 2026-05-12: ZeLo 野村弁護士 60 分無料相談で主要 6 論点すべて「現状で OK」評価、Pass 8 として legal-self-review-log.md に反映 (`fff5328`)
+- 2026-05-12: Karigo 神戸 私書箱契約完了、住所 〒651-0094 兵庫県神戸市中央区琴ノ緒町5-2-2 三信ビル401 を法務 4 文書に反映 (`377ad6f`)
 - 2026-04-26: 単一 CLAUDE.md を分割構成に再編（v0.5）
 - 2026-04-26: ADR-0002 により Phase 0 を skip、Phase 1 に直行
 - 2026-04-26: モノレポ初期化 + agent/cli 骨格 (`f9ed516`)
@@ -198,6 +216,7 @@ Phase 0 (市場検証) は ADR-0002 で skip、ADR-0003 で skip 継続。
 ## 既知の制約・将来の宿題
 
 - `pages/_document.tsx + _app.tsx` の同一 target 衝突: 後発タスク skip + 手動マージ余地。pages-router-medium で初検証 → 1 task skip、`<html lang>` や `<body className>` 等の情報が失われた。merge 機能の実装が将来の改善点
+  - **2026-05-14 追記**: skip を `failedTaskIds` に積んで pipeline 全体を fatal させていた bug を修正 (`1e28460`、MigrateResult に `skippedTaskIds` 追加)。`<html lang>` 等のロス問題は未解決 (Phase 5 で merge 機能実装予定)。当面は competent LLM が `_app.tsx` 単体からも妥当な layout.tsx を生成するため build は通る
 - **LLM 品質: 相対 import 深さ調整に inconsistency**: pages-router-medium の動的ルート ({slug}, {id}) で 2/4 が `../../` のまま (正しくは `../../../`)。with-typescript では正しく調整できていた。プロンプト改善か deterministic な後処理 (post-migration import normalization) で対応すべき
 - **LLM 品質: `params: Promise<{...}>` vs `params: { ... }` の不整合**: with-typescript run では Promise 形 (Next.js 15+ 仕様)、medium fixture run では同期形。同じ Sonnet 4.6 でも実行ごとに差。Next.js バージョン明示でプロンプトの曖昧性を減らす余地
 - LLM が path alias (`@/...`) を使うと tsconfig 設定との整合性が必要。未設定 repo では破綻しうる
@@ -219,41 +238,32 @@ ADR-0002 §1.1 kill criteria 累計使用 0.4% (約 $0.36)。
 
 ## 次に着手すべきこと
 
-**次回セッション開始時の最初のタスク**: Stripe Live activation 申請の進捗確認、または以下の残作業のうち operator が選択した項目。
+**次回セッション開始時の最初のタスク**: ローンチ告知投稿 (HN / Reddit / X) の最終確認 + 投稿、または以下の Phase 5 改善項目から operator が選択した項目。
 
-### ✅ 完了済 (5/12-5/13)
+### ✅ 完了済 (5/12-5/14)
 
 - Karigo 神戸 私書箱契約 + 住所受領 (5/12)
 - 法務 4 文書 placeholder 埋め + apps/web prod deploy (5/12 `377ad6f`)
 - ZeLo 野村弁護士 60 分相談 (5/12) + Pass 8 反映 (5/13 `fff5328`)
 - 御礼メール 2 通送信済 (5/12 会議直後、5/13 文字起こし受領後)
+- Stripe Live activation 申請 + 承認 (5/13、個人事業主 / MCC 5734、要対応タスク 0)
+- Stripe Live mode prod デプロイ (5/13 sk_live_ + 5/14 webhook URL 修正後)
+- 実カード $99 E2E (5/13 失敗で blocker 発覚 → 5/14 修正 + 再テスト成功、PR #1 作成)
+- Launch blocker 解消 (5/14、`1e28460` + `a07ba3b` + `a389c54`)
 
-### 🔴 Stripe Live activation 申請 (operator 主体、最優先)
+### 🟢 ローンチ告知 (operator 主体、最終ステップ)
 
-詳細手順 → `docs/runbooks/stripe-live-activation.md`
+`docs/templates/launch-announcements/` 配下の draft (HN / Reddit / X) を最終確認 + 投稿。投稿前 operator 承認必須 (CLAUDE.md §6)。
 
-主な準備:
-1. operator が runbook §1 checklist で書類収集 (本人確認書類、マイナンバー、銀行口座、Karigo 利用契約書 PDF)
-2. Stripe Dashboard で申請 (所要 30-60 分)
-3. 審査 1-3 営業日待機 (追加質問があれば 24h 以内返信)
-4. 承認後の本番反映 (runbook §4):
-   - `STRIPE_SECRET_KEY` を `sk_live_...` で再 put
-   - Stripe Dashboard で Live mode prod webhook 新規作成 → `STRIPE_WEBHOOK_SECRET` 更新
-   - apps/api 再 deploy
-   - Live 自分カード決済で end-to-end 確認
+### Phase 5 改善項目 (ローンチ後、随時)
 
-### Stripe Live 承認後のフロー
-
-1. STRIPE_SECRET_KEY を `sk_live_...` で再 put
-2. Stripe Dashboard で Live mode の prod webhook endpoint 新規作成 → STRIPE_WEBHOOK_SECRET 更新
-3. apps/api 再 deploy
-4. Live 自分カード決済で end-to-end 確認
-5. 確認後 ローンチ告知 (HN / Reddit / X) を operator 確認の上で投稿
-
-その後の選択肢:
-1. Cloudflare 完了後 → Fly.io 登録 (`docs/phase-2-deployment.md` §3)
-2. 全外部契約完了後 → Phase 2 後半コード作業 (D1/Queue 接続、agent パイプライン runner 統合)
-3. 並行で進めてよい task: LLM 品質改善 (import path 深さ整合のプロンプト改善 + 後処理)、`_document + _app` merge 機能
+1. eval / golden corpus に `_document.tsx` ケース追加 (回帰防止)
+2. PR body に `skippedTaskIds` 案内追加 (customer の手動マージ UX 改善)
+3. Next.js 15 対応 (`params: Promise<{...}>` への対応)
+4. `_document.tsx` 内容を `app/layout.tsx` にマージする agent ロジック (現在は内容ロスト)
+5. import path 深さ整合のプロンプト改善 (medium fixture で 2/4 失敗していた件)
+6. eval ハーネスを CI で実行 (`docs/development.md` §3.4)
+7. Stripe Live activation runbook を実体験で書き直し (UI 名称 / 順序 / webhook URL の path)
 
 ## 開発コマンド
 
