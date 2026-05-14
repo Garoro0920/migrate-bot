@@ -88,7 +88,7 @@ preview_urls = false
 
 [env.prod.vars]
 FLY_APP_NAME = "migrate-bot-runner-prod"
-RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-prod:deployment-01KQF8B9Y8M8K0Q78S254MJ712"
+RUNNER_IMAGE = "registry.fly.io/migrate-bot-runner-prod:deployment-01KRJJWZ0XE5TGR40JQDT5K7DC"
 INTERNAL_API_URL = "https://api.migrate-bot.dev"
 ENVIRONMENT = "prod"
 CHECKOUT_SUCCESS_URL = "https://migrate-bot.dev/checkout/success"
