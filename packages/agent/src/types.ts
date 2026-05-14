@@ -82,7 +82,13 @@ export interface MigrateUsage {
 
 export interface MigrateResult {
   readonly changes: readonly FileChange[];
+  // LLM が abort を返した、または primary + retry の両方で例外が出た task。
+  // pipeline は失敗として扱い、ジョブ全体を refund に進める。
   readonly failedTaskIds: readonly string[];
+  // 計画段階で別タスクと同じ targetPath を共有していたため意図的にスキップした
+  // task (例: _document.tsx は _app.tsx と同じ app/layout.tsx を target にする
+  // 設計のため、後発を skip)。pipeline は失敗として扱わない。
+  readonly skippedTaskIds: readonly string[];
   readonly usage: MigrateUsage;
 }
 

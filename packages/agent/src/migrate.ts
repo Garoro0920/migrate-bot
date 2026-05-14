@@ -29,6 +29,7 @@ export async function migrate(
 
   const changes: FileChange[] = [];
   const failedTaskIds: string[] = [];
+  const skippedTaskIds: string[] = [];
   const usageRecords: UsageRecord[] = [];
   const writtenTargets = new Set<string>();
 
@@ -37,9 +38,12 @@ export async function migrate(
 
     // 衝突検知: 別タスクが既に同じ targetPath に書き込んでいる場合 (例: _app.tsx と _document.tsx
     // が両方 app/layout.tsx を target にする) は、後発タスクをスキップ。
+    // これは計画段階で意図された設計なので skippedTaskIds に積む (failedTaskIds ではない)。
+    // pipeline は failedTaskIds.length > 0 でジョブ全体を fail させるため、ここを
+    // failedTaskIds に積むと _document.tsx を持つ全リポジトリで migration 全体が失敗する。
     // source は手動マージ余地のため削除しない。
     if (writtenTargets.has(task.targetPath)) {
-      failedTaskIds.push(task.id);
+      skippedTaskIds.push(task.id);
       continue;
     }
 
@@ -74,6 +78,7 @@ export async function migrate(
   return {
     changes,
     failedTaskIds,
+    skippedTaskIds,
     usage: {
       costUsd: totalCost,
       callCount: usageRecords.length,

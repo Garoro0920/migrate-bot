@@ -82,6 +82,10 @@ export async function runMigrate(args: readonly string[]): Promise<number> {
   for (const id of result.failedTaskIds) {
     lines.push(`    - ${id}`);
   }
+  lines.push(`  skipped tasks (intentional, e.g. _document.tsx → layout): ${result.skippedTaskIds.length}`);
+  for (const id of result.skippedTaskIds) {
+    lines.push(`    - ${id}`);
+  }
   const analyzeCost = analysis.usage.costUsd;
   const migrateCost = result.usage.costUsd;
   lines.push(

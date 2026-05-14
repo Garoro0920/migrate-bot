@@ -149,8 +149,12 @@ describe('migrate orchestration', () => {
       logPath: join(logDir, 'usage.jsonl'),
     });
 
-    // task1 succeeds (add + delete), task2 is skipped (no transform call)
-    expect(result.failedTaskIds).toEqual(['t2']);
+    // task1 succeeds (add + delete), task2 is intentionally skipped (no transform call)
+    // 設計上の意図的スキップなので failedTaskIds ではなく skippedTaskIds に入る。
+    // pipeline.ts は failedTaskIds のみで fail 判定するので、これで _document.tsx を
+    // 持つ全リポジトリの migration が中断されなくなる。
+    expect(result.failedTaskIds).toEqual([]);
+    expect(result.skippedTaskIds).toEqual(['t2']);
     expect(result.changes.some((c) => c.path === 'app/layout.tsx' && c.kind === 'add')).toBe(true);
     expect(result.changes.some((c) => c.path === 'pages/_app.tsx' && c.kind === 'delete')).toBe(
       true,

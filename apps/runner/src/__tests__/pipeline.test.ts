@@ -27,6 +27,7 @@ function buildMigrate(overrides: Partial<MigrateResult> = {}): MigrateResult {
   return {
     changes: [{ path: 'app/page.tsx', kind: 'add' }],
     failedTaskIds: [],
+    skippedTaskIds: [],
     usage: { costUsd: 0.02, callCount: 2, tokensInput: 1000, tokensOutput: 500 },
     ...overrides,
   };
